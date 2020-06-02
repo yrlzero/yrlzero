@@ -115,14 +115,14 @@
 
 <h2 id="四、exchange-type"><a href="#四、exchange-type" class="headerlink" title="四、exchange type"></a><strong>四、exchange type</strong></h2><h4 id="1）直连模式-direct："><a href="#1）直连模式-direct：" class="headerlink" title="1）直连模式-direct："></a>1）直连模式-direct：</h4><p>​        direct类型的exchange路由规则也很简单，它会把消息路由到那些binding key与routing key完全匹配的queue中 。</p>
 <p>​        默认交换器（名称为空字符串的直连交换机）,一个queue若不指定binding的交换机,就被绑定到默认交换机上,binding key为queue的名称。</p>
-<img src="./直连模式.jpg" style="zoom:67%;" />
+<img src="http://yrlzero.gitee.io/blogs/images/直连模式.jpg" style="zoom:67%;" />
 
 <h4 id="2）主题模式-topic"><a href="#2）主题模式-topic" class="headerlink" title="2）主题模式-topic"></a>2）主题模式-topic</h4><p> topic类型的Exchange在匹配规则上进行了扩展，它与direct类型的Exchage相似，也是将消息路由到binding key与routing key相匹配的Queue中，但这里的匹配规则有些不同， 可以根据某些规则进行匹配，如果 exchange 没有发现能够与 routing Key 匹配的 queue，则会抛弃此消息</p>
-<img src="./主题模式.jpg" style="zoom:67%;" />
+<img src="http://yrlzero.gitee.io/blogs/images/主题模式.jpg" style="zoom:67%;" />
 
 <p>符号 # 匹配一个或多个词，符号 * 匹配一个词</p>
 <h4 id="3）分裂模式-fanout"><a href="#3）分裂模式-fanout" class="headerlink" title="3）分裂模式-fanout"></a><strong>3）分裂模式-fanout</strong></h4><p> fanout类型的exchange路由规则非常简单，它会把所有发送到该exchange的消息路由到所有与它绑定的queue中 </p>
-<img src="./分裂模式.jpg" style="zoom:67%;" />
+<img src="http://yrlzero.gitee.io/blogs/images/分裂模式.jpg" style="zoom:67%;" />
 
 
 
