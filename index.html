@@ -86,8 +86,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>date: 2020-06-02 22:45:01</p>
-<h2 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a><strong>一、概念</strong></h2><p>RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现</p>
+        <h2 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a><strong>一、概念</strong></h2><p>RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现</p>
 <h4 id="exchange"><a href="#exchange" class="headerlink" title="exchange:"></a>exchange:</h4><p>​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不同的路由规则。</p>
 <h4 id="queue："><a href="#queue：" class="headerlink" title="queue："></a>queue：</h4><p>​        队列是 RabbitMQ 的内部对象，用于存储消息。消息消费者就是通过订阅队列<br>来获取消息的，RabbitMQ 中的消息都只能存储在 Queue 中，生产者生产消息并最终投递到Queue 中，消费者可以从 Queue 中获取消息并消费。多个消费者可以订阅同一个 Queue，这时 Queue 中的消息会被平均分摊给多个消费者进行处理，而不是每个消费者都收到所有的消息并处理。</p>
 <h4 id="connection："><a href="#connection：" class="headerlink" title="connection："></a>connection：</h4><p>connection就是一个TCP的连接。Producer和Consumer都是通过TCP连接到RabbitMQ Server的。程序的起始处就是建立这个TCP连接。</p>
