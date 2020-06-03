@@ -64,6 +64,42 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-rabbitmq系列-amqp" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/blogs/2020/06/03/rabbitmq%E7%B3%BB%E5%88%97-amqp/" class="article-date">
+  <time datetime="2020-06-03T14:03:10.548Z" itemprop="datePublished">2020-06-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/blogs/2020/06/03/rabbitmq%E7%B3%BB%E5%88%97-amqp/">rabbitmq系列-amqp</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yrlzero.gitee.io/blogs/2020/06/03/rabbitmq%E7%B3%BB%E5%88%97-amqp/" data-id="ckazfkquz0000wovnbt3idf52" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-rabbitmq系列-基础篇" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/" class="article-date">
@@ -126,6 +162,9 @@
 
 
 <h4 id="4）头部模式-headers"><a href="#4）头部模式-headers" class="headerlink" title="4）头部模式-headers"></a><strong>4）头部模式-headers</strong></h4><p>​         headers类型的exchange不依赖于routing key与binding key的匹配规则来路由消息，而是根据发送的消息内容中的headers属性进行匹配。在绑定queue与exchange时指定一组键值对；当消息发送到exchange时，rabbitMq会取到该消息的headers（也是一个键值对的形式），对比其中的键值对是否完全匹配queue与exchange绑定时指定的键值对；如果完全匹配则消息会路由到该queue，否则不会路由到该queue </p>
+<h4 id="5）延迟消息（特殊模式需要安装插件）"><a href="#5）延迟消息（特殊模式需要安装插件）" class="headerlink" title="5）延迟消息（特殊模式需要安装插件）"></a><strong>5）延迟消息（特殊模式需要安装插件）</strong></h4><p> 需要在这个页面：<a href="http://www.rabbitmq.com/community-plugins.html" target="_blank" rel="noopener">http://www.rabbitmq.com/community-plugins.html</a> 中找到<code>rabbitmq_delayed_message_exchange</code>插件，根据您使用的RabbitMQ版本选择对应的插件版本下载即可 。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-plugins enable rabbitmq_delayed_message_exchange</span><br></pre></td></tr></table></figure>
+
 
       
     </div>
@@ -169,6 +208,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/blogs/2020/06/03/rabbitmq%E7%B3%BB%E5%88%97-amqp/">rabbitmq系列-amqp</a>
+          </li>
         
           <li>
             <a href="/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/">rabbitmq系列-基础篇</a>
