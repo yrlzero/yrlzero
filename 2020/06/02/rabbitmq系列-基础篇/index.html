@@ -1,0 +1,312 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>rabbitmq系列-基础篇 | yrlzero-blogs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="一、概念RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现 exchange:​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rabbitmq系列-基础篇">
+<meta property="og:url" content="http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/index.html">
+<meta property="og:site_name" content="yrlzero-blogs">
+<meta property="og:description" content="一、概念RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现 exchange:​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yrlzero.gitee.io/blogs/images/%E7%9B%B4%E8%BF%9E%E6%A8%A1%E5%BC%8F.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/blogs/images/%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/blogs/images/%E5%88%86%E8%A3%82%E6%A8%A1%E5%BC%8F.jpg">
+<meta property="article:published_time" content="2020-06-02T14:45:01.635Z">
+<meta property="article:modified_time" content="2020-06-03T14:20:03.796Z">
+<meta property="article:author" content="yrlzero">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.gitee.io/blogs/images/%E7%9B%B4%E8%BF%9E%E6%A8%A1%E5%BC%8F.jpg">
+  
+  
+    <link rel="icon" href="/blogs/favicon.png">
+  
+  
+	<!-- If needed, replace your own web font service -->
+  <link href="https://fonts.googleapis.com/css?family=Crimson+Text:400,700|Inconsolata|Oswald" rel="stylesheet" />
+
+  
+   
+  
+<link rel="stylesheet" href="/blogs/icomoon/style.css">
+
+  
+<link rel="stylesheet" href="/blogs/style.css">
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div class="site-wrapper is_post_page">
+    <div id="loading-bar-wrapper">
+  <div id="loading-bar"></div>
+</div>
+<script>document.getElementById("loading-bar").style.width="20%";</script>
+
+
+<header id="header" class="site-header clearfix">
+
+  <a class="logo square clearfix" href="/blogs/">
+    <!-- 
+      Replace with your own size name, for example:
+      <span class="b">A</span>
+      <span class="w">B</span>
+      <span class="b">C</span>
+     -->
+     <span class="b">A</span>
+     <span class="b">R</span>
+     <span class="b">T</span>
+     <span class="w">I</span>
+     <span class="w">F</span>
+     <span class="b">A</span>
+     <span class="b">C</span>
+     <span class="b">T</span>
+  </a>
+  <a class="me square site-nav-switch clearfix">
+    <span class="b">
+    	<span class="icon icon-menu"></span>
+    </span>
+  </a>
+
+</header>
+
+    <script>document.getElementById("loading-bar").style.width="40%";</script>
+    <main id="main" class="clearfix">
+      <article id="post-rabbitmq系列-基础篇"
+  class="article white-box article-type-post"
+  itemscope itemprop="blogPost">
+
+  <header class="article-header">
+    <h1 class="article-title" itemprop="name">
+      rabbitmq系列-基础篇
+    </h1>
+    <div class="article-meta">
+      Posted on 
+      <time class="article-time" datetime="2020-06-02T14:45:01.635Z" itemprop="datePublished">
+        Jun 2, 2020
+      </time>
+    </div>
+  </header>
+
+  <div class="article-entry" itemprop="articleBody">
+    <h2 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a><strong>一、概念</strong></h2><p>RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现</p>
+<h4 id="exchange"><a href="#exchange" class="headerlink" title="exchange:"></a>exchange:</h4><p>​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不同的路由规则。</p>
+<h4 id="queue："><a href="#queue：" class="headerlink" title="queue："></a>queue：</h4><p>​        队列是 RabbitMQ 的内部对象，用于存储消息。消息消费者就是通过订阅队列<br>来获取消息的，RabbitMQ 中的消息都只能存储在 Queue 中，生产者生产消息并最终投递到Queue 中，消费者可以从 Queue 中获取消息并消费。多个消费者可以订阅同一个 Queue，这时 Queue 中的消息会被平均分摊给多个消费者进行处理，而不是每个消费者都收到所有的消息并处理。</p>
+<h4 id="connection："><a href="#connection：" class="headerlink" title="connection："></a>connection：</h4><p>connection就是一个TCP的连接。Producer和Consumer都是通过TCP连接到RabbitMQ Server的。程序的起始处就是建立这个TCP连接。</p>
+<h4 id="channels："><a href="#channels：" class="headerlink" title="channels："></a>channels：</h4><p>​        虚拟连接。它建立在上述的TCP连接中。数据流动都是在Channel中进行的。也就是说，一般情况是程序起始建立TCP连接，第二步就是建立这个Channel。</p>
+<p>那么，为什么使用Channel，而不是直接使用TCP连接？<br>    对于OS来说，建立和关闭TCP连接是有代价的，频繁的建立关闭TCP连接对于系统的性能有很大的影响，而且TCP的连接数也有限制，这也限制了系统处理高并发的能力。但是，在TCP连接中建立Channel是没有上述代价的。对于Producer或者Consumer来说，可以并发的使用多个Channel进行Publish或者Receive。</p>
+<h4 id="VirtualHost："><a href="#VirtualHost：" class="headerlink" title="VirtualHost："></a>VirtualHost：</h4><p>​        权限控制的基本单位，一个 VirtualHost 里面有若干 Exchange 和MessageQueue，以及指定被哪些 user 使用</p>
+<h4 id="routing-key："><a href="#routing-key：" class="headerlink" title="routing key："></a>routing key：</h4><p>​        生产者在将消息发送给exchange的时候，一般会指定一个routing key，来匹配这个消息的路由规则。其实是匹配exchnage与queue绑定的bbinding key</p>
+<h4 id="binding-key-："><a href="#binding-key-：" class="headerlink" title="binding key ："></a>binding key ：</h4><p>​        用于绑定exchange与queue之间的关系</p>
+<h2 id="二、windows安装"><a href="#二、windows安装" class="headerlink" title="二、windows安装"></a><strong>二、windows安装</strong></h2><p>1）下载安装erlang</p>
+<p>2）下载安装rabbitmq</p>
+<p>3）安装管理界面（插件）</p>
+<p>进入rabbitmq安装目录sbin中，调起cmd界面输入：rabbitmq-plugins enable rabbitmq_management</p>
+<p>4）重启rabbitmq服务</p>
+<p>5）访问地址127.0.0.1:15672，默认账号密码都为guest</p>
+<h2 id="三、docker启动"><a href="#三、docker启动" class="headerlink" title="三、docker启动"></a>三、docker启动</h2><p>1)     搜索镜像：docker search rabbitmq</p>
+<p>2)    下载镜像：docker pull rabbitmq:management</p>
+<p>3)    创建容器，rabbitmq 需要有映射以下端口: 5671 5672 4369 15671 15672<br>25672</p>
+<ul>
+<li>15672  management管理端监听端口</li>
+<li>5672、5671 AMQP使用端口</li>
+<li>4369 epmd代表erlang守护进程的端口</li>
+<li>25672 (Erlang distribution)</li>
+</ul>
+<figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">run</span><span class="bash"> -di --name=my_rabbitmq -p 5671:5617 -p 5672:5672 -p 4369:4369 -p 15671:15671 -p 15672:15672 -p 25672:25672 rabbitmq:management</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="四、exchange-type"><a href="#四、exchange-type" class="headerlink" title="四、exchange type"></a><strong>四、exchange type</strong></h2><h4 id="1）直连模式-direct："><a href="#1）直连模式-direct：" class="headerlink" title="1）直连模式-direct："></a>1）直连模式-direct：</h4><p>​        direct类型的exchange路由规则也很简单，它会把消息路由到那些binding key与routing key完全匹配的queue中 。</p>
+<p>​        默认交换器（名称为空字符串的直连交换机）,一个queue若不指定binding的交换机,就被绑定到默认交换机上,binding key为queue的名称。</p>
+<img src="http://yrlzero.gitee.io/blogs/images/直连模式.jpg" style="zoom:67%;" />
+
+<h4 id="2）主题模式-topic"><a href="#2）主题模式-topic" class="headerlink" title="2）主题模式-topic"></a>2）主题模式-topic</h4><p> topic类型的Exchange在匹配规则上进行了扩展，它与direct类型的Exchage相似，也是将消息路由到binding key与routing key相匹配的Queue中，但这里的匹配规则有些不同， 可以根据某些规则进行匹配，如果 exchange 没有发现能够与 routing Key 匹配的 queue，则会抛弃此消息</p>
+<img src="http://yrlzero.gitee.io/blogs/images/主题模式.jpg" style="zoom:67%;" />
+
+<p>符号 # 匹配一个或多个词，符号 * 匹配一个词</p>
+<h4 id="3）分裂模式-fanout"><a href="#3）分裂模式-fanout" class="headerlink" title="3）分裂模式-fanout"></a><strong>3）分裂模式-fanout</strong></h4><p> fanout类型的exchange路由规则非常简单，它会把所有发送到该exchange的消息路由到所有与它绑定的queue中 </p>
+<img src="http://yrlzero.gitee.io/blogs/images/分裂模式.jpg" style="zoom:67%;" />
+
+
+
+<h4 id="4）头部模式-headers"><a href="#4）头部模式-headers" class="headerlink" title="4）头部模式-headers"></a><strong>4）头部模式-headers</strong></h4><p>​         headers类型的exchange不依赖于routing key与binding key的匹配规则来路由消息，而是根据发送的消息内容中的headers属性进行匹配。在绑定queue与exchange时指定一组键值对；当消息发送到exchange时，rabbitMq会取到该消息的headers（也是一个键值对的形式），对比其中的键值对是否完全匹配queue与exchange绑定时指定的键值对；如果完全匹配则消息会路由到该queue，否则不会路由到该queue </p>
+<h4 id="5）延迟消息（特殊模式需要安装插件）"><a href="#5）延迟消息（特殊模式需要安装插件）" class="headerlink" title="5）延迟消息（特殊模式需要安装插件）"></a><strong>5）延迟消息（特殊模式需要安装插件）</strong></h4><p>​         需要在这个页面：<a href="http://www.rabbitmq.com/community-plugins.html" target="_blank" rel="noopener">http://www.rabbitmq.com/community-plugins.html</a> 中找到<code>rabbitmq_delayed_message_exchange</code>插件，根据您使用的RabbitMQ版本选择对应的插件版本下载即可 。 在下载好之后，解压得到<code>.ez</code>结尾的插件包，将其复制到RabbitMQ安装目录下的<code>plugins</code>文件夹 。</p>
+<pre><code>然后通过命令行启用该插件： </code></pre><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-plugins enable rabbitmq_delayed_message_exchange</span><br></pre></td></tr></table></figure>
+
+
+  </div>
+  
+  <div class="article-tags">
+    
+  </div>
+
+  
+
+</article>
+
+      <script>document.getElementById("loading-bar").style.width="60%";</script>
+    </main>
+    
+<footer id="footer" class="clearfix">
+	
+  <div>&copy; <a href="http://yrlzero.gitee.io/blogs">yrlzero-blogs</a> Theme by <a href="http://artifact.me/" target="_blank">Art Chen</a>.</div>
+  <div>Powered by <a href="https://hexo.io/" target="_blank" rel="external noopener">Hexo</a>.</div>
+</footer>
+
+
+    <script>document.getElementById("loading-bar").style.width="80%";</script>
+    <div class="overlay"></div>
+  </div>
+  <div class="site-sidebar">
+
+	
+	
+	<div class="sidebar-switch clearfix "
+		style="display: none">
+		<a class="dark-btn active" data-toggle="toc">
+	    <span class="icon icon-list"></span>
+	    <span class="text">Index</span>
+	  </a>
+	  <a class="dark-btn" data-toggle="bio">
+	    <span class="icon icon-person"></span>
+	    <span class="text">Bio</span>
+	  </a>
+	</div>
+
+	<div class="site-toc "
+		style="display: none">
+		
+	    <div class="no-index">No Index</div>
+	  
+  </div>
+  
+	<div class="site-bio show"
+		style="display: block">
+		
+	  <!-- About Me -->
+	  <div class="about-me clearfix">
+	    <div class="avatar">
+	      <img src="/blogs/img/avatar.png" />
+	    </div>
+	    <div class="info">
+	      <a class="name dark-btn" href="/blogs/about">
+	        yrlzero
+	      </a>
+	    </div>
+	    <div class="info">
+	      <span class="item desc">
+	        
+	      </span>
+	    </div>
+	  </div>
+	
+	  <!-- Social Icons -->
+	  <div class="social clearfix">
+	    
+	      
+	        <a href="/blogs/atom.xml" class="feed"
+	          target="_blank" rel="external">
+	          <span class="icon icon-feed"></span>
+	        </a>
+	      
+	        <a href="https://github.com/artchen" class="github"
+	          target="_blank" rel="external">
+	          <span class="icon icon-github"></span>
+	        </a>
+	      
+	    
+	  </div>
+
+	</div>
+
+	<div class="shortcuts">
+		<a href="#header" class="top window-nav dark-btn" id="go-top">
+			<span class="icon icon-chevron-thin-up"></span>
+		</a>
+		<a class="close dark-btn" id="sidebar-close">
+			<span class="icon icon-close"></span>
+		</a>
+		<a href="#footer" class="top window-nav dark-btn" id="go-bottom">
+			<span class="icon icon-chevron-thin-down"></span>
+		</a>
+	</div>
+
+</div>
+
+  <!-- Universal Search -->
+
+<script type="text/javascript">
+  var GOOGLE_CUSTOM_SEARCH_API_KEY = "";
+  var GOOGLE_CUSTOM_SEARCH_ENGINE_ID = "";
+  var ALGOLIA_API_KEY = "";
+  var ALGOLIA_APP_ID = "";
+  var ALGOLIA_INDEX_NAME = "";
+  var AZURE_SERVICE_NAME = "";
+  var AZURE_INDEX_NAME = "";
+  var AZURE_QUERY_KEY = "";
+  var BAIDU_API_ID = "";
+  var SEARCH_SERVICE = "google";
+  var universalSearchConfig = {};
+  if (SEARCH_SERVICE === 'google') {
+    universalSearchConfig = {
+      searchService: SEARCH_SERVICE,
+      apiKey: GOOGLE_CUSTOM_SEARCH_API_KEY,
+      engineId: GOOGLE_CUSTOM_SEARCH_ENGINE_ID,
+      imagePath: "/img/"
+    };
+  } else if (SEARCH_SERVICE === 'algolia') {
+    universalSearchConfig = {
+      searchService: SEARCH_SERVICE,
+      apiKey: ALGOLIA_API_KEY,
+      appId: ALGOLIA_APP_ID,
+      indexName: ALGOLIA_INDEX_NAME,
+      imagePath: "/img/"
+    };
+  } else if (SEARCH_SERVICE === 'azure') {
+    universalSearchConfig = {
+      searchService: SEARCH_SERVICE,
+      serviceName: AZURE_SERVICE_NAME,
+      indexName: AZURE_INDEX_NAME,
+      apiKey: AZURE_QUERY_KEY,
+      imagePath: "/img/"
+    };
+  }
+</script>
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script>window.jQuery || document.write('<script src="/js/jquery.js"><\/script>')</script>
+
+
+<script src="/blogs/js/search.js"></script>
+
+
+<script src="/blogs/js/app.js"></script>
+
+
+<!-- Disqus -->
+
+
+
+<!-- Valine -->
+
+
+<!-- Swiftype -->
+<!-- Please replace with your own swiftype settings -->
+<!--
+<script type="text/javascript">
+  /* Swiftype */
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','FHMeAyBdVccJECstf-XJ','2.0.0');
+</script>
+-->
+
+  <script>document.getElementById("loading-bar").style.width="100%";</script>
+</body>
+</html>
