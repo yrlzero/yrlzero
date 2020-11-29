@@ -1,12 +1,27 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  
-  <title>rabbitmq系列-基础篇 | yrlzero-blogs</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="一、概念RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现 exchange:​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>rabbitmq系列-基础篇 | yrlzero-blogs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="">
+    <meta name="description" content="一、概念RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现 exchange:​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不">
 <meta property="og:type" content="article">
 <meta property="og:title" content="rabbitmq系列-基础篇">
 <meta property="og:url" content="http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/index.html">
@@ -21,79 +36,168 @@
 <meta property="article:author" content="yrlzero">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://yrlzero.gitee.io/blogs/images/%E7%9B%B4%E8%BF%9E%E6%A8%A1%E5%BC%8F.jpg">
-  
-  
-    <link rel="icon" href="/blogs/favicon.png">
-  
-  
-	<!-- If needed, replace your own web font service -->
-  <link href="https://fonts.googleapis.com/css?family=Crimson+Text:400,700|Inconsolata|Oswald" rel="stylesheet" />
+    
+    <link rel="shortcut icon" href="/blogs/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
 
-  
-   
-  
-<link rel="stylesheet" href="/blogs/icomoon/style.css">
-
-  
-<link rel="stylesheet" href="/blogs/style.css">
-
+    <!-- custom head -->
+    
 
 <meta name="generator" content="Hexo 4.2.1"></head>
 
 <body>
-  <div class="site-wrapper is_post_page">
-    <div id="loading-bar-wrapper">
-  <div id="loading-bar"></div>
-</div>
-<script>document.getElementById("loading-bar").style.width="20%";</script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/blogs/img/brand.jpg)">
+      <div class="brand">
+        <a href="/blogs/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/blogs/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">yrlzero</h5>
+          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/blogs/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/blogs/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/blogs/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/blogs/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/yscoder" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/ysweb" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/blogs/custom"  >
+                <i class="icon icon-lg icon-link"></i>
+                测试
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">rabbitmq系列-基础篇</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">rabbitmq系列-基础篇</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-06-02T14:45:01.635Z" itemprop="datePublished" class="page-time">
+  2020-06-02
+</time>
 
 
-<header id="header" class="site-header clearfix">
+            
+        </h5>
+    </div>
 
-  <a class="logo square clearfix" href="/blogs/">
-    <!-- 
-      Replace with your own size name, for example:
-      <span class="b">A</span>
-      <span class="w">B</span>
-      <span class="b">C</span>
-     -->
-     <span class="b">A</span>
-     <span class="b">R</span>
-     <span class="b">T</span>
-     <span class="w">I</span>
-     <span class="w">F</span>
-     <span class="b">A</span>
-     <span class="b">C</span>
-     <span class="b">T</span>
-  </a>
-  <a class="me square site-nav-switch clearfix">
-    <span class="b">
-    	<span class="icon icon-menu"></span>
-    </span>
-  </a>
+    
+
 
 </header>
 
-    <script>document.getElementById("loading-bar").style.width="40%";</script>
-    <main id="main" class="clearfix">
-      <article id="post-rabbitmq系列-基础篇"
-  class="article white-box article-type-post"
-  itemscope itemprop="blogPost">
 
-  <header class="article-header">
-    <h1 class="article-title" itemprop="name">
-      rabbitmq系列-基础篇
-    </h1>
-    <div class="article-meta">
-      Posted on 
-      <time class="article-time" datetime="2020-06-02T14:45:01.635Z" itemprop="datePublished">
-        Jun 2, 2020
-      </time>
-    </div>
-  </header>
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#一、概念"><span class="post-toc-number">1.</span> <span class="post-toc-text">一、概念</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#exchange"><span class="post-toc-number">1.0.1.</span> <span class="post-toc-text">exchange:</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#queue："><span class="post-toc-number">1.0.2.</span> <span class="post-toc-text">queue：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#connection："><span class="post-toc-number">1.0.3.</span> <span class="post-toc-text">connection：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#channels："><span class="post-toc-number">1.0.4.</span> <span class="post-toc-text">channels：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#VirtualHost："><span class="post-toc-number">1.0.5.</span> <span class="post-toc-text">VirtualHost：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#routing-key："><span class="post-toc-number">1.0.6.</span> <span class="post-toc-text">routing key：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#binding-key-："><span class="post-toc-number">1.0.7.</span> <span class="post-toc-text">binding key ：</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#二、windows安装"><span class="post-toc-number">2.</span> <span class="post-toc-text">二、windows安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#三、docker启动"><span class="post-toc-number">3.</span> <span class="post-toc-text">三、docker启动</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#四、exchange-type"><span class="post-toc-number">4.</span> <span class="post-toc-text">四、exchange type</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1）直连模式-direct："><span class="post-toc-number">4.0.1.</span> <span class="post-toc-text">1）直连模式-direct：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2）主题模式-topic"><span class="post-toc-number">4.0.2.</span> <span class="post-toc-text">2）主题模式-topic</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3）分裂模式-fanout"><span class="post-toc-number">4.0.3.</span> <span class="post-toc-text">3）分裂模式-fanout</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4）头部模式-headers"><span class="post-toc-number">4.0.4.</span> <span class="post-toc-text">4）头部模式-headers</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5）延迟消息（特殊模式需要安装插件）"><span class="post-toc-number">4.0.5.</span> <span class="post-toc-text">5）延迟消息（特殊模式需要安装插件）</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
 
-  <div class="article-entry" itemprop="articleBody">
-    <h2 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a><strong>一、概念</strong></h2><p>RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现</p>
+
+<article id="post-rabbitmq系列-基础篇"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">rabbitmq系列-基础篇</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-06-02 22:45:01" datetime="2020-06-02T14:45:01.635Z"  itemprop="datePublished">2020-06-02</time>
+
+            
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a><strong>一、概念</strong></h2><p>RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现</p>
 <h4 id="exchange"><a href="#exchange" class="headerlink" title="exchange:"></a>exchange:</h4><p>​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不同的路由规则。</p>
 <h4 id="queue："><a href="#queue：" class="headerlink" title="queue："></a>queue：</h4><p>​        队列是 RabbitMQ 的内部对象，用于存储消息。消息消费者就是通过订阅队列<br>来获取消息的，RabbitMQ 中的消息都只能存储在 Queue 中，生产者生产消息并最终投递到Queue 中，消费者可以从 Queue 中获取消息并消费。多个消费者可以订阅同一个 Queue，这时 Queue 中的消息会被平均分摊给多个消费者进行处理，而不是每个消费者都收到所有的消息并处理。</p>
 <h4 id="connection："><a href="#connection：" class="headerlink" title="connection："></a>connection：</h4><p>connection就是一个TCP的连接。Producer和Consumer都是通过TCP连接到RabbitMQ Server的。程序的起始处就是建立这个TCP连接。</p>
@@ -137,176 +241,295 @@
 <pre><code>然后通过命令行启用该插件： </code></pre><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-plugins enable rabbitmq_delayed_message_exchange</span><br></pre></td></tr></table></figure>
 
 
-  </div>
-  
-  <div class="article-tags">
+        </div>
+
+        <blockquote class="post-copyright">
     
-  </div>
+    <div class="content">
+        
+<span class="post-time">
+    Last updated: <time datetime="2020-06-03T14:20:03.796Z" itemprop="dateUpdated">2020-06-03 22:20:03</time>
+</span><br>
+
+
+        
+        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/" target="_blank" rel="external">http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/</a>
+        
+    </div>
+    
+    <footer>
+        <a href="http://yrlzero.gitee.io/blogs">
+            <img src="/blogs/img/avatar.jpg" alt="yrlzero">
+            yrlzero
+        </a>
+    </footer>
+</blockquote>
+
+        
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+
+
+        <div class="post-footer">
+            
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/&title=《rabbitmq系列-基础篇》 — yrlzero-blogs&pic=http://yrlzero.gitee.io/blogs/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/&title=《rabbitmq系列-基础篇》 — yrlzero-blogs&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《rabbitmq系列-基础篇》 — yrlzero-blogs&url=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/&via=http://yrlzero.gitee.io/blogs" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/blogs/2020/06/03/rabbitmq%E7%B3%BB%E5%88%97-amqp/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">rabbitmq系列-amqp</h4>
+      </a>
+    </div>
+  
 
   
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </article>
 
-      <script>document.getElementById("loading-bar").style.width="60%";</script>
-    </main>
-    
-<footer id="footer" class="clearfix">
-	
-  <div>&copy; <a href="http://yrlzero.gitee.io/blogs">yrlzero-blogs</a> Theme by <a href="http://artifact.me/" target="_blank">Art Chen</a>.</div>
-  <div>Powered by <a href="https://hexo.io/" target="_blank" rel="external noopener">Hexo</a>.</div>
-</footer>
+<div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        谢谢大爷~
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/blogs/img/wechat.jpg" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/blogs/img/wechat.jpg" data-alipay="/blogs/img/alipay.jpg">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
 
 
-    <script>document.getElementById("loading-bar").style.width="80%";</script>
-    <div class="overlay"></div>
-  </div>
-  <div class="site-sidebar">
-
-	
-	
-	<div class="sidebar-switch clearfix "
-		style="display: none">
-		<a class="dark-btn active" data-toggle="toc">
-	    <span class="icon icon-list"></span>
-	    <span class="text">Index</span>
-	  </a>
-	  <a class="dark-btn" data-toggle="bio">
-	    <span class="icon icon-person"></span>
-	    <span class="text">Bio</span>
-	  </a>
-	</div>
-
-	<div class="site-toc "
-		style="display: none">
-		
-	    <div class="no-index">No Index</div>
-	  
-  </div>
-  
-	<div class="site-bio show"
-		style="display: block">
-		
-	  <!-- About Me -->
-	  <div class="about-me clearfix">
-	    <div class="avatar">
-	      <img src="/blogs/img/avatar.png" />
-	    </div>
-	    <div class="info">
-	      <a class="name dark-btn" href="/blogs/about">
-	        yrlzero
-	      </a>
-	    </div>
-	    <div class="info">
-	      <span class="item desc">
-	        
-	      </span>
-	    </div>
-	  </div>
-	
-	  <!-- Social Icons -->
-	  <div class="social clearfix">
-	    
-	      
-	        <a href="/blogs/atom.xml" class="feed"
-	          target="_blank" rel="external">
-	          <span class="icon icon-feed"></span>
-	        </a>
-	      
-	        <a href="https://github.com/artchen" class="github"
-	          target="_blank" rel="external">
-	          <span class="icon icon-github"></span>
-	        </a>
-	      
-	    
-	  </div>
-
-	</div>
-
-	<div class="shortcuts">
-		<a href="#header" class="top window-nav dark-btn" id="go-top">
-			<span class="icon icon-chevron-thin-up"></span>
-		</a>
-		<a class="close dark-btn" id="sidebar-close">
-			<span class="icon icon-close"></span>
-		</a>
-		<a href="#footer" class="top window-nav dark-btn" id="go-bottom">
-			<span class="icon icon-chevron-thin-down"></span>
-		</a>
-	</div>
 
 </div>
 
-  <!-- Universal Search -->
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
 
-<script type="text/javascript">
-  var GOOGLE_CUSTOM_SEARCH_API_KEY = "";
-  var GOOGLE_CUSTOM_SEARCH_ENGINE_ID = "";
-  var ALGOLIA_API_KEY = "";
-  var ALGOLIA_APP_ID = "";
-  var ALGOLIA_INDEX_NAME = "";
-  var AZURE_SERVICE_NAME = "";
-  var AZURE_INDEX_NAME = "";
-  var AZURE_QUERY_KEY = "";
-  var BAIDU_API_ID = "";
-  var SEARCH_SERVICE = "google";
-  var universalSearchConfig = {};
-  if (SEARCH_SERVICE === 'google') {
-    universalSearchConfig = {
-      searchService: SEARCH_SERVICE,
-      apiKey: GOOGLE_CUSTOM_SEARCH_API_KEY,
-      engineId: GOOGLE_CUSTOM_SEARCH_ENGINE_ID,
-      imagePath: "/img/"
-    };
-  } else if (SEARCH_SERVICE === 'algolia') {
-    universalSearchConfig = {
-      searchService: SEARCH_SERVICE,
-      apiKey: ALGOLIA_API_KEY,
-      appId: ALGOLIA_APP_ID,
-      indexName: ALGOLIA_INDEX_NAME,
-      imagePath: "/img/"
-    };
-  } else if (SEARCH_SERVICE === 'azure') {
-    universalSearchConfig = {
-      searchService: SEARCH_SERVICE,
-      serviceName: AZURE_SERVICE_NAME,
-      indexName: AZURE_INDEX_NAME,
-      apiKey: AZURE_QUERY_KEY,
-      imagePath: "/img/"
-    };
-  }
+
+        <p>
+            
+            <span>This blog is licensed under a <a rel="license noopener" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>yrlzero &copy; 2015 - 2020</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/&title=《rabbitmq系列-基础篇》 — yrlzero-blogs&pic=http://yrlzero.gitee.io/blogs/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/&title=《rabbitmq系列-基础篇》 — yrlzero-blogs&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《rabbitmq系列-基础篇》 — yrlzero-blogs&url=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/&via=http://yrlzero.gitee.io/blogs" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/blogs/', SHARE: true, REWARD: true };
+
+
 </script>
 
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script>window.jQuery || document.write('<script src="/js/jquery.js"><\/script>')</script>
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
 
 
-<script src="/blogs/js/search.js"></script>
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
 
 
-<script src="/blogs/js/app.js"></script>
-
-
-<!-- Disqus -->
 
 
 
-<!-- Valine -->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 
-<!-- Swiftype -->
-<!-- Please replace with your own swiftype settings -->
-<!--
-<script type="text/javascript">
-  /* Swiftype */
-  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
-  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
-  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
-  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
 
-  _st('install','FHMeAyBdVccJECstf-XJ','2.0.0');
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
 </script>
--->
 
-  <script>document.getElementById("loading-bar").style.width="100%";</script>
+
+
 </body>
 </html>
