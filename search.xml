@@ -340,7 +340,7 @@
   <entry>
     <title>nginx安装</title>
     <url>/blogs/2020/11/29/nginx%E5%AE%89%E8%A3%85/</url>
-    <content><![CDATA[<h2 id="版本介绍"><a href="#版本介绍" class="headerlink" title="版本介绍"></a>版本介绍</h2><img src="G:\笔记\linux\nginx安装\nginx\nginx版本介绍.jpg" style="zoom: 67%;" />
+    <content><![CDATA[<h2 id="版本介绍"><a href="#版本介绍" class="headerlink" title="版本介绍"></a>版本介绍</h2><img src="http://yrlzero.gitee.io/blogs/images/linux/nginx/nginx版本介绍.jpg" style="zoom: 67%;" />
 
 <h3 id="1-下载安装包方式"><a href="#1-下载安装包方式" class="headerlink" title="1. 下载安装包方式"></a>1. 下载安装包方式</h3><ul>
 <li><p>官网直接下载</p>
