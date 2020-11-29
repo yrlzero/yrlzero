@@ -11,7 +11,7 @@
 
 <h3 id="3-安装jdk-默认安装在-usr-java下，不要去修改默认目录，否则软连接会失效"><a href="#3-安装jdk-默认安装在-usr-java下，不要去修改默认目录，否则软连接会失效" class="headerlink" title="3. 安装jdk(默认安装在/usr/java下，不要去修改默认目录，否则软连接会失效)"></a>3. 安装jdk(默认安装在/usr/java下，不要去修改默认目录，否则软连接会失效)</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">rpm -ivh jdk-8u162-linux-x64.rpm</span><br></pre></td></tr></table></figure>
 
-<img src="http://yrlzero.gitee.io/blogs/images/linux/jdk/rpm安装jdk.jpg" style="zoom:75%;" />
+<img src="http://yrlzero.gitee.io/blogs/images/linux/jdk/rpm安装jdk.jpg" style="zoom:100%;" />
 
 <h3 id="4-修改系统环境变量"><a href="#4-修改系统环境变量" class="headerlink" title="4. 修改系统环境变量"></a>4. 修改系统环境变量</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi  &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
 
@@ -331,6 +331,34 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">TYPE&#x3D;Ethernet</span><br><span class="line">PROXY_METHOD&#x3D;none</span><br><span class="line">BROWSER_ONLY&#x3D;no</span><br><span class="line"></span><br><span class="line">BOOTPROTO&#x3D;static</span><br><span class="line">IPADDR&#x3D;192.168.243.131</span><br><span class="line">GATEWAY&#x3D;192.168.243.2</span><br><span class="line">NETMASK&#x3D;255.255.255.0</span><br><span class="line"></span><br><span class="line">DEFROUTE&#x3D;yes</span><br><span class="line">IPV4_FAILURE_FATAL&#x3D;no</span><br><span class="line">IPV6INIT&#x3D;yes</span><br><span class="line">IPV6_AUTOCONF&#x3D;yes</span><br><span class="line">IPV6_DEFROUTE&#x3D;yes</span><br><span class="line">IPV6_FAILURE_FATAL&#x3D;no</span><br><span class="line">IPV6_ADDR_GEN_MODE&#x3D;stable-privacy</span><br><span class="line">NAME&#x3D;ens33</span><br><span class="line">UUID&#x3D;193e7f5e-e25b-40ef-b292-0fe5c8970af5</span><br><span class="line">DEVICE&#x3D;ens33</span><br><span class="line">ONBOOT&#x3D;yes</span><br><span class="line">ZONE&#x3D;public</span><br></pre></td></tr></table></figure>
 
 <h2 id="c-重启网关"><a href="#c-重启网关" class="headerlink" title="c. 重启网关:"></a>c. 重启网关:</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">service network restart</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>nginx安装</title>
+    <url>/blogs/2020/11/29/nginx%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<h2 id="版本介绍"><a href="#版本介绍" class="headerlink" title="版本介绍"></a>版本介绍</h2><img src="G:\笔记\linux\nginx安装\nginx\nginx版本介绍.jpg" style="zoom: 67%;" />
+
+<h3 id="1-下载安装包方式"><a href="#1-下载安装包方式" class="headerlink" title="1. 下载安装包方式"></a>1. 下载安装包方式</h3><ul>
+<li><p>官网直接下载</p>
+</li>
+<li><p>使用<code>wget</code>命令下载（推荐）。确保系统已经安装了<code>wget</code>，如果没有安装，执行 <code>yum install wget</code> 安装</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget -c https:&#x2F;&#x2F;nginx.org&#x2F;download&#x2F;nginx-1.18.0.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-解压"><a href="#2-解压" class="headerlink" title="2. 解压"></a>2. 解压</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf nginx-1.18.0.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-yum安装依赖项"><a href="#3-yum安装依赖项" class="headerlink" title="3. yum安装依赖项"></a>3. yum安装依赖项</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#gcc安装，nginx源码编译需要；pcre-devel 安装，nginx 的 http 模块使用 pcre 来解析正则表达式；zlib安装，nginx 使用zlib对http包的内容进行gzip</span><br><span class="line"></span><br><span class="line">yum install gcc pcre-devel zlib-devel</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-配置"><a href="#4-配置" class="headerlink" title="4. 配置"></a>4. 配置</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;nginx-1.18.0</span><br><span class="line"></span><br><span class="line">#使用默认配置</span><br><span class="line">.&#x2F;configure</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-编译安装"><a href="#5-编译安装" class="headerlink" title="5. 编译安装"></a>5. 编译安装</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-启动、停止nginx"><a href="#6-启动、停止nginx" class="headerlink" title="6. 启动、停止nginx"></a>6. 启动、停止nginx</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;sbin&#x2F;</span><br><span class="line">.&#x2F;nginx </span><br><span class="line">.&#x2F;nginx -s stop</span><br><span class="line">.&#x2F;nginx -s quit</span><br><span class="line">.&#x2F;nginx -s reload</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
