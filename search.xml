@@ -45,45 +45,21 @@
       </categories>
   </entry>
   <entry>
-    <title>VMware创建centos7虚拟机</title>
-    <url>/blogs/2020/11/29/VMware%E5%88%9B%E5%BB%BAcentos7%E8%99%9A%E6%8B%9F%E6%9C%BA/</url>
-    <content><![CDATA[<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/1.png" style="zoom:75%;" />
+    <title>maven安装</title>
+    <url>/blogs/2020/11/29/maven%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<h3 id="1-下载地址：http-maven-apache-org-download-cgi"><a href="#1-下载地址：http-maven-apache-org-download-cgi" class="headerlink" title="1. 下载地址：http://maven.apache.org/download.cgi"></a>1. 下载地址：<code>http://maven.apache.org/download.cgi</code></h3><h3 id="2-解压："><a href="#2-解压：" class="headerlink" title="2. 解压："></a>2. 解压：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf apache-maven-3.6.3-bin.tar.gz</span><br></pre></td></tr></table></figure>
 
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/2.png" style="zoom:75%;" />
+<h3 id="3-重命名："><a href="#3-重命名：" class="headerlink" title="3. 重命名："></a>3. 重命名：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mv apache-maven-3.6.3 maven3.6.3</span><br></pre></td></tr></table></figure>
 
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/3.png" style="zoom:75%;" />
+<h3 id="4-添加环境变量："><a href="#4-添加环境变量：" class="headerlink" title="4. 添加环境变量："></a>4. 添加环境变量：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;profile</span><br><span class="line"></span><br><span class="line">export M2_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3</span><br><span class="line">export PATH&#x3D;$PATH:$JAVA_HOME&#x2F;bin:$M2_HOME&#x2F;bin</span><br></pre></td></tr></table></figure>
 
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/4.jpg" style="zoom:75%;" />
+<h3 id="5-让修改生效："><a href="#5-让修改生效：" class="headerlink" title="5. 让修改生效："></a>5. 让修改生效：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
 
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/5.jpg" style="zoom:75%;" />
+<h3 id="6-验证："><a href="#6-验证：" class="headerlink" title="6. 验证："></a>6. 验证：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mvn -v</span><br></pre></td></tr></table></figure>
 
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/6.jpg" style="zoom:55%;" />
+<h3 id="7-修改配置文件"><a href="#7-修改配置文件" class="headerlink" title="7. 修改配置文件"></a>7. 修改配置文件</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3&#x2F;conf&#x2F;settings.xml</span><br><span class="line">	&lt;!-- 本地仓库 --&gt;</span><br><span class="line">	&lt;localRepository&gt;&#x2F;usr&#x2F;local&#x2F;mvn_repository&lt;&#x2F;localRepository&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!--使用阿里云，速度比官方快很多行指定中央仓库的镜像。--&gt;</span><br><span class="line">	&lt;mirror&gt;</span><br><span class="line">		&lt;id&gt;nexus-aliyun&lt;&#x2F;id&gt;</span><br><span class="line">		&lt;mirrorOf&gt;central&lt;&#x2F;mirrorOf&gt;</span><br><span class="line">		&lt;name&gt;Nexus aliyun&lt;&#x2F;name&gt;</span><br><span class="line">		&lt;url&gt;http:&#x2F;&#x2F;maven.aliyun.com&#x2F;nexus&#x2F;content&#x2F;groups&#x2F;public&lt;&#x2F;url&gt;</span><br><span class="line">	&lt;&#x2F;mirror&gt;</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">	&lt;!--更改Maven的默认jdk版本 --&gt;</span><br><span class="line">	&lt;profile&gt;</span><br><span class="line">		&lt;id&gt;jdk-1.8&lt;&#x2F;id&gt;</span><br><span class="line">		&lt;activation&gt;</span><br><span class="line">			&lt;activeByDefault&gt;true&lt;&#x2F;activeByDefault&gt;</span><br><span class="line">			&lt;jdk&gt;1.8&lt;&#x2F;jdk&gt;</span><br><span class="line">		&lt;&#x2F;activation&gt;</span><br><span class="line">		&lt;properties&gt;</span><br><span class="line">			&lt;maven.compiler.source&gt;1.8&lt;&#x2F;maven.compiler.source&gt;</span><br><span class="line">			&lt;maven.compiler.target&gt;1.8&lt;&#x2F;maven.compiler.target&gt;</span><br><span class="line">			&lt;maven.compiler.compilerVersion&gt;1.8&lt;&#x2F;maven.compiler.compilerVersion&gt;</span><br><span class="line">		&lt;&#x2F;properties&gt;</span><br><span class="line">   &lt;&#x2F;profile&gt;</span><br></pre></td></tr></table></figure>
 
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/7.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/8.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/9.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/10.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/11.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/12.jpg" style="zoom:50%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/13.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/14.jpg" style="zoom:67%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/15.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/16.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/17.jpg" style="zoom:67%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/18.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/19.jpg" style="zoom:75%;" />]]></content>
+]]></content>
       <categories>
         <category>linux</category>
       </categories>
@@ -134,26 +110,9 @@
       <categories>
         <category>linux</category>
       </categories>
-  </entry>
-  <entry>
-    <title>maven安装</title>
-    <url>/blogs/2020/11/29/maven%E5%AE%89%E8%A3%85/</url>
-    <content><![CDATA[<h3 id="1-下载地址：http-maven-apache-org-download-cgi"><a href="#1-下载地址：http-maven-apache-org-download-cgi" class="headerlink" title="1. 下载地址：http://maven.apache.org/download.cgi"></a>1. 下载地址：<code>http://maven.apache.org/download.cgi</code></h3><h3 id="2-解压："><a href="#2-解压：" class="headerlink" title="2. 解压："></a>2. 解压：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf apache-maven-3.6.3-bin.tar.gz</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-重命名："><a href="#3-重命名：" class="headerlink" title="3. 重命名："></a>3. 重命名：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mv apache-maven-3.6.3 maven3.6.3</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-添加环境变量："><a href="#4-添加环境变量：" class="headerlink" title="4. 添加环境变量："></a>4. 添加环境变量：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;profile</span><br><span class="line"></span><br><span class="line">export M2_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3</span><br><span class="line">export PATH&#x3D;$PATH:$JAVA_HOME&#x2F;bin:$M2_HOME&#x2F;bin</span><br></pre></td></tr></table></figure>
-
-<h3 id="5-让修改生效："><a href="#5-让修改生效：" class="headerlink" title="5. 让修改生效："></a>5. 让修改生效：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="6-验证："><a href="#6-验证：" class="headerlink" title="6. 验证："></a>6. 验证：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mvn -v</span><br></pre></td></tr></table></figure>
-
-<h3 id="7-修改配置文件"><a href="#7-修改配置文件" class="headerlink" title="7. 修改配置文件"></a>7. 修改配置文件</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3&#x2F;conf&#x2F;settings.xml</span><br><span class="line">	&lt;!-- 本地仓库 --&gt;</span><br><span class="line">	&lt;localRepository&gt;&#x2F;usr&#x2F;local&#x2F;mvn_repository&lt;&#x2F;localRepository&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!--使用阿里云，速度比官方快很多行指定中央仓库的镜像。--&gt;</span><br><span class="line">	&lt;mirror&gt;</span><br><span class="line">		&lt;id&gt;nexus-aliyun&lt;&#x2F;id&gt;</span><br><span class="line">		&lt;mirrorOf&gt;central&lt;&#x2F;mirrorOf&gt;</span><br><span class="line">		&lt;name&gt;Nexus aliyun&lt;&#x2F;name&gt;</span><br><span class="line">		&lt;url&gt;http:&#x2F;&#x2F;maven.aliyun.com&#x2F;nexus&#x2F;content&#x2F;groups&#x2F;public&lt;&#x2F;url&gt;</span><br><span class="line">	&lt;&#x2F;mirror&gt;</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">	&lt;!--更改Maven的默认jdk版本 --&gt;</span><br><span class="line">	&lt;profile&gt;</span><br><span class="line">		&lt;id&gt;jdk-1.8&lt;&#x2F;id&gt;</span><br><span class="line">		&lt;activation&gt;</span><br><span class="line">			&lt;activeByDefault&gt;true&lt;&#x2F;activeByDefault&gt;</span><br><span class="line">			&lt;jdk&gt;1.8&lt;&#x2F;jdk&gt;</span><br><span class="line">		&lt;&#x2F;activation&gt;</span><br><span class="line">		&lt;properties&gt;</span><br><span class="line">			&lt;maven.compiler.source&gt;1.8&lt;&#x2F;maven.compiler.source&gt;</span><br><span class="line">			&lt;maven.compiler.target&gt;1.8&lt;&#x2F;maven.compiler.target&gt;</span><br><span class="line">			&lt;maven.compiler.compilerVersion&gt;1.8&lt;&#x2F;maven.compiler.compilerVersion&gt;</span><br><span class="line">		&lt;&#x2F;properties&gt;</span><br><span class="line">   &lt;&#x2F;profile&gt;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>linux</category>
-      </categories>
+      <tags>
+        <tag>jdk</tag>
+      </tags>
   </entry>
   <entry>
     <title>nginx安装</title>
@@ -177,6 +136,50 @@
 <h3 id="6-启动、停止nginx"><a href="#6-启动、停止nginx" class="headerlink" title="6. 启动、停止nginx"></a>6. 启动、停止nginx</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;sbin&#x2F;</span><br><span class="line">.&#x2F;nginx </span><br><span class="line">.&#x2F;nginx -s stop</span><br><span class="line">.&#x2F;nginx -s quit</span><br><span class="line">.&#x2F;nginx -s reload</span><br></pre></td></tr></table></figure>
 
 ]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>VMware创建centos7虚拟机</title>
+    <url>/blogs/2020/11/29/VMware%E5%88%9B%E5%BB%BAcentos7%E8%99%9A%E6%8B%9F%E6%9C%BA/</url>
+    <content><![CDATA[<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/1.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/2.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/3.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/4.jpg" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/5.jpg" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/6.jpg" style="zoom:55%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/7.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/8.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/9.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/10.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/11.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/12.jpg" style="zoom:50%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/13.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/14.jpg" style="zoom:67%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/15.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/16.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/17.jpg" style="zoom:67%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/18.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/19.jpg" style="zoom:75%;" />]]></content>
       <categories>
         <category>linux</category>
       </categories>
@@ -207,14 +210,6 @@
       <categories>
         <category>mq</category>
       </categories>
-  </entry>
-  <entry>
-    <title>restTemplate常见操作</title>
-    <url>/blogs/2020/11/29/restTemplate%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C/</url>
-    <content><![CDATA[<p>常见的restTemplate操作</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//三种方式 xxForObject、xxForEntity、exchange</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//封装请求头</span></span><br><span class="line">HttpHeaders headers = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">headers.setContentType(MediaType.APPLICATION_JSON_UTF8);<span class="comment">//封装请求类型</span></span><br><span class="line">headers.add(<span class="string">"Accept"</span>, MediaType.APPLICATION_JSON.toString());<span class="comment">//封装可接收类型,"Accept", MediaType.APPLICATION_JSON_VALUE</span></span><br><span class="line"><span class="comment">//封装请求参数</span></span><br><span class="line">ObjectMapper objectMapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">String jsonStr = objectMapper.writeValueAsString(map); </span><br><span class="line"><span class="comment">//封装请求实体（请求参数、请求头）</span></span><br><span class="line">HttpEntity&lt;String&gt; entity = <span class="keyword">new</span> HttpEntity&lt;&gt;(jsonStr, headers);</span><br><span class="line"><span class="comment">//发送请求</span></span><br><span class="line">Map result = restTemplate.postForObject(expressUrl, entity, Map<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//发送携带query参数的uri，使用此api进行编码生成uri</span></span><br><span class="line">UriComponentsBuilder builder = UriComponentsBuilder</span><br><span class="line">                .fromUriString(getUsersUrl)</span><br><span class="line">                .queryParam(<span class="string">"nameOrEmail"</span>, nameOrEmail);</span><br><span class="line">HttpHeaders headers = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">headers.setContentType(MediaType.APPLICATION_JSON_UTF8);</span><br><span class="line">ResponseEntity&lt;String&gt; exchange = restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.PUT, <span class="keyword">new</span> HttpEntity&lt;&gt;(headers), String<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//发送文件</span></span><br><span class="line">httpHeaders.setAccept(Arrays.asList(MediaType.MULTIPART_FORM_DATA));</span><br><span class="line">httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);</span><br><span class="line"><span class="comment">//设置请求体，注意是LinkedMultiValueMap</span></span><br><span class="line">FileSystemResource fileSystemResource = <span class="keyword">new</span> FileSystemResource(filePath+<span class="string">"/"</span>+fileName);<span class="comment">//获取文件资源</span></span><br><span class="line">MultiValueMap&lt;String, Object&gt; form = <span class="keyword">new</span> LinkedMultiValueMap&lt;&gt;();<span class="comment">//一个key可以存多个value</span></span><br><span class="line">form.add(<span class="string">"file"</span>, fileSystemResource);<span class="comment">//封装资源文件 </span></span><br><span class="line">form.add(<span class="string">"filename"</span>,fileName);<span class="comment">//封装文件名称</span></span><br><span class="line"><span class="comment">//用HttpEntity封装整个请求报文</span></span><br><span class="line">HttpEntity&lt;MultiValueMap&lt;String, Object&gt;&gt; files = <span class="keyword">new</span> HttpEntity&lt;&gt;(form, headers);</span><br><span class="line">String s = restTemplate.postForObject(url, files, String<span class="class">.<span class="keyword">class</span>)</span>;</span><br></pre></td></tr></table></figure>
-
-]]></content>
   </entry>
   <entry>
     <title>rabbitmq系列-基础篇</title>
@@ -266,6 +261,14 @@
       <categories>
         <category>mq</category>
       </categories>
+  </entry>
+  <entry>
+    <title>restTemplate常见操作</title>
+    <url>/blogs/2020/11/29/restTemplate%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C/</url>
+    <content><![CDATA[<p>常见的restTemplate操作</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//三种方式 xxForObject、xxForEntity、exchange</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//封装请求头</span></span><br><span class="line">HttpHeaders headers = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">headers.setContentType(MediaType.APPLICATION_JSON_UTF8);<span class="comment">//封装请求类型</span></span><br><span class="line">headers.add(<span class="string">"Accept"</span>, MediaType.APPLICATION_JSON.toString());<span class="comment">//封装可接收类型,"Accept", MediaType.APPLICATION_JSON_VALUE</span></span><br><span class="line"><span class="comment">//封装请求参数</span></span><br><span class="line">ObjectMapper objectMapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">String jsonStr = objectMapper.writeValueAsString(map); </span><br><span class="line"><span class="comment">//封装请求实体（请求参数、请求头）</span></span><br><span class="line">HttpEntity&lt;String&gt; entity = <span class="keyword">new</span> HttpEntity&lt;&gt;(jsonStr, headers);</span><br><span class="line"><span class="comment">//发送请求</span></span><br><span class="line">Map result = restTemplate.postForObject(expressUrl, entity, Map<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//发送携带query参数的uri，使用此api进行编码生成uri</span></span><br><span class="line">UriComponentsBuilder builder = UriComponentsBuilder</span><br><span class="line">                .fromUriString(getUsersUrl)</span><br><span class="line">                .queryParam(<span class="string">"nameOrEmail"</span>, nameOrEmail);</span><br><span class="line">HttpHeaders headers = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">headers.setContentType(MediaType.APPLICATION_JSON_UTF8);</span><br><span class="line">ResponseEntity&lt;String&gt; exchange = restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.PUT, <span class="keyword">new</span> HttpEntity&lt;&gt;(headers), String<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//发送文件</span></span><br><span class="line">httpHeaders.setAccept(Arrays.asList(MediaType.MULTIPART_FORM_DATA));</span><br><span class="line">httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);</span><br><span class="line"><span class="comment">//设置请求体，注意是LinkedMultiValueMap</span></span><br><span class="line">FileSystemResource fileSystemResource = <span class="keyword">new</span> FileSystemResource(filePath+<span class="string">"/"</span>+fileName);<span class="comment">//获取文件资源</span></span><br><span class="line">MultiValueMap&lt;String, Object&gt; form = <span class="keyword">new</span> LinkedMultiValueMap&lt;&gt;();<span class="comment">//一个key可以存多个value</span></span><br><span class="line">form.add(<span class="string">"file"</span>, fileSystemResource);<span class="comment">//封装资源文件 </span></span><br><span class="line">form.add(<span class="string">"filename"</span>,fileName);<span class="comment">//封装文件名称</span></span><br><span class="line"><span class="comment">//用HttpEntity封装整个请求报文</span></span><br><span class="line">HttpEntity&lt;MultiValueMap&lt;String, Object&gt;&gt; files = <span class="keyword">new</span> HttpEntity&lt;&gt;(form, headers);</span><br><span class="line">String s = restTemplate.postForObject(url, files, String<span class="class">.<span class="keyword">class</span>)</span>;</span><br></pre></td></tr></table></figure>
+
+]]></content>
   </entry>
   <entry>
     <title>配置centos固定ip</title>
