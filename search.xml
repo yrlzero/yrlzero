@@ -18,59 +18,13 @@
 <p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
 <h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/blogs/images/多线程/AQS.png" style="zoom:200%;" />
 
-]]></content>
+<h3 id="CLH双向队列"><a href="#CLH双向队列" class="headerlink" title="CLH双向队列"></a>CLH双向队列</h3><img src="http://yrlzero.gitee.io/images/多线程/CLH.png" style="zoom:150%;" />]]></content>
       <categories>
         <category>多线程</category>
       </categories>
       <tags>
         <tag>AQS</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>VMware创建centos7虚拟机</title>
-    <url>/2020/11/29/VMware%E5%88%9B%E5%BB%BAcentos7%E8%99%9A%E6%8B%9F%E6%9C%BA/</url>
-    <content><![CDATA[<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/1.png" style="zoom:75%;" />
-
-<a id="more"></a>
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/2.png" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/3.png" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/4.jpg" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/5.jpg" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/6.jpg" style="zoom:55%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/7.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/8.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/9.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/10.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/11.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/12.jpg" style="zoom:50%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/13.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/14.jpg" style="zoom:67%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/15.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/16.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/17.jpg" style="zoom:67%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/18.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/19.jpg" style="zoom:75%;" />]]></content>
-      <categories>
-        <category>linux</category>
-      </categories>
   </entry>
   <entry>
     <title>JackJson和FastJson常见操作</title>
@@ -94,28 +48,6 @@
 ]]></content>
       <categories>
         <category>json</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>maven安装</title>
-    <url>/2020/11/29/maven%E5%AE%89%E8%A3%85/</url>
-    <content><![CDATA[<h3 id="1-下载地址：http-maven-apache-org-download-cgi"><a href="#1-下载地址：http-maven-apache-org-download-cgi" class="headerlink" title="1. 下载地址：http://maven.apache.org/download.cgi"></a>1. 下载地址：<code>http://maven.apache.org/download.cgi</code></h3><h3 id="2-解压："><a href="#2-解压：" class="headerlink" title="2. 解压："></a>2. 解压：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf apache-maven-3.6.3-bin.tar.gz</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-重命名："><a href="#3-重命名：" class="headerlink" title="3. 重命名："></a>3. 重命名：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mv apache-maven-3.6.3 maven3.6.3</span><br></pre></td></tr></table></figure>
-
-<a id="more"></a>
-
-<h3 id="4-添加环境变量："><a href="#4-添加环境变量：" class="headerlink" title="4. 添加环境变量："></a>4. 添加环境变量：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;profile</span><br><span class="line"></span><br><span class="line">export M2_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3</span><br><span class="line">export PATH&#x3D;$PATH:$JAVA_HOME&#x2F;bin:$M2_HOME&#x2F;bin</span><br></pre></td></tr></table></figure>
-
-<h3 id="5-让修改生效："><a href="#5-让修改生效：" class="headerlink" title="5. 让修改生效："></a>5. 让修改生效：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="6-验证："><a href="#6-验证：" class="headerlink" title="6. 验证："></a>6. 验证：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mvn -v</span><br></pre></td></tr></table></figure>
-
-<h3 id="7-修改配置文件"><a href="#7-修改配置文件" class="headerlink" title="7. 修改配置文件"></a>7. 修改配置文件</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3&#x2F;conf&#x2F;settings.xml</span><br><span class="line">	&lt;!-- 本地仓库 --&gt;</span><br><span class="line">	&lt;localRepository&gt;&#x2F;usr&#x2F;local&#x2F;mvn_repository&lt;&#x2F;localRepository&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!--使用阿里云，速度比官方快很多行指定中央仓库的镜像。--&gt;</span><br><span class="line">	&lt;mirror&gt;</span><br><span class="line">		&lt;id&gt;nexus-aliyun&lt;&#x2F;id&gt;</span><br><span class="line">		&lt;mirrorOf&gt;central&lt;&#x2F;mirrorOf&gt;</span><br><span class="line">		&lt;name&gt;Nexus aliyun&lt;&#x2F;name&gt;</span><br><span class="line">		&lt;url&gt;http:&#x2F;&#x2F;maven.aliyun.com&#x2F;nexus&#x2F;content&#x2F;groups&#x2F;public&lt;&#x2F;url&gt;</span><br><span class="line">	&lt;&#x2F;mirror&gt;</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">	&lt;!--更改Maven的默认jdk版本 --&gt;</span><br><span class="line">	&lt;profile&gt;</span><br><span class="line">		&lt;id&gt;jdk-1.8&lt;&#x2F;id&gt;</span><br><span class="line">		&lt;activation&gt;</span><br><span class="line">			&lt;activeByDefault&gt;true&lt;&#x2F;activeByDefault&gt;</span><br><span class="line">			&lt;jdk&gt;1.8&lt;&#x2F;jdk&gt;</span><br><span class="line">		&lt;&#x2F;activation&gt;</span><br><span class="line">		&lt;properties&gt;</span><br><span class="line">			&lt;maven.compiler.source&gt;1.8&lt;&#x2F;maven.compiler.source&gt;</span><br><span class="line">			&lt;maven.compiler.target&gt;1.8&lt;&#x2F;maven.compiler.target&gt;</span><br><span class="line">			&lt;maven.compiler.compilerVersion&gt;1.8&lt;&#x2F;maven.compiler.compilerVersion&gt;</span><br><span class="line">		&lt;&#x2F;properties&gt;</span><br><span class="line">   &lt;&#x2F;profile&gt;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>linux</category>
       </categories>
   </entry>
   <entry>
@@ -169,6 +101,74 @@
       <tags>
         <tag>jdk</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>VMware创建centos7虚拟机</title>
+    <url>/2020/11/29/VMware%E5%88%9B%E5%BB%BAcentos7%E8%99%9A%E6%8B%9F%E6%9C%BA/</url>
+    <content><![CDATA[<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/1.png" style="zoom:75%;" />
+
+<a id="more"></a>
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/2.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/3.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/4.jpg" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/5.jpg" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/6.jpg" style="zoom:55%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/7.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/8.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/9.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/10.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/11.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/12.jpg" style="zoom:50%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/13.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/14.jpg" style="zoom:67%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/15.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/16.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/17.jpg" style="zoom:67%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/18.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/19.jpg" style="zoom:75%;" />]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>maven安装</title>
+    <url>/2020/11/29/maven%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<h3 id="1-下载地址：http-maven-apache-org-download-cgi"><a href="#1-下载地址：http-maven-apache-org-download-cgi" class="headerlink" title="1. 下载地址：http://maven.apache.org/download.cgi"></a>1. 下载地址：<code>http://maven.apache.org/download.cgi</code></h3><h3 id="2-解压："><a href="#2-解压：" class="headerlink" title="2. 解压："></a>2. 解压：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf apache-maven-3.6.3-bin.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-重命名："><a href="#3-重命名：" class="headerlink" title="3. 重命名："></a>3. 重命名：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mv apache-maven-3.6.3 maven3.6.3</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h3 id="4-添加环境变量："><a href="#4-添加环境变量：" class="headerlink" title="4. 添加环境变量："></a>4. 添加环境变量：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;profile</span><br><span class="line"></span><br><span class="line">export M2_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3</span><br><span class="line">export PATH&#x3D;$PATH:$JAVA_HOME&#x2F;bin:$M2_HOME&#x2F;bin</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-让修改生效："><a href="#5-让修改生效：" class="headerlink" title="5. 让修改生效："></a>5. 让修改生效：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-验证："><a href="#6-验证：" class="headerlink" title="6. 验证："></a>6. 验证：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mvn -v</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-修改配置文件"><a href="#7-修改配置文件" class="headerlink" title="7. 修改配置文件"></a>7. 修改配置文件</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3&#x2F;conf&#x2F;settings.xml</span><br><span class="line">	&lt;!-- 本地仓库 --&gt;</span><br><span class="line">	&lt;localRepository&gt;&#x2F;usr&#x2F;local&#x2F;mvn_repository&lt;&#x2F;localRepository&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!--使用阿里云，速度比官方快很多行指定中央仓库的镜像。--&gt;</span><br><span class="line">	&lt;mirror&gt;</span><br><span class="line">		&lt;id&gt;nexus-aliyun&lt;&#x2F;id&gt;</span><br><span class="line">		&lt;mirrorOf&gt;central&lt;&#x2F;mirrorOf&gt;</span><br><span class="line">		&lt;name&gt;Nexus aliyun&lt;&#x2F;name&gt;</span><br><span class="line">		&lt;url&gt;http:&#x2F;&#x2F;maven.aliyun.com&#x2F;nexus&#x2F;content&#x2F;groups&#x2F;public&lt;&#x2F;url&gt;</span><br><span class="line">	&lt;&#x2F;mirror&gt;</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">	&lt;!--更改Maven的默认jdk版本 --&gt;</span><br><span class="line">	&lt;profile&gt;</span><br><span class="line">		&lt;id&gt;jdk-1.8&lt;&#x2F;id&gt;</span><br><span class="line">		&lt;activation&gt;</span><br><span class="line">			&lt;activeByDefault&gt;true&lt;&#x2F;activeByDefault&gt;</span><br><span class="line">			&lt;jdk&gt;1.8&lt;&#x2F;jdk&gt;</span><br><span class="line">		&lt;&#x2F;activation&gt;</span><br><span class="line">		&lt;properties&gt;</span><br><span class="line">			&lt;maven.compiler.source&gt;1.8&lt;&#x2F;maven.compiler.source&gt;</span><br><span class="line">			&lt;maven.compiler.target&gt;1.8&lt;&#x2F;maven.compiler.target&gt;</span><br><span class="line">			&lt;maven.compiler.compilerVersion&gt;1.8&lt;&#x2F;maven.compiler.compilerVersion&gt;</span><br><span class="line">		&lt;&#x2F;properties&gt;</span><br><span class="line">   &lt;&#x2F;profile&gt;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
   </entry>
   <entry>
     <title>nginx安装</title>
