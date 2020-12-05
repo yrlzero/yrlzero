@@ -21,18 +21,18 @@
     var CONFIG = {"hostname":"yrlzero.gitee.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="AQS (AbstractQueuedSynchronizer) 其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类">
+  <meta name="description" content="AQS (AbstractQueuedSynchronizer)抽象的队列式同步器 其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类">
 <meta property="og:type" content="article">
 <meta property="og:title" content="多线程-AQS">
 <meta property="og:url" content="http://yrlzero.gitee.io/2020/12/05/AQS/index.html">
 <meta property="og:site_name" content="yrlzero-blogs">
-<meta property="og:description" content="AQS (AbstractQueuedSynchronizer) 其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类">
+<meta property="og:description" content="AQS (AbstractQueuedSynchronizer)抽象的队列式同步器 其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/AQS.png">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/CLH.png">
 <meta property="article:published_time" content="2020-12-05T09:58:16.209Z">
-<meta property="article:modified_time" content="2020-12-05T14:40:26.091Z">
+<meta property="article:modified_time" content="2020-12-05T14:57:21.083Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="AQS">
 <meta name="twitter:card" content="summary">
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-12-05 17:58:16 / 修改时间：22:40:26" itemprop="dateCreated datePublished" datetime="2020-12-05T17:58:16+08:00">2020-12-05</time>
+              <time title="创建时间：2020-12-05 17:58:16 / 修改时间：22:57:21" itemprop="dateCreated datePublished" datetime="2020-12-05T17:58:16+08:00">2020-12-05</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -236,7 +236,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="AQS-AbstractQueuedSynchronizer"><a href="#AQS-AbstractQueuedSynchronizer" class="headerlink" title="AQS (AbstractQueuedSynchronizer)"></a>AQS (AbstractQueuedSynchronizer)</h2><p><img src="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
+        <h2 id="AQS-AbstractQueuedSynchronizer-抽象的队列式同步器"><a href="#AQS-AbstractQueuedSynchronizer-抽象的队列式同步器" class="headerlink" title="AQS (AbstractQueuedSynchronizer)抽象的队列式同步器"></a>AQS (AbstractQueuedSynchronizer)抽象的队列式同步器</h2><p><img src="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
 <p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
 <a id="more"></a>
 
@@ -331,7 +331,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AQS-AbstractQueuedSynchronizer"><span class="nav-number">1.</span> <span class="nav-text">AQS (AbstractQueuedSynchronizer)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AQS内部结构"><span class="nav-number">1.1.</span> <span class="nav-text">AQS内部结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node内部结构"><span class="nav-number">1.2.</span> <span class="nav-text">Node内部结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程图"><span class="nav-number">1.3.</span> <span class="nav-text">流程图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CLH双向队列"><span class="nav-number">1.4.</span> <span class="nav-text">CLH双向队列</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AQS-AbstractQueuedSynchronizer-抽象的队列式同步器"><span class="nav-number">1.</span> <span class="nav-text">AQS (AbstractQueuedSynchronizer)抽象的队列式同步器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AQS内部结构"><span class="nav-number">1.1.</span> <span class="nav-text">AQS内部结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node内部结构"><span class="nav-number">1.2.</span> <span class="nav-text">Node内部结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程图"><span class="nav-number">1.3.</span> <span class="nav-text">流程图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CLH双向队列"><span class="nav-number">1.4.</span> <span class="nav-text">CLH双向队列</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
