@@ -7,20 +7,11 @@
 <p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
 <a id="more"></a>
 
-<h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><p>state：同步器状态，被volatile修饰，通过cas争抢状态</p>
-<p>exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</p>
-<p>head：同步等待队列的头部，被volatile修饰</p>
-<p>tail：同步等待队列的尾部，被volatile修饰</p>
-<p>node：AQS的静态内部类，CLH的基础节点</p>
-<h3 id="Node内部结构"><a href="#Node内部结构" class="headerlink" title="Node内部结构"></a>Node内部结构</h3><p>​    prev：指向前一个node节点，被volatile修饰</p>
-<p>​    next：指向后一个node节点，被volatile修饰</p>
-<p>​    waitStatus：信号状态，默认是0，被volatile修饰</p>
-<p>​            CANCELLED = 1：取消状态，当timeout或被中断（响应中断的情况下），会触发变更为此状态，进入该状态后，节点将不会再变化</p>
+<h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><h4 id="state：同步器状态，被volatile修饰，通过cas争抢状态"><a href="#state：同步器状态，被volatile修饰，通过cas争抢状态" class="headerlink" title="state：同步器状态，被volatile修饰，通过cas争抢状态"></a>state：同步器状态，被volatile修饰，通过cas争抢状态</h4><h4 id="exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）"><a href="#exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）" class="headerlink" title="exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）"></a>exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</h4><h4 id="head：同步等待队列的头部，被volatile修饰"><a href="#head：同步等待队列的头部，被volatile修饰" class="headerlink" title="head：同步等待队列的头部，被volatile修饰"></a>head：同步等待队列的头部，被volatile修饰</h4><h4 id="tail：同步等待队列的尾部，被volatile修饰"><a href="#tail：同步等待队列的尾部，被volatile修饰" class="headerlink" title="tail：同步等待队列的尾部，被volatile修饰"></a>tail：同步等待队列的尾部，被volatile修饰</h4><h4 id="node：AQS的静态内部类，CLH的基础节点"><a href="#node：AQS的静态内部类，CLH的基础节点" class="headerlink" title="node：AQS的静态内部类，CLH的基础节点"></a>node：AQS的静态内部类，CLH的基础节点</h4><h3 id="Node内部结构"><a href="#Node内部结构" class="headerlink" title="Node内部结构"></a>Node内部结构</h3><h4 id="prev：指向前一个node节点，被volatile修饰"><a href="#prev：指向前一个node节点，被volatile修饰" class="headerlink" title="prev：指向前一个node节点，被volatile修饰"></a>prev：指向前一个node节点，被volatile修饰</h4><h4 id="next：指向后一个node节点，被volatile修饰"><a href="#next：指向后一个node节点，被volatile修饰" class="headerlink" title="next：指向后一个node节点，被volatile修饰"></a>next：指向后一个node节点，被volatile修饰</h4><h4 id="waitStatus：信号状态，默认是0，被volatile修饰"><a href="#waitStatus：信号状态，默认是0，被volatile修饰" class="headerlink" title="waitStatus：信号状态，默认是0，被volatile修饰"></a>waitStatus：信号状态，默认是0，被volatile修饰</h4><p>​            CANCELLED = 1：取消状态，当timeout或被中断（响应中断的情况下），会触发变更为此状态，进入该状态后，节点将不会再变化</p>
 <p>​            SIGNAL = -1：等待触发状态，后继节点在等待当前节点唤醒。后继节点入队后，会将前继节点的状态更新为SGNAL</p>
 <p>​            CONDITION = -2：节点等待在confition上，当其他线程调用confition的signal()方法后，CONDITION状态的节点将从等待队列转移到同步队列中</p>
 <p>​            PROPAGATE = -3：共享模式下，前继节点不仅会唤醒后继节点，同时也可能会唤醒后继节点的后继节点</p>
-<p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
-<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/images/多线程/AQS.png" style="zoom:200%;" />
+<h4 id="thread：当前节点关联的客户线程，被volatile修饰"><a href="#thread：当前节点关联的客户线程，被volatile修饰" class="headerlink" title="thread：当前节点关联的客户线程，被volatile修饰"></a>thread：当前节点关联的客户线程，被volatile修饰</h4><h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/images/多线程/AQS.png" style="zoom:200%;" />
 
 <h3 id="CLH双向队列"><a href="#CLH双向队列" class="headerlink" title="CLH双向队列"></a>CLH双向队列</h3><img src="http://yrlzero.gitee.io/images/多线程/CLH.png" style="zoom:150%;" />]]></content>
       <categories>
