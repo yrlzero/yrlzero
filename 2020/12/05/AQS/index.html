@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/AQS.png">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/CLH.png">
 <meta property="article:published_time" content="2020-12-05T09:58:16.209Z">
-<meta property="article:modified_time" content="2020-12-05T15:23:18.545Z">
+<meta property="article:modified_time" content="2020-12-05T15:25:08.260Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="AQS">
 <meta name="twitter:card" content="summary">
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-12-05 17:58:16 / 修改时间：23:23:18" itemprop="dateCreated datePublished" datetime="2020-12-05T17:58:16+08:00">2020-12-05</time>
+              <time title="创建时间：2020-12-05 17:58:16 / 修改时间：23:25:08" itemprop="dateCreated datePublished" datetime="2020-12-05T17:58:16+08:00">2020-12-05</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -240,18 +240,18 @@
 <p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
 <a id="more"></a>
 
-<h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><h4 id="state："><a href="#state：" class="headerlink" title="state："></a>state：</h4><p>同步器状态，被volatile修饰，通过cas争抢状态</p>
-<h4 id="exclusiveOwnerThread："><a href="#exclusiveOwnerThread：" class="headerlink" title="exclusiveOwnerThread："></a>exclusiveOwnerThread：</h4><p>互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</p>
-<h4 id="head："><a href="#head：" class="headerlink" title="head："></a>head：</h4><p>同步等待队列的头部，被volatile修饰</p>
-<h4 id="tail："><a href="#tail：" class="headerlink" title="tail："></a>tail：</h4><p>同步等待队列的尾部，被volatile修饰</p>
-<h4 id="node："><a href="#node：" class="headerlink" title="node："></a>node：</h4><p>AQS的静态内部类，CLH的基础节点</p>
-<h3 id="Node内部结构"><a href="#Node内部结构" class="headerlink" title="Node内部结构"></a>Node内部结构</h3><h4 id="prev："><a href="#prev：" class="headerlink" title="prev："></a>prev：</h4><p>指向前一个node节点，被volatile修饰</p>
-<h4 id="next："><a href="#next：" class="headerlink" title="next："></a>next：</h4><p>指向后一个node节点，被volatile修饰</p>
-<h4 id="waitStatus："><a href="#waitStatus：" class="headerlink" title="waitStatus："></a>waitStatus：</h4><p>信号状态，默认是0，被volatile修饰</p>
-<h5 id="CANCELLED-1："><a href="#CANCELLED-1：" class="headerlink" title="CANCELLED = 1："></a>CANCELLED = 1：</h5><p>取消状态，当timeout或被中断（响应中断的情况下），会触发变更为此状态，进入该状态后，节点将不会再变化</p>
-<h5 id="SIGNAL-1："><a href="#SIGNAL-1：" class="headerlink" title="SIGNAL = -1："></a>SIGNAL = -1：</h5><p>等待触发状态，后继节点在等待当前节点唤醒。后继节点入队后，会将前继节点的状态更新为SGNAL</p>
-<h5 id="CONDITION-2："><a href="#CONDITION-2：" class="headerlink" title="CONDITION = -2："></a>CONDITION = -2：</h5><p>节点等待在confition上，当其他线程调用confition的signal()方法后，CONDITION状态的节点将从等待队列转移到同步队列中</p>
-<h5 id="PROPAGATE-3："><a href="#PROPAGATE-3：" class="headerlink" title="PROPAGATE = -3："></a>PROPAGATE = -3：</h5><p>共享模式下，前继节点不仅会唤醒后继节点，同时也可能会唤醒后继节点的后继节点</p>
+<h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><h4 id="state："><a href="#state：" class="headerlink" title="state："></a>state：</h4><p>​        同步器状态，被volatile修饰，通过cas争抢状态</p>
+<h4 id="exclusiveOwnerThread："><a href="#exclusiveOwnerThread：" class="headerlink" title="exclusiveOwnerThread："></a>exclusiveOwnerThread：</h4><p>​        互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</p>
+<h4 id="head："><a href="#head：" class="headerlink" title="head："></a>head：</h4><p>​        同步等待队列的头部，被volatile修饰</p>
+<h4 id="tail："><a href="#tail：" class="headerlink" title="tail："></a>tail：</h4><p>​        同步等待队列的尾部，被volatile修饰</p>
+<h4 id="node："><a href="#node：" class="headerlink" title="node："></a>node：</h4><p>​        AQS的静态内部类，CLH的基础节点</p>
+<h3 id="Node内部结构"><a href="#Node内部结构" class="headerlink" title="Node内部结构"></a>Node内部结构</h3><h4 id="prev："><a href="#prev：" class="headerlink" title="prev："></a>prev：</h4><p>​        指向前一个node节点，被volatile修饰</p>
+<h4 id="next："><a href="#next：" class="headerlink" title="next："></a>next：</h4><p>​        指向后一个node节点，被volatile修饰</p>
+<h4 id="waitStatus："><a href="#waitStatus：" class="headerlink" title="waitStatus："></a>waitStatus：</h4><p>​        信号状态，默认是0，被volatile修饰</p>
+<h5 id="CANCELLED-1："><a href="#CANCELLED-1：" class="headerlink" title="CANCELLED = 1："></a>CANCELLED = 1：</h5><p>​                        取消状态，当timeout或被中断（响应中断的情况下），会触发变更为此状态，进入该状态后，节点将不会再变化</p>
+<h5 id="SIGNAL-1："><a href="#SIGNAL-1：" class="headerlink" title="SIGNAL = -1："></a>SIGNAL = -1：</h5><p>​                        等待触发状态，后继节点在等待当前节点唤醒。后继节点入队后，会将前继节点的状态更新为SGNAL</p>
+<h5 id="CONDITION-2："><a href="#CONDITION-2：" class="headerlink" title="CONDITION = -2："></a>CONDITION = -2：</h5><p>​                        节点等待在confition上，当其他线程调用confition的signal()方法后，CONDITION状态的节点将从等待队列转移到同步队列中</p>
+<h5 id="PROPAGATE-3："><a href="#PROPAGATE-3：" class="headerlink" title="PROPAGATE = -3："></a>PROPAGATE = -3：</h5><p>​                        共享模式下，前继节点不仅会唤醒后继节点，同时也可能会唤醒后继节点的后继节点</p>
 <h4 id="thread：当前节点关联的客户线程，被volatile修饰"><a href="#thread：当前节点关联的客户线程，被volatile修饰" class="headerlink" title="thread：当前节点关联的客户线程，被volatile修饰"></a>thread：当前节点关联的客户线程，被volatile修饰</h4><h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/images/多线程/AQS.png" style="zoom:200%;" />
 
 <h3 id="CLH双向队列"><a href="#CLH双向队列" class="headerlink" title="CLH双向队列"></a>CLH双向队列</h3><img src="http://yrlzero.gitee.io/images/多线程/CLH.png" style="zoom:150%;" />
