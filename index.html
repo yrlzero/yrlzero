@@ -150,6 +150,84 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/blogs/2020/12/05/AQS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/avatar.gif">
+      <meta itemprop="name" content="yrlzero">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrlzero-blogs">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/blogs/2020/12/05/AQS/" class="post-title-link" itemprop="url">多线程-AQS</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-12-05 17:58:16 / 修改时间：17:57:55" itemprop="dateCreated datePublished" datetime="2020-12-05T17:58:16+08:00">2020-12-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blogs/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="AQS-AbstractQueuedSynchronizer"><a href="#AQS-AbstractQueuedSynchronizer" class="headerlink" title="AQS (AbstractQueuedSynchronizer)"></a>AQS (AbstractQueuedSynchronizer)</h2><p><img src="G:%5C%E7%AC%94%E8%AE%B0%5C%E5%A4%9A%E7%BA%BF%E7%A8%8B%5CLock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
+<p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
+<h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><p>state：同步器状态，被volatile修饰，通过cas争抢状态</p>
+<p>exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</p>
+<p>head：同步等待队列的头部，被volatile修饰</p>
+<p>tail：同步等待队列的尾部，被volatile修饰</p>
+<p>node：AQS的静态内部类，CLH的基础节点</p>
+<h3 id="Node内部结构"><a href="#Node内部结构" class="headerlink" title="Node内部结构"></a>Node内部结构</h3><p>​    prev：指向前一个node节点，被volatile修饰</p>
+<p>​    next：指向后一个node节点，被volatile修饰</p>
+<p>​    waitStatus：信号状态，默认是0，被volatile修饰</p>
+<p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
+<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="G:\笔记\多线程\AQS.png" style="zoom:200%;" />
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/blogs/2020/11/29/maven%E5%AE%89%E8%A3%85/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1009,124 +1087,11 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/blogs/images/avatar.gif">
-      <meta itemprop="name" content="yrlzero">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/" class="post-title-link" itemprop="url">rabbitmq系列-基础篇</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-06-02 22:45:01" itemprop="dateCreated datePublished" datetime="2020-06-02T22:45:01+08:00">2020-06-02</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-29 16:06:50" itemprop="dateModified" datetime="2020-11-29T16:06:50+08:00">2020-11-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blogs/categories/mq/" itemprop="url" rel="index"><span itemprop="name">mq</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a><strong>一、概念</strong></h2><p>RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现</p>
-<h4 id="exchange"><a href="#exchange" class="headerlink" title="exchange:"></a>exchange:</h4><p>​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不同的路由规则。</p>
-<h4 id="queue："><a href="#queue：" class="headerlink" title="queue："></a>queue：</h4><p>​        队列是 RabbitMQ 的内部对象，用于存储消息。消息消费者就是通过订阅队列<br>来获取消息的，RabbitMQ 中的消息都只能存储在 Queue 中，生产者生产消息并最终投递到Queue 中，消费者可以从 Queue 中获取消息并消费。多个消费者可以订阅同一个 Queue，这时 Queue 中的消息会被平均分摊给多个消费者进行处理，而不是每个消费者都收到所有的消息并处理。</p>
-<h4 id="connection："><a href="#connection：" class="headerlink" title="connection："></a>connection：</h4><p>connection就是一个TCP的连接。Producer和Consumer都是通过TCP连接到RabbitMQ Server的。程序的起始处就是建立这个TCP连接。</p>
-<h4 id="channels："><a href="#channels：" class="headerlink" title="channels："></a>channels：</h4><p>​        虚拟连接。它建立在上述的TCP连接中。数据流动都是在Channel中进行的。也就是说，一般情况是程序起始建立TCP连接，第二步就是建立这个Channel。</p>
-<p>那么，为什么使用Channel，而不是直接使用TCP连接？<br>    对于OS来说，建立和关闭TCP连接是有代价的，频繁的建立关闭TCP连接对于系统的性能有很大的影响，而且TCP的连接数也有限制，这也限制了系统处理高并发的能力。但是，在TCP连接中建立Channel是没有上述代价的。对于Producer或者Consumer来说，可以并发的使用多个Channel进行Publish或者Receive。</p>
-<h4 id="VirtualHost："><a href="#VirtualHost：" class="headerlink" title="VirtualHost："></a>VirtualHost：</h4><p>​        权限控制的基本单位，一个 VirtualHost 里面有若干 Exchange 和MessageQueue，以及指定被哪些 user 使用</p>
-<h4 id="routing-key："><a href="#routing-key：" class="headerlink" title="routing key："></a>routing key：</h4><p>​        生产者在将消息发送给exchange的时候，一般会指定一个routing key，来匹配这个消息的路由规则。其实是匹配exchnage与queue绑定的bbinding key</p>
-<h4 id="binding-key-："><a href="#binding-key-：" class="headerlink" title="binding key ："></a>binding key ：</h4><p>​        用于绑定exchange与queue之间的关系</p>
-<h2 id="二、windows安装"><a href="#二、windows安装" class="headerlink" title="二、windows安装"></a><strong>二、windows安装</strong></h2><p>1）下载安装erlang</p>
-<p>2）下载安装rabbitmq</p>
-<p>3）安装管理界面（插件）</p>
-<p>进入rabbitmq安装目录sbin中，调起cmd界面输入：rabbitmq-plugins enable rabbitmq_management</p>
-<p>4）重启rabbitmq服务</p>
-<p>5）访问地址127.0.0.1:15672，默认账号密码都为guest</p>
-<h2 id="三、docker启动"><a href="#三、docker启动" class="headerlink" title="三、docker启动"></a>三、docker启动</h2><p>1)     搜索镜像：docker search rabbitmq</p>
-<p>2)    下载镜像：docker pull rabbitmq:management</p>
-<p>3)    创建容器，rabbitmq 需要有映射以下端口: 5671 5672 4369 15671 15672<br>25672</p>
-<ul>
-<li>15672  management管理端监听端口</li>
-<li>5672、5671 AMQP使用端口</li>
-<li>4369 epmd代表erlang守护进程的端口</li>
-<li>25672 (Erlang distribution)</li>
-</ul>
-<figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">run</span><span class="bash"> -di --name=my_rabbitmq -p 5671:5617 -p 5672:5672 -p 4369:4369 -p 15671:15671 -p 15672:15672 -p 25672:25672 rabbitmq:management</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="四、exchange-type"><a href="#四、exchange-type" class="headerlink" title="四、exchange type"></a><strong>四、exchange type</strong></h2><h4 id="1）直连模式-direct："><a href="#1）直连模式-direct：" class="headerlink" title="1）直连模式-direct："></a>1）直连模式-direct：</h4><p>​        direct类型的exchange路由规则也很简单，它会把消息路由到那些binding key与routing key完全匹配的queue中 。</p>
-<p>​        默认交换器（名称为空字符串的直连交换机）,一个queue若不指定binding的交换机,就被绑定到默认交换机上,binding key为queue的名称。</p>
-<img src="http://yrlzero.gitee.io/blogs/images/直连模式.jpg" style="zoom:67%;" />
-
-<h4 id="2）主题模式-topic"><a href="#2）主题模式-topic" class="headerlink" title="2）主题模式-topic"></a>2）主题模式-topic</h4><p> topic类型的Exchange在匹配规则上进行了扩展，它与direct类型的Exchage相似，也是将消息路由到binding key与routing key相匹配的Queue中，但这里的匹配规则有些不同， 可以根据某些规则进行匹配，如果 exchange 没有发现能够与 routing Key 匹配的 queue，则会抛弃此消息</p>
-<img src="http://yrlzero.gitee.io/blogs/images/主题模式.jpg" style="zoom:67%;" />
-
-<p>符号 # 匹配一个或多个词，符号 * 匹配一个词</p>
-<h4 id="3）分裂模式-fanout"><a href="#3）分裂模式-fanout" class="headerlink" title="3）分裂模式-fanout"></a><strong>3）分裂模式-fanout</strong></h4><p> fanout类型的exchange路由规则非常简单，它会把所有发送到该exchange的消息路由到所有与它绑定的queue中 </p>
-<img src="http://yrlzero.gitee.io/blogs/images/分裂模式.jpg" style="zoom:67%;" />
-
-
-
-<h4 id="4）头部模式-headers"><a href="#4）头部模式-headers" class="headerlink" title="4）头部模式-headers"></a><strong>4）头部模式-headers</strong></h4><p>​         headers类型的exchange不依赖于routing key与binding key的匹配规则来路由消息，而是根据发送的消息内容中的headers属性进行匹配。在绑定queue与exchange时指定一组键值对；当消息发送到exchange时，rabbitMq会取到该消息的headers（也是一个键值对的形式），对比其中的键值对是否完全匹配queue与exchange绑定时指定的键值对；如果完全匹配则消息会路由到该queue，否则不会路由到该queue </p>
-<h4 id="5）延迟消息（特殊模式需要安装插件）"><a href="#5）延迟消息（特殊模式需要安装插件）" class="headerlink" title="5）延迟消息（特殊模式需要安装插件）"></a><strong>5）延迟消息（特殊模式需要安装插件）</strong></h4><p>​         需要在这个页面：<a href="http://www.rabbitmq.com/community-plugins.html" target="_blank" rel="noopener">http://www.rabbitmq.com/community-plugins.html</a> 中找到<code>rabbitmq_delayed_message_exchange</code>插件，根据您使用的RabbitMQ版本选择对应的插件版本下载即可 。 在下载好之后，解压得到<code>.ez</code>结尾的插件包，将其复制到RabbitMQ安装目录下的<code>plugins</code>文件夹 。</p>
-<pre><code>然后通过命令行启用该插件： </code></pre><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-plugins enable rabbitmq_delayed_message_exchange</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/blogs/page/2/">2</a><a class="extend next" rel="next" href="/blogs/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
 
 
 
@@ -1191,14 +1156,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/blogs/archives/">
         
-          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-count">11</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/blogs/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
   </nav>
