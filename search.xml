@@ -5,6 +5,8 @@
     <url>/blogs/2020/12/05/AQS/</url>
     <content><![CDATA[<h2 id="AQS-AbstractQueuedSynchronizer"><a href="#AQS-AbstractQueuedSynchronizer" class="headerlink" title="AQS (AbstractQueuedSynchronizer)"></a>AQS (AbstractQueuedSynchronizer)</h2><p><img src="http://yrlzero.gitee.io/blogs/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
 <p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
+<a id="more"></a>
+
 <h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><p>state：同步器状态，被volatile修饰，通过cas争抢状态</p>
 <p>exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</p>
 <p>head：同步等待队列的头部，被volatile修饰</p>
@@ -14,7 +16,9 @@
 <p>​    next：指向后一个node节点，被volatile修饰</p>
 <p>​    waitStatus：信号状态，默认是0，被volatile修饰</p>
 <p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
-<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/blogs/images/多线程/AQS.png" style="zoom:200%;" />]]></content>
+<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/blogs/images/多线程/AQS.png" style="zoom:200%;" />
+
+]]></content>
       <categories>
         <category>多线程</category>
       </categories>
@@ -27,6 +31,8 @@
     <url>/blogs/2020/11/29/JackJson%E5%92%8CFastJson%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C/</url>
     <content><![CDATA[<h3 id="jackjson"><a href="#jackjson" class="headerlink" title="jackjson"></a>jackjson</h3><p>配置：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ObjectMapper objectMapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line"><span class="comment">//Include.ALWAYS  是序列化对像所有属性</span></span><br><span class="line"><span class="comment">//Include.NON_NULL 只有不为null的字段才被序列化</span></span><br><span class="line"><span class="comment">//Include.NON_EMPTY 如果为null或者 空字符串和空集合都不会被序列化</span></span><br><span class="line">objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);</span><br><span class="line"><span class="comment">//取消时间的转化格式,默认是时间戳,可以取消,同时需要设置要表现的时间格式</span></span><br><span class="line">objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, <span class="keyword">false</span>);</span><br><span class="line">objectMapper.setDateFormat(<span class="keyword">new</span> SimpleDateFormat(<span class="string">"yyyy-MM-dd HH:mm:ss"</span>));</span><br><span class="line"><span class="comment">//如果是空对象的时候,设置为false不抛异常,也就是对应的属性没有get方法,默认是true,即会抛异常</span></span><br><span class="line">objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, <span class="keyword">false</span>);</span><br><span class="line"><span class="comment">//反序列化的时候如果多了其他属性,不抛出异常  </span></span><br><span class="line">objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
 
 <p>yml配置</p>
 <figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">    <span class="attr">jackson:</span></span><br><span class="line">      <span class="comment"># 设置属性命名策略,对应jackson下PropertyNamingStrategy中的常量值，SNAKE_CASE-返回的json驼峰式转下划线，json body下划线传到后端自动转驼峰式</span></span><br><span class="line">      <span class="attr">property-naming-strategy:</span> <span class="string">SNAKE_CASE</span></span><br><span class="line">      <span class="comment"># 全局设置@JsonFormat的格式pattern</span></span><br><span class="line">      <span class="attr">date-format:</span> <span class="string">yyyy-MM-dd</span> <span class="string">HH:mm:ss</span></span><br><span class="line">      <span class="comment"># 当地时区</span></span><br><span class="line">      <span class="attr">locale:</span> <span class="string">zh</span></span><br><span class="line">      <span class="comment"># 设置全局时区</span></span><br><span class="line">      <span class="attr">time-zone:</span> <span class="string">GMT+8</span></span><br><span class="line">      <span class="comment"># 常用，全局设置pojo或被@JsonInclude注解的属性的序列化方式</span></span><br><span class="line">      <span class="attr">default-property-inclusion:</span> <span class="string">NON_NULL</span> <span class="comment">#不为空的属性才会序列化,具体属性可看JsonInclude.Include</span></span><br><span class="line">      <span class="comment"># 常规默认,枚举类SerializationFeature中的枚举属性为key，值为boolean设置jackson序列化特性,具体key请看SerializationFeature源码</span></span><br><span class="line">      <span class="attr">serialization:</span></span><br><span class="line">        <span class="attr">WRITE_DATES_AS_TIMESTAMPS:</span> <span class="literal">true</span> <span class="comment"># 返回的java.util.date转换成timestamp</span></span><br><span class="line">        <span class="attr">FAIL_ON_EMPTY_BEANS:</span> <span class="literal">true</span> <span class="comment"># 对象为空时是否报错，默认true</span></span><br><span class="line">      <span class="comment"># 枚举类DeserializationFeature中的枚举属性为key，值为boolean设置jackson反序列化特性,具体key请看DeserializationFeature源码</span></span><br><span class="line">      <span class="attr">deserialization:</span></span><br><span class="line">        <span class="comment"># 常用,json中含pojo不存在属性时是否失败报错,默认true</span></span><br><span class="line">        <span class="attr">FAIL_ON_UNKNOWN_PROPERTIES:</span> <span class="literal">false</span></span><br><span class="line">      <span class="comment"># 枚举类MapperFeature中的枚举属性为key，值为boolean设置jackson ObjectMapper特性</span></span><br><span class="line">      <span class="comment"># ObjectMapper在jackson中负责json的读写、json与pojo的互转、json tree的互转,具体特性请看MapperFeature,常规默认即可</span></span><br><span class="line">      <span class="attr">mapper:</span></span><br><span class="line">        <span class="comment"># 使用getter取代setter探测属性，如类中含getName()但不包含name属性与setName()，传输的vo json格式模板中依旧含name属性</span></span><br><span class="line">        <span class="attr">USE_GETTERS_AS_SETTERS:</span> <span class="literal">true</span> <span class="comment">#默认false</span></span><br><span class="line">      <span class="comment"># 枚举类JsonParser.Feature枚举类中的枚举属性为key，值为boolean设置jackson JsonParser特性</span></span><br><span class="line">      <span class="comment"># JsonParser在jackson中负责json内容的读取,具体特性请看JsonParser.Feature，一般无需设置默认即可</span></span><br><span class="line">      <span class="attr">parser:</span></span><br><span class="line">        <span class="attr">ALLOW_SINGLE_QUOTES:</span> <span class="literal">true</span> <span class="comment"># 是否允许出现单引号,默认false</span></span><br><span class="line">      <span class="comment"># 枚举类JsonGenerator.Feature枚举类中的枚举属性为key，值为boolean设置jackson JsonGenerator特性，一般无需设置默认即可</span></span><br><span class="line">      <span class="comment"># JsonGenerator在jackson中负责编写json内容,具体特性请看JsonGenerator.Feature</span></span><br></pre></td></tr></table></figure>
@@ -45,55 +51,13 @@
       </categories>
   </entry>
   <entry>
-    <title>VMware创建centos7虚拟机</title>
-    <url>/blogs/2020/11/29/VMware%E5%88%9B%E5%BB%BAcentos7%E8%99%9A%E6%8B%9F%E6%9C%BA/</url>
-    <content><![CDATA[<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/1.png" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/2.png" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/3.png" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/4.jpg" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/5.jpg" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/6.jpg" style="zoom:55%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/7.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/8.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/9.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/10.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/11.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/12.jpg" style="zoom:50%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/13.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/14.jpg" style="zoom:67%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/15.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/16.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/17.jpg" style="zoom:67%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/18.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/19.jpg" style="zoom:75%;" />]]></content>
-      <categories>
-        <category>linux</category>
-      </categories>
-  </entry>
-  <entry>
     <title>jdk1.8安装</title>
     <url>/blogs/2020/11/29/jdk1.8%E5%AE%89%E8%A3%85/</url>
     <content><![CDATA[<h2 id="一、安装rz、sz命令"><a href="#一、安装rz、sz命令" class="headerlink" title="一、安装rz、sz命令"></a>一、安装rz、sz命令</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum -y install lrzsz</span><br></pre></td></tr></table></figure>
 
 <h2 id="二、rpm方式安装jdk"><a href="#二、rpm方式安装jdk" class="headerlink" title="二、rpm方式安装jdk"></a>二、rpm方式安装jdk</h2><h3 id="1-查看是否含有系统自带jdk"><a href="#1-查看是否含有系统自带jdk" class="headerlink" title="1. 查看是否含有系统自带jdk"></a>1. 查看是否含有系统自带jdk</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">java -version</span><br><span class="line">rpm -qa | grep java</span><br><span class="line">rpm -qa | grep jdk</span><br><span class="line">rpm -e --nodeps xxxx</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
 
 <h3 id="2-上传安装包"><a href="#2-上传安装包" class="headerlink" title="2. 上传安装包"></a>2. 上传安装包</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">rz</span><br></pre></td></tr></table></figure>
 
@@ -139,11 +103,59 @@
       </tags>
   </entry>
   <entry>
+    <title>VMware创建centos7虚拟机</title>
+    <url>/blogs/2020/11/29/VMware%E5%88%9B%E5%BB%BAcentos7%E8%99%9A%E6%8B%9F%E6%9C%BA/</url>
+    <content><![CDATA[<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/1.png" style="zoom:75%;" />
+
+<a id="more"></a>
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/2.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/3.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/4.jpg" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/5.jpg" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/6.jpg" style="zoom:55%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/7.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/8.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/9.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/10.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/11.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/12.jpg" style="zoom:50%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/13.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/14.jpg" style="zoom:67%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/15.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/16.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/17.jpg" style="zoom:67%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/18.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/blogs/images/linux/centos/19.jpg" style="zoom:75%;" />]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
     <title>maven安装</title>
     <url>/blogs/2020/11/29/maven%E5%AE%89%E8%A3%85/</url>
     <content><![CDATA[<h3 id="1-下载地址：http-maven-apache-org-download-cgi"><a href="#1-下载地址：http-maven-apache-org-download-cgi" class="headerlink" title="1. 下载地址：http://maven.apache.org/download.cgi"></a>1. 下载地址：<code>http://maven.apache.org/download.cgi</code></h3><h3 id="2-解压："><a href="#2-解压：" class="headerlink" title="2. 解压："></a>2. 解压：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf apache-maven-3.6.3-bin.tar.gz</span><br></pre></td></tr></table></figure>
 
 <h3 id="3-重命名："><a href="#3-重命名：" class="headerlink" title="3. 重命名："></a>3. 重命名：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mv apache-maven-3.6.3 maven3.6.3</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
 
 <h3 id="4-添加环境变量："><a href="#4-添加环境变量：" class="headerlink" title="4. 添加环境变量："></a>4. 添加环境变量：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;profile</span><br><span class="line"></span><br><span class="line">export M2_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;maven&#x2F;maven3.6.3</span><br><span class="line">export PATH&#x3D;$PATH:$JAVA_HOME&#x2F;bin:$M2_HOME&#x2F;bin</span><br></pre></td></tr></table></figure>
 
@@ -169,6 +181,8 @@
 <li><p>使用<code>wget</code>命令下载（推荐）。确保系统已经安装了<code>wget</code>，如果没有安装，执行 <code>yum install wget</code> 安装<code>wget -c https://nginx.org/download/nginx-1.18.0.tar.gz</code></p>
 </li>
 </ul>
+<a id="more"></a>
+
 <h3 id="2-解压"><a href="#2-解压" class="headerlink" title="2. 解压"></a>2. 解压</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf nginx-1.18.0.tar.gz</span><br></pre></td></tr></table></figure>
 
 <h3 id="3-yum安装依赖项"><a href="#3-yum安装依赖项" class="headerlink" title="3. yum安装依赖项"></a>3. yum安装依赖项</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#gcc安装，nginx源码编译需要；pcre-devel 安装，nginx 的 http 模块使用 pcre 来解析正则表达式；zlib安装，nginx 使用zlib对http包的内容进行gzip</span><br><span class="line"></span><br><span class="line">yum install gcc pcre-devel zlib-devel</span><br></pre></td></tr></table></figure>
@@ -190,6 +204,8 @@
     <content><![CDATA[<p><strong>一、概念</strong></p>
 <p>​         AMQP 是 Advanced Message Queuing Protocol 的简称，它是一个面向消息中间件的开放式标准应用层协议。</p>
 <h2 id="二、spring-boot的应用"><a href="#二、spring-boot的应用" class="headerlink" title="二、spring boot的应用"></a><strong>二、spring boot的应用</strong></h2><h4 id="1-消息生产者"><a href="#1-消息生产者" class="headerlink" title="1.消息生产者"></a><strong>1.消息生产者</strong></h4><h5 id="1）导入maven依赖："><a href="#1）导入maven依赖：" class="headerlink" title="1）导入maven依赖："></a><strong>1）导入maven依赖：</strong></h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-boot-starter-amqp&lt;&#x2F;artifactId&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
 
 <h5 id="2）配置application-yml"><a href="#2）配置application-yml" class="headerlink" title="2）配置application.yml"></a><strong>2）配置application.yml</strong></h5><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">rabbitmq:</span></span><br><span class="line">    <span class="attr">virtual-host:</span> <span class="string">yrl_test</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">test</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">test123</span></span><br><span class="line">    <span class="attr">host:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">5672</span></span><br><span class="line">    <span class="attr">publisher-confirms:</span> <span class="literal">true</span> <span class="comment"># 后续消息确认使用</span></span><br><span class="line">    <span class="attr">publisher-returns:</span> <span class="literal">true</span> <span class="comment"># 后续消息确认使用</span></span><br></pre></td></tr></table></figure>
 
@@ -224,6 +240,8 @@
     <url>/blogs/2020/06/02/rabbitmq%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E7%AF%87/</url>
     <content><![CDATA[<h2 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a><strong>一、概念</strong></h2><p>RabbitMQ 是一个由 Erlang 语言开发的 AMQP 的开源实现</p>
 <h4 id="exchange"><a href="#exchange" class="headerlink" title="exchange:"></a>exchange:</h4><p>​        生产者将消息发送到 Exchange（交换器），由 Exchange 将消息路由到一个或多个 Queue 中（或者丢弃）。Exchange 并不存储消息。RabbitMQ 中的 Exchange 有 direct、fanout、topic、headers 四种类型，每种类型对应不同的路由规则。</p>
+<a id="more"></a>
+
 <h4 id="queue："><a href="#queue：" class="headerlink" title="queue："></a>queue：</h4><p>​        队列是 RabbitMQ 的内部对象，用于存储消息。消息消费者就是通过订阅队列<br>来获取消息的，RabbitMQ 中的消息都只能存储在 Queue 中，生产者生产消息并最终投递到Queue 中，消费者可以从 Queue 中获取消息并消费。多个消费者可以订阅同一个 Queue，这时 Queue 中的消息会被平均分摊给多个消费者进行处理，而不是每个消费者都收到所有的消息并处理。</p>
 <h4 id="connection："><a href="#connection：" class="headerlink" title="connection："></a>connection：</h4><p>connection就是一个TCP的连接。Producer和Consumer都是通过TCP连接到RabbitMQ Server的。程序的起始处就是建立这个TCP连接。</p>
 <h4 id="channels："><a href="#channels：" class="headerlink" title="channels："></a>channels：</h4><p>​        虚拟连接。它建立在上述的TCP连接中。数据流动都是在Channel中进行的。也就是说，一般情况是程序起始建立TCP连接，第二步就是建立这个Channel。</p>
@@ -276,6 +294,8 @@
     <content><![CDATA[<h2 id="a-修改-etc-sysconfig-network配置文件："><a href="#a-修改-etc-sysconfig-network配置文件：" class="headerlink" title="a. 修改/etc/sysconfig/network配置文件："></a>a. 修改/etc/sysconfig/network配置文件：</h2><p>vi /etc/sysconfig/network</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># Created by anaconda</span><br><span class="line">GATEWAY&#x3D;192.168.243.2</span><br></pre></td></tr></table></figure>
 
+<a id="more"></a>
+
 <h2 id="b-修改-etc-sysconfig-network-scripts-ifcfg-ens33配置文件："><a href="#b-修改-etc-sysconfig-network-scripts-ifcfg-ens33配置文件：" class="headerlink" title="b. 修改/etc/sysconfig/network-scripts/ifcfg-ens33配置文件："></a>b. 修改/etc/sysconfig/network-scripts/ifcfg-ens33配置文件：</h2><p>vi /etc/sysconfig/network-scripts/ifcfg-ens33</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">TYPE&#x3D;Ethernet</span><br><span class="line">PROXY_METHOD&#x3D;none</span><br><span class="line">BROWSER_ONLY&#x3D;no</span><br><span class="line"></span><br><span class="line">BOOTPROTO&#x3D;static</span><br><span class="line">IPADDR&#x3D;192.168.243.131</span><br><span class="line">GATEWAY&#x3D;192.168.243.2</span><br><span class="line">NETMASK&#x3D;255.255.255.0</span><br><span class="line"></span><br><span class="line">DEFROUTE&#x3D;yes</span><br><span class="line">IPV4_FAILURE_FATAL&#x3D;no</span><br><span class="line">IPV6INIT&#x3D;yes</span><br><span class="line">IPV6_AUTOCONF&#x3D;yes</span><br><span class="line">IPV6_DEFROUTE&#x3D;yes</span><br><span class="line">IPV6_FAILURE_FATAL&#x3D;no</span><br><span class="line">IPV6_ADDR_GEN_MODE&#x3D;stable-privacy</span><br><span class="line">NAME&#x3D;ens33</span><br><span class="line">UUID&#x3D;193e7f5e-e25b-40ef-b292-0fe5c8970af5</span><br><span class="line">DEVICE&#x3D;ens33</span><br><span class="line">ONBOOT&#x3D;yes</span><br><span class="line">ZONE&#x3D;public</span><br></pre></td></tr></table></figure>
 
@@ -294,6 +314,8 @@
 <h4 id="1-1-2-资源拥有者"><a href="#1-1-2-资源拥有者" class="headerlink" title="1.1.2 资源拥有者"></a>1.1.2 资源拥有者</h4><p>​        通常为用户、也可为应用程序，即资源的拥有者。</p>
 <h4 id="1-1-3-资源服务器"><a href="#1-1-3-资源服务器" class="headerlink" title="1.1.3  资源服务器"></a>1.1.3  资源服务器</h4><p>​        存储资源的服务器，一般为提供业务接口服务的程序。</p>
 <h4 id="1-1-4-授权服务器"><a href="#1-1-4-授权服务器" class="headerlink" title="1.1.4 授权服务器"></a>1.1.4 授权服务器</h4><p>​        用于对资源拥有者的身份进行认证、对访问资源进行授权，认证成功发放令牌（access_token）给客户端，作为客户端访问资源服务器的凭证；授权服务器就是对客户端和资源拥有着进行认证授权，使其可以访问资源服务器获取资源。</p>
+<a id="more"></a>
+
 <h3 id="1-2-四种模式"><a href="#1-2-四种模式" class="headerlink" title="1.2 四种模式"></a>1.2 四种模式</h3><h4 id="1-2-1-授权码模式"><a href="#1-2-1-授权码模式" class="headerlink" title="1.2.1 授权码模式"></a>1.2.1 授权码模式</h4><p>授权码模式（authorization code）是功能最完整、流程最严密的授权模式，code保证了token的安全性，即使code被拦截，由于没有app_secret，也是无法通过code获得token的。</p>
 <h4 id="1-2-2-隐式授权模式-简化模式"><a href="#1-2-2-隐式授权模式-简化模式" class="headerlink" title="1.2.2 隐式授权模式/简化模式"></a>1.2.2 隐式授权模式/简化模式</h4><p>和授权码模式类似，少了获取code的步骤，是直接获取令牌token的，适用于公开的浏览器单页应用，令牌直接从授权服务器返回，不支持刷新令牌，且没有code安全保证，令牌容易因为被拦截窃听而泄露。</p>
 <h4 id="1-2-3-密码模式"><a href="#1-2-3-密码模式" class="headerlink" title="1.2.3 密码模式"></a>1.2.3 密码模式</h4><p>使用用户名/密码作为授权方式从授权服务器上获取令牌，一般不支持刷新令牌。</p>
