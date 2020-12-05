@@ -15,6 +15,10 @@
 <h3 id="Node内部结构"><a href="#Node内部结构" class="headerlink" title="Node内部结构"></a>Node内部结构</h3><p>​    prev：指向前一个node节点，被volatile修饰</p>
 <p>​    next：指向后一个node节点，被volatile修饰</p>
 <p>​    waitStatus：信号状态，默认是0，被volatile修饰</p>
+<p>​            CANCELLED = 1：取消状态，当timeout或被中断（响应中断的情况下），会触发变更为此状态，进入该状态后，节点将不会再变化</p>
+<p>​            SIGNAL = -1：等待触发状态，后继节点在等待当前节点唤醒。后继节点入队后，会将前继节点的状态更新为SGNAL</p>
+<p>​            CONDITION = -2：节点等待在confition上，当其他线程调用confition的signal()方法后，CONDITION状态的节点将从等待队列转移到同步队列中</p>
+<p>​            PROPAGATE = -3：共享模式下，前继节点不仅会唤醒后继节点，同时也可能会唤醒后继节点的后继节点</p>
 <p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
 <h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/images/多线程/AQS.png" style="zoom:200%;" />
 
