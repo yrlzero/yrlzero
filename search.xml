@@ -1,32 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>多线程-AQS</title>
-    <url>/2020/12/05/AQS/</url>
-    <content><![CDATA[<h2 id="AQS-AbstractQueuedSynchronizer"><a href="#AQS-AbstractQueuedSynchronizer" class="headerlink" title="AQS (AbstractQueuedSynchronizer)"></a>AQS (AbstractQueuedSynchronizer)</h2><p><img src="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
-<p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
-<a id="more"></a>
-
-<h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><p>state：同步器状态，被volatile修饰，通过cas争抢状态</p>
-<p>exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</p>
-<p>head：同步等待队列的头部，被volatile修饰</p>
-<p>tail：同步等待队列的尾部，被volatile修饰</p>
-<p>node：AQS的静态内部类，CLH的基础节点</p>
-<h3 id="Node内部结构"><a href="#Node内部结构" class="headerlink" title="Node内部结构"></a>Node内部结构</h3><p>​    prev：指向前一个node节点，被volatile修饰</p>
-<p>​    next：指向后一个node节点，被volatile修饰</p>
-<p>​    waitStatus：信号状态，默认是0，被volatile修饰</p>
-<p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
-<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/images/多线程/AQS.png" style="zoom:200%;" />
-
-<h3 id="CLH双向队列"><a href="#CLH双向队列" class="headerlink" title="CLH双向队列"></a>CLH双向队列</h3><img src="http://yrlzero.gitee.io/images/多线程/CLH.png" style="zoom:150%;" />]]></content>
-      <categories>
-        <category>多线程</category>
-      </categories>
-      <tags>
-        <tag>AQS</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>JackJson和FastJson常见操作</title>
     <url>/2020/11/29/JackJson%E5%92%8CFastJson%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C/</url>
     <content><![CDATA[<h3 id="jackjson"><a href="#jackjson" class="headerlink" title="jackjson"></a>jackjson</h3><p>配置：</p>
@@ -48,6 +22,52 @@
 ]]></content>
       <categories>
         <category>json</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>VMware创建centos7虚拟机</title>
+    <url>/2020/11/29/VMware%E5%88%9B%E5%BB%BAcentos7%E8%99%9A%E6%8B%9F%E6%9C%BA/</url>
+    <content><![CDATA[<img src="http://yrlzero.gitee.io/images/linux/centos/1.png" style="zoom:75%;" />
+
+<a id="more"></a>
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/2.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/3.png" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/4.jpg" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/5.jpg" style="zoom:75%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/6.jpg" style="zoom:55%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/7.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/8.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/9.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/10.jpg" style="zoom:65%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/11.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/12.jpg" style="zoom:50%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/13.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/14.jpg" style="zoom:67%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/15.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/16.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/17.jpg" style="zoom:67%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/18.jpg" style="zoom:60%;" />
+
+<img src="http://yrlzero.gitee.io/images/linux/centos/19.jpg" style="zoom:75%;" />]]></content>
+      <categories>
+        <category>linux</category>
       </categories>
   </entry>
   <entry>
@@ -103,50 +123,30 @@
       </tags>
   </entry>
   <entry>
-    <title>VMware创建centos7虚拟机</title>
-    <url>/2020/11/29/VMware%E5%88%9B%E5%BB%BAcentos7%E8%99%9A%E6%8B%9F%E6%9C%BA/</url>
-    <content><![CDATA[<img src="http://yrlzero.gitee.io/images/linux/centos/1.png" style="zoom:75%;" />
-
+    <title>多线程-AQS</title>
+    <url>/2020/12/05/AQS/</url>
+    <content><![CDATA[<h2 id="AQS-AbstractQueuedSynchronizer"><a href="#AQS-AbstractQueuedSynchronizer" class="headerlink" title="AQS (AbstractQueuedSynchronizer)"></a>AQS (AbstractQueuedSynchronizer)</h2><p><img src="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
+<p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
 <a id="more"></a>
 
-<img src="http://yrlzero.gitee.io/images/linux/centos/2.png" style="zoom:75%;" />
+<h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><p>state：同步器状态，被volatile修饰，通过cas争抢状态</p>
+<p>exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</p>
+<p>head：同步等待队列的头部，被volatile修饰</p>
+<p>tail：同步等待队列的尾部，被volatile修饰</p>
+<p>node：AQS的静态内部类，CLH的基础节点</p>
+<h3 id="Node内部结构"><a href="#Node内部结构" class="headerlink" title="Node内部结构"></a>Node内部结构</h3><p>​    prev：指向前一个node节点，被volatile修饰</p>
+<p>​    next：指向后一个node节点，被volatile修饰</p>
+<p>​    waitStatus：信号状态，默认是0，被volatile修饰</p>
+<p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
+<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/images/多线程/AQS.png" style="zoom:200%;" />
 
-<img src="http://yrlzero.gitee.io/images/linux/centos/3.png" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/4.jpg" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/5.jpg" style="zoom:75%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/6.jpg" style="zoom:55%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/7.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/8.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/9.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/10.jpg" style="zoom:65%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/11.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/12.jpg" style="zoom:50%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/13.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/14.jpg" style="zoom:67%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/15.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/16.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/17.jpg" style="zoom:67%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/18.jpg" style="zoom:60%;" />
-
-<img src="http://yrlzero.gitee.io/images/linux/centos/19.jpg" style="zoom:75%;" />]]></content>
+<h3 id="CLH双向队列"><a href="#CLH双向队列" class="headerlink" title="CLH双向队列"></a>CLH双向队列</h3><img src="http://yrlzero.gitee.io/images/多线程/CLH.png" style="zoom:150%;" />]]></content>
       <categories>
-        <category>linux</category>
+        <category>多线程</category>
       </categories>
+      <tags>
+        <tag>AQS</tag>
+      </tags>
   </entry>
   <entry>
     <title>maven安装</title>
@@ -289,6 +289,24 @@
 ]]></content>
   </entry>
   <entry>
+    <title>配置centos固定ip</title>
+    <url>/2020/11/29/%E9%85%8D%E7%BD%AEcentos%E5%9B%BA%E5%AE%9Aip/</url>
+    <content><![CDATA[<h2 id="a-修改-etc-sysconfig-network配置文件："><a href="#a-修改-etc-sysconfig-network配置文件：" class="headerlink" title="a. 修改/etc/sysconfig/network配置文件："></a>a. 修改/etc/sysconfig/network配置文件：</h2><p>vi /etc/sysconfig/network</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># Created by anaconda</span><br><span class="line">GATEWAY&#x3D;192.168.243.2</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h2 id="b-修改-etc-sysconfig-network-scripts-ifcfg-ens33配置文件："><a href="#b-修改-etc-sysconfig-network-scripts-ifcfg-ens33配置文件：" class="headerlink" title="b. 修改/etc/sysconfig/network-scripts/ifcfg-ens33配置文件："></a>b. 修改/etc/sysconfig/network-scripts/ifcfg-ens33配置文件：</h2><p>vi /etc/sysconfig/network-scripts/ifcfg-ens33</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">TYPE&#x3D;Ethernet</span><br><span class="line">PROXY_METHOD&#x3D;none</span><br><span class="line">BROWSER_ONLY&#x3D;no</span><br><span class="line"></span><br><span class="line">BOOTPROTO&#x3D;static</span><br><span class="line">IPADDR&#x3D;192.168.243.131</span><br><span class="line">GATEWAY&#x3D;192.168.243.2</span><br><span class="line">NETMASK&#x3D;255.255.255.0</span><br><span class="line"></span><br><span class="line">DEFROUTE&#x3D;yes</span><br><span class="line">IPV4_FAILURE_FATAL&#x3D;no</span><br><span class="line">IPV6INIT&#x3D;yes</span><br><span class="line">IPV6_AUTOCONF&#x3D;yes</span><br><span class="line">IPV6_DEFROUTE&#x3D;yes</span><br><span class="line">IPV6_FAILURE_FATAL&#x3D;no</span><br><span class="line">IPV6_ADDR_GEN_MODE&#x3D;stable-privacy</span><br><span class="line">NAME&#x3D;ens33</span><br><span class="line">UUID&#x3D;193e7f5e-e25b-40ef-b292-0fe5c8970af5</span><br><span class="line">DEVICE&#x3D;ens33</span><br><span class="line">ONBOOT&#x3D;yes</span><br><span class="line">ZONE&#x3D;public</span><br></pre></td></tr></table></figure>
+
+<h2 id="c-重启网关"><a href="#c-重启网关" class="headerlink" title="c. 重启网关:"></a>c. 重启网关:</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">service network restart</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
     <title>spring security oauth2搭建</title>
     <url>/2020/11/29/spring%20security%20oauth2%E6%90%AD%E5%BB%BA/</url>
     <content><![CDATA[<h2 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h2><p>OAuth2是一套开放标准，Spring Cloud Security Oauth2是对它的一种实现。</p>
@@ -410,24 +428,6 @@
 ]]></content>
       <categories>
         <category>oauth2</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>配置centos固定ip</title>
-    <url>/2020/11/29/%E9%85%8D%E7%BD%AEcentos%E5%9B%BA%E5%AE%9Aip/</url>
-    <content><![CDATA[<h2 id="a-修改-etc-sysconfig-network配置文件："><a href="#a-修改-etc-sysconfig-network配置文件：" class="headerlink" title="a. 修改/etc/sysconfig/network配置文件："></a>a. 修改/etc/sysconfig/network配置文件：</h2><p>vi /etc/sysconfig/network</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># Created by anaconda</span><br><span class="line">GATEWAY&#x3D;192.168.243.2</span><br></pre></td></tr></table></figure>
-
-<a id="more"></a>
-
-<h2 id="b-修改-etc-sysconfig-network-scripts-ifcfg-ens33配置文件："><a href="#b-修改-etc-sysconfig-network-scripts-ifcfg-ens33配置文件：" class="headerlink" title="b. 修改/etc/sysconfig/network-scripts/ifcfg-ens33配置文件："></a>b. 修改/etc/sysconfig/network-scripts/ifcfg-ens33配置文件：</h2><p>vi /etc/sysconfig/network-scripts/ifcfg-ens33</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">TYPE&#x3D;Ethernet</span><br><span class="line">PROXY_METHOD&#x3D;none</span><br><span class="line">BROWSER_ONLY&#x3D;no</span><br><span class="line"></span><br><span class="line">BOOTPROTO&#x3D;static</span><br><span class="line">IPADDR&#x3D;192.168.243.131</span><br><span class="line">GATEWAY&#x3D;192.168.243.2</span><br><span class="line">NETMASK&#x3D;255.255.255.0</span><br><span class="line"></span><br><span class="line">DEFROUTE&#x3D;yes</span><br><span class="line">IPV4_FAILURE_FATAL&#x3D;no</span><br><span class="line">IPV6INIT&#x3D;yes</span><br><span class="line">IPV6_AUTOCONF&#x3D;yes</span><br><span class="line">IPV6_DEFROUTE&#x3D;yes</span><br><span class="line">IPV6_FAILURE_FATAL&#x3D;no</span><br><span class="line">IPV6_ADDR_GEN_MODE&#x3D;stable-privacy</span><br><span class="line">NAME&#x3D;ens33</span><br><span class="line">UUID&#x3D;193e7f5e-e25b-40ef-b292-0fe5c8970af5</span><br><span class="line">DEVICE&#x3D;ens33</span><br><span class="line">ONBOOT&#x3D;yes</span><br><span class="line">ZONE&#x3D;public</span><br></pre></td></tr></table></figure>
-
-<h2 id="c-重启网关"><a href="#c-重启网关" class="headerlink" title="c. 重启网关:"></a>c. 重启网关:</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">service network restart</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>linux</category>
       </categories>
   </entry>
 </search>
