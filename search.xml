@@ -14,7 +14,7 @@
 <p>​    next：指向后一个node节点，被volatile修饰</p>
 <p>​    waitStatus：信号状态，默认是0，被volatile修饰</p>
 <p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
-<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="G:\笔记\多线程\AQS.png" style="zoom:200%;" />]]></content>
+<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/blogs/images/多线程/AQS.png" style="zoom:200%;" />]]></content>
       <categories>
         <category>多线程</category>
       </categories>

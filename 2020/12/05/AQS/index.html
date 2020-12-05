@@ -28,9 +28,9 @@
 <meta property="og:description" content="AQS (AbstractQueuedSynchronizer) 其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类 AQS内部结构state：同步器状态，被volatile修饰，通过cas争抢状态 exclusiveOwnerThread：互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="g:%5C%E7%AC%94%E8%AE%B0%5C%E5%A4%9A%E7%BA%BF%E7%A8%8B%5CLock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg">
-<meta property="og:image" content="g:/笔记/多线程/AQS.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/blogs/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/AQS.png">
 <meta property="article:published_time" content="2020-12-05T09:58:16.209Z">
-<meta property="article:modified_time" content="2020-12-05T09:57:55.360Z">
+<meta property="article:modified_time" content="2020-12-05T10:05:44.024Z">
 <meta property="article:author" content="yrlzero">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="g:%5C%E7%AC%94%E8%AE%B0%5C%E5%A4%9A%E7%BA%BF%E7%A8%8B%5CLock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg">
@@ -182,7 +182,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-12-05 17:58:16 / 修改时间：17:57:55" itemprop="dateCreated datePublished" datetime="2020-12-05T17:58:16+08:00">2020-12-05</time>
+              <time title="创建时间：2020-12-05 17:58:16 / 修改时间：18:05:44" itemprop="dateCreated datePublished" datetime="2020-12-05T17:58:16+08:00">2020-12-05</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -216,7 +216,7 @@
 <p>​    next：指向后一个node节点，被volatile修饰</p>
 <p>​    waitStatus：信号状态，默认是0，被volatile修饰</p>
 <p>​    thread：当前节点关联的客户线程，被volatile修饰</p>
-<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="G:\笔记\多线程\AQS.png" style="zoom:200%;" />
+<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><img src="http://yrlzero.gitee.io/blogs/images/多线程/AQS.png" style="zoom:200%;" />
     </div>
 
     
