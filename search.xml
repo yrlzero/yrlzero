@@ -18,6 +18,9 @@
       <categories>
         <category>多线程</category>
       </categories>
+      <tags>
+        <tag>AQS</tag>
+      </tags>
   </entry>
   <entry>
     <title>JackJson和FastJson常见操作</title>
