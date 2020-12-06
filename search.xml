@@ -239,8 +239,8 @@
 <h2 id="8-修改naocs自身配置"><a href="#8-修改naocs自身配置" class="headerlink" title="8. 修改naocs自身配置"></a>8. 修改naocs自身配置</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vim &#x2F;usr&#x2F;local&#x2F;nacos&#x2F;nacos&#x2F;conf&#x2F;application.properties</span><br></pre></td></tr></table></figure>
 
 <p><img src="http://yrlzero.gitee.io/images/cloud/alibaba/nacos/nacos%E9%85%8D%E7%BD%AE.jpg" alt=""></p>
-<h2 id="9-异常情况"><a href="#9-异常情况" class="headerlink" title="9. 异常情况"></a>9. 异常情况</h2><p>如果出现JAVA服务无法连接nacos集群的情况，可以修改nacos.inetutils.ip-address为本机ip</p>
-]]></content>
+<h2 id="9-异常情况"><a href="#9-异常情况" class="headerlink" title="9. 异常情况"></a>9. 异常情况</h2><p>如果出现JAVA服务无法连接nacos集群的情况，可以修改nacos.inetutils.ip-address为本机ip(一般情况下不加)</p>
+<h2 id="10-开放防火墙"><a href="#10-开放防火墙" class="headerlink" title="10. 开放防火墙"></a>10. 开放防火墙</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 防火墙中打开8848端口</span><br><span class="line">firewall-cmd --zone&#x3D;public --add-port&#x3D;8848&#x2F;tcp --permanent</span><br><span class="line"></span><br><span class="line"># 重启防火墙</span><br><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>cloud</category>
       </categories>
