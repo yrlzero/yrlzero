@@ -544,6 +544,7 @@
       <tags>
         <tag>注册中心</tag>
         <tag>eureka</tag>
+        <tag>cloud</tag>
       </tags>
   </entry>
   <entry>
@@ -600,6 +601,7 @@
         <tag>链路追踪</tag>
         <tag>sleuth</tag>
         <tag>zipkin</tag>
+        <tag>cloud</tag>
       </tags>
   </entry>
   <entry>
@@ -635,5 +637,8 @@
       <categories>
         <category>admin</category>
       </categories>
+      <tags>
+        <tag>cloud</tag>
+      </tags>
   </entry>
 </search>
