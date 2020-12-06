@@ -3,9 +3,9 @@
   <entry>
     <title>多线程-AQS</title>
     <url>/2020/12/05/AQS/</url>
-    <content><![CDATA[<h2 id="AQS-AbstractQueuedSynchronizer-抽象的队列式同步器"><a href="#AQS-AbstractQueuedSynchronizer-抽象的队列式同步器" class="headerlink" title="AQS (AbstractQueuedSynchronizer)抽象的队列式同步器"></a>AQS (AbstractQueuedSynchronizer)抽象的队列式同步器</h2><a id="more"></a>
+    <content><![CDATA[<h2 id="AQS-AbstractQueuedSynchronizer-抽象的队列式同步器"><a href="#AQS-AbstractQueuedSynchronizer-抽象的队列式同步器" class="headerlink" title="AQS (AbstractQueuedSynchronizer)抽象的队列式同步器"></a>AQS (AbstractQueuedSynchronizer)抽象的队列式同步器</h2><p><img src="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
+<a id="more"></a>
 
-<p><img src="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
 <p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
 <h3 id="AQS内部结构"><a href="#AQS内部结构" class="headerlink" title="AQS内部结构"></a>AQS内部结构</h3><h4 id="state："><a href="#state：" class="headerlink" title="state："></a>state：</h4><p>​        同步器状态，被volatile修饰，通过cas争抢状态</p>
 <h4 id="exclusiveOwnerThread："><a href="#exclusiveOwnerThread：" class="headerlink" title="exclusiveOwnerThread："></a>exclusiveOwnerThread：</h4><p>​        互斥锁持有的线程（AbstractOwnableSynchronizer的属性，aqs的父类）</p>
