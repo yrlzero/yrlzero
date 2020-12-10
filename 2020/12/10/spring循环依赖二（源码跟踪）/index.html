@@ -21,28 +21,33 @@
     var CONFIG = {"hostname":"yrlzero.gitee.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="yrlzero-blogs">
-<meta property="og:url" content="http://yrlzero.gitee.io/index.html">
+  <meta name="description" content="流程第一步：最初的入口ClassPathXmlApplicationContext：  1234567891011public ClassPathXmlApplicationContext(			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)			throws BeansExceptio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring循环依赖-源码跟踪">
+<meta property="og:url" content="http://yrlzero.gitee.io/2020/12/10/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%BA%8C%EF%BC%88%E6%BA%90%E7%A0%81%E8%B7%9F%E8%B8%AA%EF%BC%89/index.html">
 <meta property="og:site_name" content="yrlzero-blogs">
+<meta property="og:description" content="流程第一步：最初的入口ClassPathXmlApplicationContext：  1234567891011public ClassPathXmlApplicationContext(			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)			throws BeansExceptio">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-10T15:12:44.366Z">
+<meta property="article:modified_time" content="2020-12-10T15:12:22.566Z">
 <meta property="article:author" content="yrl">
+<meta property="article:tag" content="spring">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yrlzero.gitee.io/">
+<link rel="canonical" href="http://yrlzero.gitee.io/2020/12/10/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%BA%8C%EF%BC%88%E6%BA%90%E7%A0%81%E8%B7%9F%E8%B8%AA%EF%BC%89/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>yrlzero-blogs</title>
+  <title>spring循环依赖-源码跟踪 | yrlzero-blogs</title>
   
 
 
@@ -173,86 +178,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/12/10/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/10/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89/" class="post-title-link" itemprop="url">spring循环依赖一（图解）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-10 23:12:44 / 修改时间：23:11:49" itemprop="dateCreated datePublished" datetime="2020-12-10T23:12:44+08:00">2020-12-10</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
 
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>spring通过三级缓存来解决循环依赖问题</p>
-<h2 id="三级缓存"><a href="#三级缓存" class="headerlink" title="三级缓存"></a>三级缓存</h2><p>指的是DefaultSingletonBeanRegistry类中的三个Map</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//一级缓存，存放初始化完成的Bean</span></span><br><span class="line"><span class="comment">/** Cache of singleton objects: bean name to bean instance. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Object&gt; singletonObjects = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">256</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 二级缓存，存放已经被实例化，但是未初始化完成的Bean</span></span><br><span class="line"><span class="comment">/** Cache of early singleton objects: bean name to bean instance. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Object&gt; earlySingletonObjects = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">16</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//三级缓存，存储创建Bean的匿名内部类工厂对象（() -&gt; getEarlyBeanReference(beanName, mbd, bean)），解决创建动态代理逻辑性能，解耦 bean动态代理问题</span></span><br><span class="line"><span class="comment">/** Cache of singleton factories: bean name to ObjectFactory. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, ObjectFactory&lt;?&gt;&gt; singletonFactories = <span class="keyword">new</span> HashMap&lt;&gt;(<span class="number">16</span>);</span><br></pre></td></tr></table></figure>
-
-<h2 id="不含aop的流程图"><a href="#不含aop的流程图" class="headerlink" title="不含aop的流程图"></a>不含aop的流程图</h2><p><img src="G:%5C%E7%AC%94%E8%AE%B0%5Cspring%5Cspring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89%5C%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%961.jpg" alt=""></p>
-<p>spring通过</p>
-<h2 id="含aop的流程图"><a href="#含aop的流程图" class="headerlink" title="含aop的流程图"></a>含aop的流程图</h2><p><img src="G:%5C%E7%AC%94%E8%AE%B0%5Cspring%5Cspring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89%5C%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%90%ABaop2.jpg" alt=""></p>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="1：为什么使用三级缓存的作用？"><a href="#1：为什么使用三级缓存的作用？" class="headerlink" title="1：为什么使用三级缓存的作用？"></a>1：为什么使用三级缓存的作用？</h3><p>在三个级别的缓存中防止的对象是有区别的<br>    一级缓存存放的是：实例化和初始化都完成的对象<br>    二级缓存存放的是：实例化完成、初始化未完成的对象<br>    三级缓存存放的是：实例化和初始化都未完成，存放的是创建bean的匿名内部类（函数是接口ObjectFactory传入）</p>
-<h3 id="2：只使用一级缓存？"><a href="#2：只使用一级缓存？" class="headerlink" title="2：只使用一级缓存？"></a>2：只使用一级缓存？</h3><p>​    在并发的情况下，可能取到实例化但是未初始化的对象</p>
-<h3 id="3：只使用二级缓存？"><a href="#3：只使用二级缓存？" class="headerlink" title="3：只使用二级缓存？"></a>3：只使用二级缓存？</h3><p>​    三级缓存存放的是生成具体对象的一个匿名内部类，这个类可能是代理类，也可能是普通的实例对象就，使用三级缓存就保证了不管是否需要代理，用的都是一个对象</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -268,10 +197,9 @@
       <meta itemprop="name" content="yrlzero-blogs">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/10/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%BA%8C%EF%BC%88%E6%BA%90%E7%A0%81%E8%B7%9F%E8%B8%AA%EF%BC%89/" class="post-title-link" itemprop="url">spring循环依赖-源码跟踪</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          spring循环依赖-源码跟踪
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -304,7 +232,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><h3 id="第一步：最初的入口"><a href="#第一步：最初的入口" class="headerlink" title="第一步：最初的入口"></a>第一步：最初的入口</h3><p>ClassPathXmlApplicationContext： </p>
+        <h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><h3 id="第一步：最初的入口"><a href="#第一步：最初的入口" class="headerlink" title="第一步：最初的入口"></a>第一步：最初的入口</h3><p>ClassPathXmlApplicationContext： </p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ClassPathXmlApplicationContext</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">			String[] configLocations, <span class="keyword">boolean</span> refresh, @Nullable ApplicationContext parent)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">super</span>(parent);</span><br><span class="line">		setConfigLocations(configLocations);</span><br><span class="line">		<span class="keyword">if</span> (refresh) &#123;</span><br><span class="line">            <span class="comment">//第一步，最初的入口</span></span><br><span class="line"><span class="number">144</span>			refresh();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="第二步：实例化所有剩余的-非延迟-init-单例"><a href="#第二步：实例化所有剩余的-非延迟-init-单例" class="headerlink" title="第二步：实例化所有剩余的(非延迟-init)单例"></a>第二步：实例化所有剩余的(非延迟-init)单例</h3><p>AbstractApplicationContext： </p>
@@ -364,646 +292,37 @@
 <h2 id="主要方法"><a href="#主要方法" class="headerlink" title="主要方法"></a>主要方法</h2><h3 id="getSingleton：获取各级缓存"><a href="#getSingleton：获取各级缓存" class="headerlink" title="getSingleton：获取各级缓存"></a>getSingleton：获取各级缓存</h3><h3 id="doCreateBean：创建bean主要方法"><a href="#doCreateBean：创建bean主要方法" class="headerlink" title="doCreateBean：创建bean主要方法"></a>doCreateBean：创建bean主要方法</h3><h3 id="populateBean：填充属性方法"><a href="#populateBean：填充属性方法" class="headerlink" title="populateBean：填充属性方法"></a>populateBean：填充属性方法</h3><h3 id="addSingleton：添加一级缓存方法"><a href="#addSingleton：添加一级缓存方法" class="headerlink" title="addSingleton：添加一级缓存方法"></a>addSingleton：添加一级缓存方法</h3><h2 id="简单总结"><a href="#简单总结" class="headerlink" title="简单总结"></a>简单总结</h2><p>结合上面四个方法做个简单的总结：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1.调用doGetBean()方法，想要获取A，于是调用getSingleton()方法，从缓存中查找A</span><br><span class="line">2.在getSingleton()方法中，从一级缓存中查找，没有，返回null</span><br><span class="line">3.doGet】Bean()方法中获取的A为null，于是走对应的处理逻辑，调用getSingleton()的重载方法(参数为ObjectFactory)</span><br><span class="line">4.在getSingleton()方法中，现将A的name添加到一个集合中，用于标记该bean正常创建中；然后回调匿名内部类的createBean方法</span><br><span class="line">5.进入AbstractAutowireCapableBeanFactory#doCreateBean，先反射调用构造器创建出A的实例，然后判断是否为单例、是否允许提前曝光引用（单例一般为true）、是否正在创建中（第四步的集合）；判断为true则将A添加到三级缓存中</span><br><span class="line">6.对A进行属性填充，此时检测到A依赖于B，于是开始查找B</span><br><span class="line">7.调用doGetBean()方法和上面A的过程一样，到缓存中查找B，没有则创建，然后给B填充属性</span><br><span class="line">8.此时B依赖于A，调用getSingle()获取A，依次从缓存中茶渣，此时从三级缓存中获取到A的工厂，通过公办工厂获取singletonObject，此时这个singleton指向就是上面在doCreate()方法中实例化的A（第七步）</span><br><span class="line">9.这样B就获取到了A的依赖，于是B顺利完成实例化，并将A从三级缓存移动到二级缓存中</span><br><span class="line">10.随后A继续它的属性填充工作，此时也获取到B，A也随之完成创建，回到getSingleton()方法中继续向下执行，将A从二级缓存移动到一级缓存中</span><br></pre></td></tr></table></figure>
 
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+          </div>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/12/06/admin/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/06/admin/" class="post-title-link" itemprop="url">admin监控</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-06 22:53:17 / 修改时间：23:03:44" itemprop="dateCreated datePublished" datetime="2020-12-06T22:53:17+08:00">2020-12-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/admin/" itemprop="url" rel="index"><span itemprop="name">admin</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="admin服务端"><a href="#admin服务端" class="headerlink" title="admin服务端"></a>admin服务端</h2>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/12/06/admin/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/12/06/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/06/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/" class="post-title-link" itemprop="url">链路追踪</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-06 21:42:20 / 修改时间：23:00:09" itemprop="dateCreated datePublished" datetime="2020-12-06T21:42:20+08:00">2020-12-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/cloud/" itemprop="url" rel="index"><span itemprop="name">cloud</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h2><p>sleuth收集跟踪信息通过http请求发送给zipkin server，zipkin将跟踪信息存储，以及提供RESTful API接口，zipkin ui通过调用api进行数据展示。默认内存存储，可以用mysql，ES等存储。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/12/06/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/06/admin/" rel="prev" title="admin监控">
+      <i class="fa fa-chevron-left"></i> admin监控
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/12/10/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89/" rel="next" title="spring循环依赖一（图解）">
+      spring循环依赖一（图解） <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
   
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/12/06/eureka%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/06/eureka%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">eureka集群安装</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-06 17:12:52 / 修改时间：23:08:23" itemprop="dateCreated datePublished" datetime="2020-12-06T17:12:52+08:00">2020-12-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/cloud/" itemprop="url" rel="index"><span itemprop="name">cloud</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、服务端"><a href="#一、服务端" class="headerlink" title="一、服务端"></a>一、服务端</h2><h3 id="1-依赖"><a href="#1-依赖" class="headerlink" title="1. 依赖"></a>1. 依赖</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- eureka 服务端依赖 --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-server&lt;&#x2F;artifactId&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br><span class="line">&lt;!-- 安全配置，服务之间注册需要校验 --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-security&lt;&#x2F;artifactId&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br><span class="line">&lt;!-- 健康检查，用于服务之间的心跳检测 --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-boot-starter-actuator&lt;&#x2F;artifactId&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/12/06/eureka%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/12/06/nacos%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/06/nacos%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">nacos集群安装</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-06 15:12:05 / 修改时间：16:48:55" itemprop="dateCreated datePublished" datetime="2020-12-06T15:12:05+08:00">2020-12-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/cloud/" itemprop="url" rel="index"><span itemprop="name">cloud</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1-下载稳定版本1-3-1（July-10-2020）"><a href="#1-下载稳定版本1-3-1（July-10-2020）" class="headerlink" title="1. 下载稳定版本1.3.1（July 10, 2020）"></a>1. 下载稳定版本<a href="https://github.com/alibaba/nacos/releases/tag/1.3.1" target="_blank" rel="noopener">1.3.1（July 10, 2020）</a></h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">其他版本参考：https:&#x2F;&#x2F;github.com&#x2F;alibaba&#x2F;nacos&#x2F;releases</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/12/06/nacos%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/12/06/mysql%E5%AE%89%E8%A3%85/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/06/mysql%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">mysql安装</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-06 11:44:15 / 修改时间：11:45:27" itemprop="dateCreated datePublished" datetime="2020-12-06T11:44:15+08:00">2020-12-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1-下载地址："><a href="#1-下载地址：" class="headerlink" title="1.下载地址："></a>1.下载地址：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;dev.mysql.com&#x2F;downloads&#x2F;mysql&#x2F;</span><br></pre></td></tr></table></figure>
-
-<p><img src="H:%5Chexo%5Csource%5Cimages%5Clinux%5Cmysql%5C1.png" alt=""></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/12/06/mysql%E5%AE%89%E8%A3%85/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/12/05/AQS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/05/AQS/" class="post-title-link" itemprop="url">多线程-AQS</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-12-05 17:58:16" itemprop="dateCreated datePublished" datetime="2020-12-05T17:58:16+08:00">2020-12-05</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-12-07 21:35:36" itemprop="dateModified" datetime="2020-12-07T21:35:36+08:00">2020-12-07</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="AQS-AbstractQueuedSynchronizer-抽象的队列式同步器"><a href="#AQS-AbstractQueuedSynchronizer-抽象的队列式同步器" class="headerlink" title="AQS (AbstractQueuedSynchronizer)抽象的队列式同步器"></a>AQS (AbstractQueuedSynchronizer)抽象的队列式同步器</h2><p><img src="http://yrlzero.gitee.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/Lock%E7%B1%BB%E4%B8%8Eaqs%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg" alt=""></p>
-<p>其中Sync及其子类NonfairSync、FairSync和node均为ReentrantLock的静态内部类</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/12/05/AQS/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/11/29/maven%E5%AE%89%E8%A3%85/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/29/maven%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">maven安装</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-11-29 23:07:05" itemprop="dateCreated datePublished" datetime="2020-11-29T23:07:05+08:00">2020-11-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-12-06 09:26:44" itemprop="dateModified" datetime="2020-12-06T09:26:44+08:00">2020-12-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="1-下载地址：http-maven-apache-org-download-cgi"><a href="#1-下载地址：http-maven-apache-org-download-cgi" class="headerlink" title="1. 下载地址：http://maven.apache.org/download.cgi"></a>1. 下载地址：<code>http://maven.apache.org/download.cgi</code></h3>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/29/maven%E5%AE%89%E8%A3%85/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2020/11/29/nginx%E5%AE%89%E8%A3%85/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrlzero-blogs">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/29/nginx%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">nginx安装</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-11-29 21:14:00" itemprop="dateCreated datePublished" datetime="2020-11-29T21:14:00+08:00">2020-11-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-12-06 09:26:54" itemprop="dateModified" datetime="2020-12-06T09:26:54+08:00">2020-12-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="版本介绍"><a href="#版本介绍" class="headerlink" title="版本介绍"></a>版本介绍</h2><img src="http://yrlzero.gitee.io/images/linux/nginx/nginx版本介绍.jpg" style="zoom: 67%;" />
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/29/nginx%E5%AE%89%E8%A3%85/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
-  </nav>
 
 
 
@@ -1055,6 +374,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程"><span class="nav-number">1.</span> <span class="nav-text">流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一步：最初的入口"><span class="nav-number">1.1.</span> <span class="nav-text">第一步：最初的入口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二步：实例化所有剩余的-非延迟-init-单例"><span class="nav-number">1.2.</span> <span class="nav-text">第二步：实例化所有剩余的(非延迟-init)单例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第三步"><span class="nav-number">1.3.</span> <span class="nav-text">第三步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第四步：调用子类的doGetBean"><span class="nav-number">1.4.</span> <span class="nav-text">第四步：调用子类的doGetBean</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第五（获取Bean的缓存）、七（创建实例）、九步（执行createBean方法）"><span class="nav-number">1.5.</span> <span class="nav-text">第五（获取Bean的缓存）、七（创建实例）、九步（执行createBean方法）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第六（获取不到Bean的缓存）、十八步（获取到Bean的三级缓存生成对象放入二级缓存）"><span class="nav-number">1.6.</span> <span class="nav-text">第六（获取不到Bean的缓存）、十八步（获取到Bean的三级缓存生成对象放入二级缓存）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第八（执行第七步传入的lambda表达式）、二十一步（添加到一级缓存中，然后调用链将回到初始化实例的函数）"><span class="nav-number">1.7.</span> <span class="nav-text">第八（执行第七步传入的lambda表达式）、二十一步（添加到一级缓存中，然后调用链将回到初始化实例的函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第十步：创建一个bean实"><span class="nav-number">1.8.</span> <span class="nav-text">第十步：创建一个bean实</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第十一（实例化对象，开辟内存空间）、十二步（添加Bean的工厂对象到三级缓存中）、十九步（获取到二级缓存中提前暴露的A）"><span class="nav-number">1.9.</span> <span class="nav-text">第十一（实例化对象，开辟内存空间）、十二步（添加Bean的工厂对象到三级缓存中）、十九步（获取到二级缓存中提前暴露的A）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第十三步：给给Bean的属性赋值"><span class="nav-number">1.10.</span> <span class="nav-text">第十三步：给给Bean的属性赋值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第十四（属性解析器获取property的实际内容）、二十一步（真正的属性赋值）"><span class="nav-number">1.11.</span> <span class="nav-text">第十四（属性解析器获取property的实际内容）、二十一步（真正的属性赋值）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第十五步："><span class="nav-number">1.12.</span> <span class="nav-text">第十五步：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第十六步：调用子类的doGetBean"><span class="nav-number">1.13.</span> <span class="nav-text">第十六步：调用子类的doGetBean</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第十七步-循环第五步创建B"><span class="nav-number">1.14.</span> <span class="nav-text">第十七步:循环第五步创建B</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#归纳步骤："><span class="nav-number">2.</span> <span class="nav-text">归纳步骤：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#实例化A"><span class="nav-number">2.0.1.</span> <span class="nav-text">实例化A</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取A的属性B"><span class="nav-number">2.0.2.</span> <span class="nav-text">获取A的属性B</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实例化B"><span class="nav-number">2.0.3.</span> <span class="nav-text">实例化B</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取B的属性A"><span class="nav-number">2.0.4.</span> <span class="nav-text">获取B的属性A</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主要方法"><span class="nav-number">3.</span> <span class="nav-text">主要方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#getSingleton：获取各级缓存"><span class="nav-number">3.1.</span> <span class="nav-text">getSingleton：获取各级缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#doCreateBean：创建bean主要方法"><span class="nav-number">3.2.</span> <span class="nav-text">doCreateBean：创建bean主要方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#populateBean：填充属性方法"><span class="nav-number">3.3.</span> <span class="nav-text">populateBean：填充属性方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#addSingleton：添加一级缓存方法"><span class="nav-number">3.4.</span> <span class="nav-text">addSingleton：添加一级缓存方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单总结"><span class="nav-number">4.</span> <span class="nav-text">简单总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
