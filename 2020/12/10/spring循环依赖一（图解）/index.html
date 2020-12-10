@@ -21,17 +21,17 @@
     var CONFIG = {"hostname":"yrlzero.gitee.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="spring通过三级缓存来解决循环依赖问题 三级缓存指的是DefaultSingletonBeanRegistry类中的三个Map 1234567891011&#x2F;&#x2F;一级缓存，存放初始化完成的Bean&#x2F;** Cache of singleton objects: bean name to bean instance. *&#x2F;private final Map&lt;String, Object&gt;">
+  <meta name="description" content="三级缓存指的是DefaultSingletonBeanRegistry类中的三个Map 1234567891011&#x2F;&#x2F;一级缓存，存放初始化完成的Bean&#x2F;** Cache of singleton objects: bean name to bean instance. *&#x2F;private final Map&lt;String, Object&gt; singletonObjects &#x3D; new">
 <meta property="og:type" content="article">
 <meta property="og:title" content="spring循环依赖一（图解）">
 <meta property="og:url" content="http://yrlzero.gitee.io/2020/12/10/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89/index.html">
 <meta property="og:site_name" content="yrlzero-blogs">
-<meta property="og:description" content="spring通过三级缓存来解决循环依赖问题 三级缓存指的是DefaultSingletonBeanRegistry类中的三个Map 1234567891011&#x2F;&#x2F;一级缓存，存放初始化完成的Bean&#x2F;** Cache of singleton objects: bean name to bean instance. *&#x2F;private final Map&lt;String, Object&gt;">
+<meta property="og:description" content="三级缓存指的是DefaultSingletonBeanRegistry类中的三个Map 1234567891011&#x2F;&#x2F;一级缓存，存放初始化完成的Bean&#x2F;** Cache of singleton objects: bean name to bean instance. *&#x2F;private final Map&lt;String, Object&gt; singletonObjects &#x3D; new">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="g:%5C%E7%AC%94%E8%AE%B0%5Cspring%5Cspring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89%5C%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%961.jpg">
 <meta property="og:image" content="g:%5C%E7%AC%94%E8%AE%B0%5Cspring%5Cspring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89%5C%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%90%ABaop2.jpg">
 <meta property="article:published_time" content="2020-12-10T15:12:44.367Z">
-<meta property="article:modified_time" content="2020-12-10T15:11:49.469Z">
+<meta property="article:modified_time" content="2020-12-10T15:15:54.855Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="spring">
 <meta name="twitter:card" content="summary">
@@ -212,7 +212,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-12-10 23:12:44 / 修改时间：23:11:49" itemprop="dateCreated datePublished" datetime="2020-12-10T23:12:44+08:00">2020-12-10</time>
+              <time title="创建时间：2020-12-10 23:12:44 / 修改时间：23:15:54" itemprop="dateCreated datePublished" datetime="2020-12-10T23:12:44+08:00">2020-12-10</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -235,9 +235,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>spring通过三级缓存来解决循环依赖问题</p>
-<h2 id="三级缓存"><a href="#三级缓存" class="headerlink" title="三级缓存"></a>三级缓存</h2><p>指的是DefaultSingletonBeanRegistry类中的三个Map</p>
+        <h2 id="三级缓存"><a href="#三级缓存" class="headerlink" title="三级缓存"></a>三级缓存</h2><p>指的是DefaultSingletonBeanRegistry类中的三个Map</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//一级缓存，存放初始化完成的Bean</span></span><br><span class="line"><span class="comment">/** Cache of singleton objects: bean name to bean instance. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Object&gt; singletonObjects = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">256</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 二级缓存，存放已经被实例化，但是未初始化完成的Bean</span></span><br><span class="line"><span class="comment">/** Cache of early singleton objects: bean name to bean instance. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Object&gt; earlySingletonObjects = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">16</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//三级缓存，存储创建Bean的匿名内部类工厂对象（() -&gt; getEarlyBeanReference(beanName, mbd, bean)），解决创建动态代理逻辑性能，解耦 bean动态代理问题</span></span><br><span class="line"><span class="comment">/** Cache of singleton factories: bean name to ObjectFactory. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, ObjectFactory&lt;?&gt;&gt; singletonFactories = <span class="keyword">new</span> HashMap&lt;&gt;(<span class="number">16</span>);</span><br></pre></td></tr></table></figure>
+
+<p>spring通过三级缓存来解决循环依赖问题</p>
+<a id="more"></a>
 
 <h2 id="不含aop的流程图"><a href="#不含aop的流程图" class="headerlink" title="不含aop的流程图"></a>不含aop的流程图</h2><p><img src="G:%5C%E7%AC%94%E8%AE%B0%5Cspring%5Cspring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89%5C%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%961.jpg" alt=""></p>
 <p>spring通过</p>
