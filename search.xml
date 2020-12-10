@@ -262,9 +262,8 @@
 <p>spring通过三级缓存来解决循环依赖问题</p>
 <a id="more"></a>
 
-<h2 id="不含aop的流程图"><a href="#不含aop的流程图" class="headerlink" title="不含aop的流程图"></a>不含aop的流程图</h2><p><img src="http://yrlzero.gitee.io/images/spring/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%961.jpg" alt=""></p>
-<p>spring通过</p>
-<h2 id="含aop的流程图"><a href="#含aop的流程图" class="headerlink" title="含aop的流程图"></a>含aop的流程图</h2><p><img src="http://yrlzero.gitee.io/images/spring/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E4%B8%80%EF%BC%88%E5%9B%BE%E8%A7%A3%EF%BC%89/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%90%ABaop2.jpg" alt=""></p>
+<h2 id="不含aop的流程图"><a href="#不含aop的流程图" class="headerlink" title="不含aop的流程图"></a>不含aop的流程图</h2><p><img src="http://yrlzero.gitee.io/images/spring/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%961.jpg" alt=""></p>
+<h2 id="含aop的流程图"><a href="#含aop的流程图" class="headerlink" title="含aop的流程图"></a>含aop的流程图</h2><p><img src="http://yrlzero.gitee.io/images/spring/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%90%ABaop2.jpg" alt=""></p>
 <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="1：为什么使用三级缓存的作用？"><a href="#1：为什么使用三级缓存的作用？" class="headerlink" title="1：为什么使用三级缓存的作用？"></a>1：为什么使用三级缓存的作用？</h3><p>在三个级别的缓存中防止的对象是有区别的<br>    一级缓存存放的是：实例化和初始化都完成的对象<br>    二级缓存存放的是：实例化完成、初始化未完成的对象<br>    三级缓存存放的是：实例化和初始化都未完成，存放的是创建bean的匿名内部类（函数是接口ObjectFactory传入）</p>
 <h3 id="2：只使用一级缓存？"><a href="#2：只使用一级缓存？" class="headerlink" title="2：只使用一级缓存？"></a>2：只使用一级缓存？</h3><p>​    在并发的情况下，可能取到实例化但是未初始化的对象</p>
 <h3 id="3：只使用二级缓存？"><a href="#3：只使用二级缓存？" class="headerlink" title="3：只使用二级缓存？"></a>3：只使用二级缓存？</h3><p>​    三级缓存存放的是生成具体对象的一个匿名内部类，这个类可能是代理类，也可能是普通的实例对象就，使用三级缓存就保证了不管是否需要代理，用的都是一个对象</p>
