@@ -806,5 +806,8 @@
       <categories>
         <category>linux</category>
       </categories>
+      <tags>
+        <tag>redis</tag>
+      </tags>
   </entry>
 </search>
