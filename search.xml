@@ -744,7 +744,7 @@
   <entry>
     <title>Spring Boot国际化（i18n）</title>
     <url>/2020/12/12/Spring%20Boot%E5%9B%BD%E9%99%85%E5%8C%96%EF%BC%88i18n%EF%BC%89/</url>
-    <content><![CDATA[<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>i18n是internationalization（国际化单词的缩写，i和n之前有18个字母）</p>
+    <content><![CDATA[<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>i18n是internationalization（国际化单词的缩写，i和n之间有18个字母）</p>
 <a id="more"></a>
 
 <h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!-- 只需要导入web包 --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">         &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">         &lt;artifactId&gt;spring-boot-starter-web&lt;&#x2F;artifactId&gt;</span><br><span class="line">     &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
