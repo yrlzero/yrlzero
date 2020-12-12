@@ -789,9 +789,9 @@
     <title>redis安装</title>
     <url>/2020/12/12/redis%E5%AE%89%E8%A3%85/</url>
     <content><![CDATA[<h3 id="一、下载地址"><a href="#一、下载地址" class="headerlink" title="一、下载地址"></a>一、<a href="https://redis.io/download" target="_blank" rel="noopener">下载地址</a></h3><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%B8%8B%E8%BD%BD.jpg" alt=""></p>
-<h3 id="二、安装gcc依赖"><a href="#二、安装gcc依赖" class="headerlink" title="二、安装gcc依赖"></a>二、安装gcc依赖</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 查看gcc版本是否在9.3以上，centos7.6默认安装4.8.5</span><br><span class="line">gcc -v</span><br></pre></td></tr></table></figure>
-
 <a id="more"></a>
+
+<h3 id="二、安装gcc依赖"><a href="#二、安装gcc依赖" class="headerlink" title="二、安装gcc依赖"></a>二、安装gcc依赖</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 查看gcc版本是否在9.3以上，centos7.6默认安装4.8.5</span><br><span class="line">gcc -v</span><br></pre></td></tr></table></figure>
 
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/%E6%9F%A5%E7%9C%8Bgcc%E7%89%88%E6%9C%AC.jpg" alt=""></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># redis6以上,gcc版本不能低于5,升级gcc到9.3及以上,如下：</span><br><span class="line">升级到gcc 9.3：</span><br><span class="line">yum -y install centos-release-scl</span><br><span class="line">yum -y install devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils</span><br><span class="line"></span><br><span class="line">scl enable devtoolset-9 bash</span><br><span class="line">需要注意的是scl命令启用只是临时的，退出shell或重启就会恢复原系统gcc版本。</span><br><span class="line">如果要长期使用gcc 9.3的话：</span><br><span class="line"></span><br><span class="line">echo &quot;source &#x2F;opt&#x2F;rh&#x2F;devtoolset-9&#x2F;enable&quot; &gt;&gt;&#x2F;etc&#x2F;profile</span><br><span class="line">这样退出shell重新打开就是新版的gcc了</span><br><span class="line">以下其他版本同理，修改devtoolset版本号即可。</span><br></pre></td></tr></table></figure>
