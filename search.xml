@@ -855,6 +855,8 @@
     <url>/2020/12/12/%E5%BC%BA%E8%BD%AF%E5%BC%B1%E8%99%9A/</url>
     <content><![CDATA[<h2 id="一、强引用"><a href="#一、强引用" class="headerlink" title="一、强引用"></a>一、强引用</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">最常见的普通对象引用，只要还有强引用指向一个对象，就能表明对象还“活着”，垃圾收集器不会碰这种对象，在java中最常见的就是强引用，把一个对象赋给一个引用变量，这个引用变量就是一个强引用，当一个对象被强引用变量引用时，它处于可达状态，它是不可能被垃圾回收机制回收的，及时该对象以后永远都不会被用到jvm也不会回收。因此强引用时造成java内存泄露的主要原因之一。</span><br></pre></td></tr></table></figure>
 
+<a id="more"></a>
+
 <h2 id="二、软引用"><a href="#二、软引用" class="headerlink" title="二、软引用"></a>二、软引用</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">一种相对强引用弱化了一些的引用，需要java.lang.ref.SoftReference类来实现，可以让对象豁免一些垃圾收集。当系统内存充足时，它不会被回收，当系统内存不足时，会被回收。通常用在对内存敏感的程序中，比如高速缓存就有用到软引用，内存够用时候就保留，不够用就回收。</span><br></pre></td></tr></table></figure>
 
 <p>案例：</p>
