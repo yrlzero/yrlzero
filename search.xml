@@ -747,7 +747,7 @@
     <content><![CDATA[<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>i18n是internationalization（国际化单词的缩写，i和n之间有18个字母）</p>
 <a id="more"></a>
 
-<h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!-- 只需要导入web包 --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">         &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">         &lt;artifactId&gt;spring-boot-starter-web&lt;&#x2F;artifactId&gt;</span><br><span class="line">     &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!-- 只需要导入web包 --&gt;</span><br><span class="line">     &lt;dependency&gt;</span><br><span class="line">         &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">         &lt;artifactId&gt;spring-boot-starter-web&lt;&#x2F;artifactId&gt;</span><br><span class="line">     &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
 
 <h3 id="语言配置文件"><a href="#语言配置文件" class="headerlink" title="语言配置文件"></a>语言配置文件</h3><p>创建配置文件存放不同语言的消息文本:</p>
 <p><img src="http://yrlzero.gitee.io/images/spring/message%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6.jpg" alt=""></p>
