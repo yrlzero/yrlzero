@@ -357,15 +357,15 @@
   <entry>
     <title>mysql安装</title>
     <url>/2020/12/06/mysql%E5%AE%89%E8%A3%85/</url>
-    <content><![CDATA[<h2 id="1-下载地址："><a href="#1-下载地址：" class="headerlink" title="1.下载地址："></a>1.下载地址：</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;dev.mysql.com&#x2F;downloads&#x2F;mysql&#x2F;</span><br></pre></td></tr></table></figure>
+    <content><![CDATA[<h2 id="一、下载地址："><a href="#一、下载地址：" class="headerlink" title="一、下载地址："></a>一、下载地址：</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;dev.mysql.com&#x2F;downloads&#x2F;mysql&#x2F;</span><br></pre></td></tr></table></figure>
 
 <p><img src="H:%5Chexo%5Csource%5Cimages%5Clinux%5Cmysql%5C1.png" alt=""></p>
 <a id="more"></a>
 
 <p><img src="H:%5Chexo%5Csource%5Cimages%5Clinux%5Cmysql%5C2.png" alt=""></p>
-<h2 id="2-删除旧有版本"><a href="#2-删除旧有版本" class="headerlink" title="2. 删除旧有版本"></a>2. 删除旧有版本</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 查看MySql与mariadb安装情况</span><br><span class="line"># grep -i是不分大小写字符查询，只要含有mysql就显示</span><br><span class="line">rpm -qa | grep -i mysql </span><br><span class="line">rpm -qa | grep mariadb</span><br><span class="line"></span><br><span class="line"># 卸载mariadb(会与mysql冲突)</span><br><span class="line">rpm -e --nodeps xxxxx</span><br></pre></td></tr></table></figure>
+<h2 id="二、-删除旧有版本"><a href="#二、-删除旧有版本" class="headerlink" title="二、 删除旧有版本"></a>二、 删除旧有版本</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 查看MySql与mariadb安装情况</span><br><span class="line"># grep -i是不分大小写字符查询，只要含有mysql就显示</span><br><span class="line">rpm -qa | grep -i mysql </span><br><span class="line">rpm -qa | grep mariadb</span><br><span class="line"></span><br><span class="line"># 卸载mariadb(会与mysql冲突)</span><br><span class="line">rpm -e --nodeps xxxxx</span><br></pre></td></tr></table></figure>
 
-<h2 id="3-rpm安装新MySQL"><a href="#3-rpm安装新MySQL" class="headerlink" title="3. rpm安装新MySQL"></a>3. rpm安装新MySQL</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 创建新文件夹</span><br><span class="line">mkdir &#x2F;usr&#x2F;local&#x2F;mysql</span><br><span class="line"></span><br><span class="line"># 上传文件</span><br><span class="line"></span><br><span class="line"># 对”mysql-5.7.21-1.el7.x86_64.rpm-bundle.tar”解包，不是压缩文件不需要解压缩</span><br><span class="line">tar -xvf mysql-5.7.21-1.el7.x86_64.rpm-bundle.tar</span><br></pre></td></tr></table></figure>
+<h2 id="三、-rpm安装新MySQL"><a href="#三、-rpm安装新MySQL" class="headerlink" title="三、 rpm安装新MySQL"></a>三、 rpm安装新MySQL</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 创建新文件夹</span><br><span class="line">mkdir &#x2F;usr&#x2F;local&#x2F;mysql</span><br><span class="line"></span><br><span class="line"># 上传文件</span><br><span class="line"></span><br><span class="line"># 对”mysql-5.7.21-1.el7.x86_64.rpm-bundle.tar”解包，不是压缩文件不需要解压缩</span><br><span class="line">tar -xvf mysql-5.7.21-1.el7.x86_64.rpm-bundle.tar</span><br></pre></td></tr></table></figure>
 
 <p>![](G:<a href="http://yrlzero.gitee.io/images/linux/mysql/解压mysql">http://yrlzero.gitee.io/images/linux/mysql/解压mysql</a> tar包.jpg)</p>
 <p>执行如下安装命令：</p>
@@ -374,17 +374,21 @@
 <p>安装完成。MySql默认安装文件位置：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;    #数据库目录</span><br><span class="line">&#x2F;usr&#x2F;share&#x2F;mysql   #配置文件目录</span><br><span class="line">&#x2F;usr&#x2F;bin             #相关命令目录</span><br><span class="line">&#x2F;etc&#x2F;my.cnf         #核心配置文件</span><br></pre></td></tr></table></figure>
 
-<h2 id="配置MySQL"><a href="#配置MySQL" class="headerlink" title="配置MySQL"></a>配置MySQL</h2><p>命令：</p>
+<h2 id="四、配置MySQL"><a href="#四、配置MySQL" class="headerlink" title="四、配置MySQL"></a>四、配置MySQL</h2><p>命令：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#启动mysql </span><br><span class="line">service mysqld start</span><br><span class="line">#重启mysql </span><br><span class="line">service mysqld restart</span><br><span class="line">#停止mysql</span><br><span class="line">service mysqld stop</span><br><span class="line">#查看mysql状态</span><br><span class="line">service mysqld status</span><br><span class="line"></span><br><span class="line"># 设置开机启动Mysql</span><br><span class="line">systemctl enable mysqld</span><br><span class="line"># 设置开机不启动Mysql</span><br><span class="line">systemctl disable mysqld</span><br></pre></td></tr></table></figure>
 
 <p>修改root密码</p>
 <p>MySQL安装成功后，会生成一个临时密码，我们第一次登录需要输入这个密码，所以查看该临时密码，然后修改密码。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 查看临时密码(&#x2F;var&#x2F;log&#x2F;mysqld.log)</span><br><span class="line">grep password &#x2F;var&#x2F;log&#x2F;mysqld.log</span><br><span class="line"></span><br><span class="line"># 使用root登录</span><br><span class="line">mysql -uroot -p</span><br><span class="line">#然后输入&#x2F;var&#x2F;log&#x2F;mysqld.log文件中的临时密码</span><br><span class="line"></span><br><span class="line">#登录后；修改密码为Root_123</span><br><span class="line">set password &#x3D; password(&#39;Root_123&#39;);</span><br><span class="line"></span><br><span class="line">注意：密码必须包含大小写字母、数字、特殊符号</span><br></pre></td></tr></table></figure>
 
-<h2 id="设置允许远程访问"><a href="#设置允许远程访问" class="headerlink" title="设置允许远程访问"></a>设置允许远程访问</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#登录，密码为新修改的密码Root_123</span><br><span class="line">mysql -uroot –p</span><br><span class="line"></span><br><span class="line">#设置远程访问（使用root密码）：</span><br><span class="line">mysql&gt; grant all privileges on  *.*  to  &#39;root&#39; @&#39;%&#39;  identified by &#39;Root_123&#39;; </span><br><span class="line">mysql&gt; flush privileges;</span><br></pre></td></tr></table></figure>
+<h2 id="五、设置允许远程访问"><a href="#五、设置允许远程访问" class="headerlink" title="五、设置允许远程访问"></a>五、设置允许远程访问</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#登录，密码为新修改的密码Root_123</span><br><span class="line">mysql -uroot –p</span><br><span class="line"></span><br><span class="line">#设置远程访问（使用root密码）：</span><br><span class="line">mysql&gt; grant all privileges on  *.*  to  &#39;root&#39; @&#39;%&#39;  identified by &#39;Root_123&#39;; </span><br><span class="line">mysql&gt; flush privileges;</span><br></pre></td></tr></table></figure>
 
 <p>设置3306端口可以被访问</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 退出mysql</span><br><span class="line"># 防火墙中打开3306端口</span><br><span class="line">firewall-cmd --zone&#x3D;public --add-port&#x3D;3306&#x2F;tcp --permanent</span><br><span class="line"></span><br><span class="line">–zone：作用域</span><br><span class="line">–add-port&#x3D;3306&#x2F;tcp：添加端口，格式为：端口&#x2F;通讯协议</span><br><span class="line">–permanent：永久生效，没有此参数重启后失效</span><br><span class="line"></span><br><span class="line"># 重启防火墙</span><br><span class="line">firewall-cmd --reload</span><br><span class="line"># 查看已经开放的端口</span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line"></span><br><span class="line"># 停止防火墙</span><br><span class="line">systemctl stop firewalld.service</span><br><span class="line"># 启动防火墙</span><br><span class="line">systemctl start firewalld.service</span><br><span class="line"># 禁止防火墙开机启动</span><br><span class="line">systemctl disable firewalld.service</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、远端登录"><a href="#六、远端登录" class="headerlink" title="六、远端登录"></a>六、远端登录</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysql -u root -P 3306 -h 127.0.0.1 -p&#39;password&#39;</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、备份"><a href="#七、备份" class="headerlink" title="七、备份"></a>七、备份</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">备份命令mysqldump格式</span><br><span class="line">   格式：mysqldump -h主机名  -P端口 -u用户名 -p密码 –database 数据库名 &gt; 文件名.sql </span><br><span class="line">还原MySQL数据库的命令</span><br><span class="line">	mysql -hhostname -uusername -ppassword databasename &lt; backupfile.sql</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
@@ -392,6 +396,7 @@
       </categories>
       <tags>
         <tag>mysql</tag>
+        <tag>db</tag>
       </tags>
   </entry>
   <entry>
@@ -802,12 +807,43 @@
 
 <h3 id="五、开放防火墙"><a href="#五、开放防火墙" class="headerlink" title="五、开放防火墙"></a>五、开放防火墙</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 防火墙中打开6379端口</span><br><span class="line">firewall-cmd --zone&#x3D;public --add-port&#x3D;6379&#x2F;tcp --permanent</span><br><span class="line"></span><br><span class="line">–zone：作用域</span><br><span class="line">–add-port&#x3D;6379&#x2F;tcp：添加端口，格式为：端口&#x2F;通讯协议</span><br><span class="line">–permanent：永久生效，没有此参数重启后失效</span><br><span class="line"></span><br><span class="line"># 重启防火墙</span><br><span class="line">firewall-cmd --reload</span><br><span class="line"># 查看已经开放的端口</span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line"></span><br><span class="line"># 停止防火墙</span><br><span class="line">systemctl stop firewalld.service</span><br><span class="line"># 启动防火墙</span><br><span class="line">systemctl start firewalld.service</span><br><span class="line"># 禁止防火墙开机启动</span><br><span class="line">systemctl disable firewalld.service</span><br></pre></td></tr></table></figure>
 
+<h3 id="六、远端登录"><a href="#六、远端登录" class="headerlink" title="六、远端登录"></a>六、远端登录</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">redis-cli -h 192.168.243.131 -p 6379 -a passsword</span><br></pre></td></tr></table></figure>
+
 ]]></content>
       <categories>
         <category>linux</category>
       </categories>
       <tags>
         <tag>redis</tag>
+        <tag>db</tag>
+        <tag>nosql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>线程池</title>
+    <url>/2020/12/12/%E7%BA%BF%E7%A8%8B%E6%B1%A0/</url>
+    <content><![CDATA[<h2 id="一、常见线程池"><a href="#一、常见线程池" class="headerlink" title="一、常见线程池"></a>一、常见线程池</h2><h3 id="1-Executors-newFixedThreadPool"><a href="#1-Executors-newFixedThreadPool" class="headerlink" title="1.Executors.newFixedThreadPool()"></a>1.Executors.newFixedThreadPool()</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">创建一个定长的线程池，可控制线程最大并发数，超出的线程会在队列中等待</span><br><span class="line">创建线程池corePoolSize和maximumPoolSize的值是相等的，它使用的LinkedBlockingQueue</span><br><span class="line">构造方法</span><br><span class="line">	return new ThreadPoolExecutor(nThreads, nThreads,0L, TimeUnit.MILLISECONDS,new LinkedBlockingQueue&lt;Runnable&gt;());</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Executors-newSingleThreadExecutor"><a href="#2-Executors-newSingleThreadExecutor" class="headerlink" title="2.Executors.newSingleThreadExecutor()"></a>2.Executors.newSingleThreadExecutor()</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">创建一个单线程化的线程池，他只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序执行</span><br><span class="line">创建线程池corePoolSize和maximumPoolSize的值为1，它使用的LinkedBlockingQueue</span><br><span class="line">构造</span><br><span class="line">	return new FinalizableDelegatedExecutorService(new ThreadPoolExecutor(1, 1,0L, TimeUnit.MILLISECONDS,new LinkedBlockingQueue&lt;Runnable&gt;()));</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Executors-newCachedThreadPool"><a href="#3-Executors-newCachedThreadPool" class="headerlink" title="3.Executors.newCachedThreadPool()"></a>3.Executors.newCachedThreadPool()</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程corePoolSize的值为0，maximumPoolSize的值为Integer,MAX_VALUE，使用的SynchronousQueue。有任务时就创建线程运行，当线程空闲60s就销毁线程</span><br><span class="line">构造</span><br><span class="line">	return new ThreadPoolExecutor(0, Integer.MAX_VALUE,60L, TimeUnit.SECONDS,new SynchronousQueue&lt;Runnable&gt;());</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、线程池底层调用"><a href="#二、线程池底层调用" class="headerlink" title="二、线程池底层调用"></a>二、线程池底层调用</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue)</span><br><span class="line">--&gt; 调用自身七参构造方法public ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue,ThreadFactory threadFactory,RejectedExecutionHandler handler)</span><br><span class="line">	 int corePoolSize:线程池中常驻核心线程数</span><br><span class="line">	 int maximumPoolSize：线程池能够容纳同时执行你的最大线程数，此值必须大于等于1</span><br><span class="line">	 long keepAliveTime：多余的空闲线程存活时间，当前线程池超过corePoolSize时，当空闲时间达到keepAliveTime值时，多余空闲线程会被销毁直到只剩下corePoolSize个线程为止</span><br><span class="line">	 TimeUnit unit：keepAliveTime的单位</span><br><span class="line">	 BlockingQueue&lt;Runnable&gt; workQueue：任务队列，被提交但尚未被执行的任务</span><br><span class="line">	 ThreadFactory threadFactory：表示生成线程池中工作线程的线程工厂，用于创建线程一般用默认即可</span><br><span class="line">	 RejectedExecutionHandler handler：拒绝策略，表示当队列满了并且工作线程大于线程池的最大线程数（maximumPoolSize）时如何来拒绝</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、线程池底层原理"><a href="#三、线程池底层原理" class="headerlink" title="三、线程池底层原理"></a>三、线程池底层原理</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1）在创建了线程池后，等待提交过来的任务请求</span><br><span class="line">2）当调用execute()方法添加一个请求任务时，线程会做如下判断</span><br><span class="line">	2.1）如果正在运行的线程数量小于corePoolSize,那么马上创建线程运行这个任务</span><br><span class="line">	2.2）如果正在运行的线程数量大于或等于corePoolSize，那么将这个任务放入队列</span><br><span class="line">	2.3）如果这时候队列满了且正在运行的线程数量还小于maximumPoolSize，那么还是要创建非核心线程立刻运行这个任务</span><br><span class="line">	2.4）如果队列满了且正在运行的线程数量大于或等于maximumPoolSize，那么线程池会启动饱和拒绝策略来执行</span><br><span class="line">3）当一个线程完成任务时，它会从队列中取下一个任务来执行</span><br><span class="line">4）当一个线程无事可做超过一定的时间（keepAliveTime）时，线程池会判断：</span><br><span class="line">	4.1) 如果当前运行的线程数大于corePoolSize，那么这个线程就被停掉</span><br><span class="line">	4.2）所以线程池的所有任务完成后它最终会收缩到corePoolSize的大小</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、线程池拒绝策略"><a href="#四、线程池拒绝策略" class="headerlink" title="四、线程池拒绝策略"></a>四、线程池拒绝策略</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">AbortPolicy（默认）：直接抛出RejectedExecutionException异常阻止系统正常运行</span><br><span class="line">CallerRunsPolicy：“调用者运行”一种调节机制，该策略既不会抛弃任务，也不会抛出异常，而是将某些任务回退到调用者，从而降低任务流量</span><br><span class="line">DiscardOldestPolicy:抛弃任务中等待最久的任务，然后把当前任务加入队列中尝试再次提交当前任务</span><br><span class="line">DiscardPolicy：直接丢弃任务，不予任何处理也不抛出异常。如果允许任务丢失，这是最好的一种方案</span><br><span class="line">为什么不能使用常见的这三个线程池？</span><br><span class="line">因为newFixedThreadPool和newSingleThreadExecutor允许创建的队列长度Integer.MAX_VALUE，长度为21亿，可能会堆积大量请求，容易造成OOM；</span><br><span class="line">而newCachedThreadPool 和 newScheduledThreadPool允许创建的线程数量为Integer，MAX_VALUE，可能会创建大量的线程，容易造成OOM</span><br><span class="line">如何设置线程数？</span><br><span class="line">CPU密集型，该任务需要大量的运算，而没有阻塞，CPU一直全速运行，尽可能少的线程数量，CPU核数+1个线程</span><br><span class="line">IO密集型 该任务需要大量的IO，即大量的阻塞，</span><br><span class="line">	由于IO密集型任务线程并不是一直在执行任务，则应该配置尽可能多的线程，</span><br><span class="line">																		1.常见公式：CPU核数*2</span><br><span class="line">																		2. CPU核数 &#x2F; （1 - 阻塞系数）  阻塞系数0.8-09之间</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、自定义创建线程"><a href="#五、自定义创建线程" class="headerlink" title="五、自定义创建线程"></a>五、自定义创建线程</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ThreadPoolExecutor threadPoolExecutor = <span class="keyword">new</span> ThreadPoolExecutor(</span><br><span class="line">		<span class="number">2</span>,</span><br><span class="line">		<span class="number">5</span>,</span><br><span class="line">		<span class="number">1L</span>,</span><br><span class="line">		TimeUnit.SECONDS,</span><br><span class="line">		<span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;(<span class="number">3</span>),</span><br><span class="line">		Executors.defaultThreadFactory(),</span><br><span class="line">		<span class="keyword">new</span> ThreadPoolExecutor.CallerRunsPolicy());</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、注意点"><a href="#六、注意点" class="headerlink" title="六、注意点"></a>六、注意点</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">线程池不允许使用 Executors 去创建，而是通过 ThreadPoolExecutor 的方式，这样</span><br><span class="line">的处理方式让写的人更加明确线程池的运行规则，规避资源耗尽的风险。</span><br><span class="line">说明： Executors 返回的线程池对象的弊端如下：</span><br><span class="line">	1） FixedThreadPool 和 SingleThreadPool :</span><br><span class="line">			允许的请求队列长度为 Integer.MAX_VALUE ，可能会堆积大量的请求，从而导致 OOM 。</span><br><span class="line">	2） CachedThreadPool 和 ScheduledThreadPool :</span><br><span class="line">			允许的创建线程数量为 Integer.MAX_VALUE ，可能会创建大量的线程，从而导致 OOM 。</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>多线程</category>
+      </categories>
+      <tags>
+        <tag>多线程</tag>
       </tags>
   </entry>
 </search>
