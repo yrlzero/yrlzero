@@ -913,8 +913,10 @@
     <content><![CDATA[<h2 id="一、Server启动原理"><a href="#一、Server启动原理" class="headerlink" title="一、Server启动原理"></a>一、Server启动原理</h2><ol>
 <li>springboot会去加载META-INF下面的spring.factories自动装配<code>org.springframework.cloud.netflix.eureka.server.EurekaServerAutoConfiguration</code>这个类</li>
 </ol>
-<p><img src="http://yrlzero.gitee.io/images/cloud/eureka/eureka%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D-1608300752191.jpg" alt=""></p>
-<p><img src="http://yrlzero.gitee.io/images/cloud/eureka/%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E7%9A%84%E7%B1%BB-1608300510779.jpg" alt=""></p>
+<p><img src="http://yrlzero.gitee.io/images/cloud/eureka/eureka%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D.jpg" alt=""></p>
+<a id="more"></a>
+
+<p><img src="http://yrlzero.gitee.io/images/cloud/eureka/%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E7%9A%84%E7%B1%BB.jpg" alt=""></p>
 <ol start="2">
 <li><p>此类的判断条件注解标识需要有Mark这个类存在才会加载</p>
 </li>
