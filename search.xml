@@ -830,7 +830,7 @@
   <entry>
     <title>链路追踪</title>
     <url>/2020/12/06/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/</url>
-    <content><![CDATA[<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h2><p>sleuth收集跟踪信息通过http请求发送给zipkin server，zipkin将跟踪信息存储，以及提供RESTful API接口，zipkin ui通过调用api进行数据展示。默认内存存储，可以用mysql，ES等存储。</p>
+    <content><![CDATA[<h2 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h2><p>sleuth收集跟踪信息通过http请求发送给zipkin server，zipkin将跟踪信息存储，以及提供RESTful API接口，zipkin ui通过调用api进行数据展示。默认内存存储，可以用mysql，ES等存储。</p>
 <a id="more"></a>
 
 <h2 id="二、Sleuth"><a href="#二、Sleuth" class="headerlink" title="二、Sleuth"></a>二、Sleuth</h2><p>Sleuth是Spring cloud的分布式跟踪解决方案。</p>
@@ -878,7 +878,6 @@
         <category>cloud</category>
       </categories>
       <tags>
-        <tag>cloud</tag>
         <tag>链路追踪</tag>
         <tag>sleuth</tag>
         <tag>zipkin</tag>
