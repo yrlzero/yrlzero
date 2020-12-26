@@ -32,9 +32,9 @@
 <meta property="og:image" content="http://yrlzero.gitee.io/images/cloud/eureka/%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E7%9A%84%E7%B1%BB.jpg">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/cloud/eureka/eurekaServer%E6%B3%A8%E8%A7%A3.jpg">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/cloud/eureka/%E6%B3%A8%E5%86%8C%E8%A1%A8%E7%BB%93%E6%9E%84.png">
-<meta property="og:image" content="http://yrlzero.gitee.io/2020/12/26/eureka%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/images%5Ccloud%5Ceureka%5Ceureka%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90%5C%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/cloud/eureka/%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98.jpg">
 <meta property="article:published_time" content="2020-12-26T06:51:12.238Z">
-<meta property="article:modified_time" content="2020-12-26T07:00:07.723Z">
+<meta property="article:modified_time" content="2020-12-26T07:04:38.132Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="eureka">
 <meta property="article:tag" content="注册中心">
@@ -217,7 +217,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-12-26 14:51:12 / 修改时间：15:00:07" itemprop="dateCreated datePublished" datetime="2020-12-26T14:51:12+08:00">2020-12-26</time>
+              <time title="创建时间：2020-12-26 14:51:12 / 修改时间：15:04:38" itemprop="dateCreated datePublished" datetime="2020-12-26T14:51:12+08:00">2020-12-26</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -261,7 +261,7 @@
 <p>​        第二层嵌套的 ConcurrentHashMap 的 <code>key=instanceId</code> 也就是服务的唯一实例 ID，value 为 Lease 对象，Lease 对象存储着这个实例的所有注册信息，包括 ip 、端口、属性等。</p>
 <p><img src="http://yrlzero.gitee.io/images/cloud/eureka/%E6%B3%A8%E5%86%8C%E8%A1%A8%E7%BB%93%E6%9E%84.png" alt=""></p>
 <h4 id="1-2-ReadOnlyMap（ConcurrentHashMap）"><a href="#1-2-ReadOnlyMap（ConcurrentHashMap）" class="headerlink" title="1.2  ReadOnlyMap（ConcurrentHashMap）"></a>1.2  ReadOnlyMap（ConcurrentHashMap）</h4><p>​        <strong>周期更新</strong>，类ResponseCacheImpl成员变量，默认每<strong>30s</strong>从readWriteCacheMap更新</p>
-<p>​        ReadOnlyMap是一个 只读缓存，供客户端获取注册信息时使用，默认情况下，定时任务每30s将readWriteCacheMap同步至readOnlyCacheMap，通过和 readWriteCacheMap 的值做对比，如果数据不一致，则以 readWriteCacheMap 的数据为准。</p>
+<p>​        ReadOnlyMap是一个只读缓存，供客户端获取注册信息时使用，默认情况下，定时任务每30s将readWriteCacheMap同步至readOnlyCacheMap，通过和 readWriteCacheMap 的值做对比，如果数据不一致，则以 readWriteCacheMap 的数据为准。</p>
 <h4 id="1-3-readWriteCacheMap（guava-LoadingCache）"><a href="#1-3-readWriteCacheMap（guava-LoadingCache）" class="headerlink" title="1.3  readWriteCacheMap（guava#LoadingCache）"></a>1.3  readWriteCacheMap（guava#LoadingCache）</h4><p>​        <strong>实时更新</strong>，类AbstractInstanceRegistry成员变量</p>
 <p>​        readWriteCacheMap，本质上是 Guava 缓存，数据主要同步于registry。当获取缓存时判断缓存中是否没有数据，如果不存在此数据，则通过 CacheLoader 的 load 方法去加载，加载成功之后将数据放入缓存，同时返回数据。</p>
 <p>​        定时器每60s清理超过90s未续约的节点。</p>
@@ -269,7 +269,7 @@
 <h3 id="2-缓存机制"><a href="#2-缓存机制" class="headerlink" title="2. 缓存机制"></a>2. 缓存机制</h3><h4 id="2-1-注册一个服务实例"><a href="#2-1-注册一个服务实例" class="headerlink" title="2.1 注册一个服务实例"></a>2.1 注册一个服务实例</h4><p>​        向注册表中写入服务实例信息，并使得readWriteCacheMap缓存失效</p>
 <h4 id="2-2-寻找一个服务"><a href="#2-2-寻找一个服务" class="headerlink" title="2.2 寻找一个服务"></a>2.2 寻找一个服务</h4><p>​        从ReadOnlyMap缓存中找，如果有则返回，如果没有则去ReadWriteMap缓存拿并更新，如果ReadWriteMap缓存已经失效，触发guava的回调函数从注册表中同步。</p>
 <h4 id="2-3-数据同步定时器"><a href="#2-3-数据同步定时器" class="headerlink" title="2.3 数据同步定时器"></a>2.3 数据同步定时器</h4><p>​        默认情况下定时任务每30s将readWriteCacheMap同步至readOnlyCacheMap，每60s清理超过90s未续约的节点，Eureka Client每30s从readOnlyCacheMap更新服务注册信息，而UI则从registry更新服务注册信息。</p>
-<p><img src="images%5Ccloud%5Ceureka%5Ceureka%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90%5C%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98.jpg" alt=""></p>
+<p><img src="http://yrlzero.gitee.io/images/cloud/eureka/%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98.jpg" alt=""></p>
 <h3 id="3-缓存相关配置"><a href="#3-缓存相关配置" class="headerlink" title="3. 缓存相关配置"></a>3. 缓存相关配置</h3><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">lease-renewal-interval-in-seconds:</span> <span class="number">30</span> <span class="comment"># 客户端向服务端发送心跳（续约）的时间间隔，默认30s</span></span><br><span class="line">    <span class="attr">lease-expiration-duration-in-seconds:</span> <span class="number">90</span> <span class="comment"># 续约到期时间，服务端收到最后一次心跳后等待的时间上限，默认90s，超时剔除服务</span></span><br><span class="line">  <span class="attr">server:</span></span><br><span class="line">    <span class="attr">enable-self-preservation:</span> <span class="literal">false</span> <span class="comment"># 心跳保护机制，默认开启，微服务少的情况下关闭，剔除挂掉的节点；微服务多的情况下开启，防止网络抖动节点心跳丢失而被剔除</span></span><br><span class="line">    <span class="attr">eviction-interval-timer-in-ms:</span> <span class="number">1000</span> <span class="comment"># 逐出实例时间,默认60 * 1000（清理无效节点的时间间隔）</span></span><br><span class="line">    <span class="attr">renewal-percent-threshold:</span> <span class="number">0.85</span> <span class="comment">#自我保护机制触发的阈值，默认0.85</span></span><br><span class="line">    <span class="attr">use-read-only-response-cache:</span> <span class="literal">false</span> <span class="comment">#Client是否从readOnlyCacheMap更新数据，false则跳过readOnlyCacheMap直接从readWriteCacheMap更新，默认true</span></span><br><span class="line">    <span class="attr">response-cache-update-interval-ms:</span> <span class="number">1000</span> <span class="comment"># readwrite 和readOnly 同步时间间隔，默认30 * 1000</span></span><br></pre></td></tr></table></figure>
 
 
