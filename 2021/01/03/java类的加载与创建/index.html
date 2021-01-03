@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.gitee.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="类的加载与创建">
+<meta property="og:url" content="http://yrlzero.gitee.io/2021/01/03/java%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%88%9B%E5%BB%BA/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-01.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-03.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-02.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-06.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-04.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-05.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-07.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/%E7%B1%BB%E5%AE%9E%E4%BE%8B%E5%8C%96%E5%92%8C%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-08.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-09.png">
+<meta property="article:published_time" content="2021-01-03T09:14:11.587Z">
+<meta property="article:modified_time" content="2021-01-03T09:15:51.922Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-01.png">
+
+<link rel="canonical" href="http://yrlzero.gitee.io/2021/01/03/java%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%88%9B%E5%BB%BA/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>类的加载与创建 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/01/03/java%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%88%9B%E5%BB%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          类的加载与创建
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-03 17:14:11 / 修改时间：17:15:51" itemprop="dateCreated datePublished" datetime="2021-01-03T17:14:11+08:00">2021-01-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-01.png" alt="jvm"></p>
+<a id="more"></a>
+
+<h2 id="Class格式"><a href="#Class格式" class="headerlink" title="Class格式"></a>Class格式</h2><p>Java虚拟机规范规定，Class文件格式采用类似C语言结构体的伪结构来存储数据，这种结构只有两种数据类型：无符号数和表。</p>
+<h3 id="无符号数"><a href="#无符号数" class="headerlink" title="无符号数"></a><strong>无符号数</strong></h3><p>属于基本数据类型，主要可以用来描述数字、索引符号、数量值或者按照UTF-8编码构成的字符串值，大小使用u1、u2、u4、u8分别表示1字节、2字节、4字节和8字节。</p>
+<h3 id="表"><a href="#表" class="headerlink" title="表"></a><strong>表</strong></h3><p>是由多个无符号数或者其他表作为数据项构成的复合数据类型，所有的表都习惯以“_info”结尾。表主要用于描述有层次关系的复合结构的数据，比如方法、字段。需要注意的是class文件是没有分隔符的，所以每个的二进制数据类型都是严格定义的。具体的顺序定义如下：</p>
+<p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-03.png" alt="jvm"></p>
+<p>从二进制的数据来看：</p>
+<p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-02.png" alt="jvm"></p>
+<p>通过<code>javap</code>编译成可视化语言来看：</p>
+<p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-06.png" alt="jvm"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">cafe babe 0000 0034 000f 0a00 0300 0c07</span><br><span class="line">000d 0700 0e01 0006 3c69 6e69 743e 0100</span><br><span class="line">0328 2956 0100 0443 6f64 6501 000f 4c69</span><br><span class="line">6e65 4e75 6d62 6572 5461 626c 6501 0004</span><br><span class="line">6d61 696e 0100 1628 5b4c 6a61 7661 2f6c</span><br><span class="line">616e 672f 5374 7269 6e67 3b29 5601 000a</span><br><span class="line">536f 7572 6365 4669 6c65 0100 134a 766d</span><br><span class="line">436c 6173 7346 6f72 6d61 742e 6a61 7661</span><br><span class="line">0c00 0400 0501 0013 6b75 726f 2f4a 766d</span><br><span class="line">436c 6173 7346 6f72 6d61 7401 0010 6a61</span><br><span class="line">7661 2f6c 616e 672f 4f62 6a65 6374 0021</span><br><span class="line">0002 0003 0000 0000 0002 0001 0004 0005</span><br><span class="line">0001 0006 0000 001d 0001 0001 0000 0005</span><br><span class="line">2ab7 0001 b100 0000 0100 0700 0000 0600</span><br><span class="line">0100 0000 0300 0900 0800 0900 0100 0600</span><br><span class="line">0000 1900 0000 0100 0000 01b1 0000 0001</span><br><span class="line">0007 0000 0006 0001 0000 0006 0001 000a</span><br><span class="line">0000 0002 000b</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">魔法数字： cafe babe</span><br><span class="line">次版本号： 0000</span><br><span class="line">主版本号： 0034			JDK1.8</span><br><span class="line">常量数量： 000f			从1开始</span><br><span class="line">#1常量 ： 0a			 表示表中第十项（CONSTANT_Methodref_info）</span><br><span class="line">      :  00 03		   指向#3常量</span><br><span class="line">      ： 00 0c		  指向#13常量</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-04.png" alt="jvm"></p>
+<p>详情可查阅查阅：</p>
+<p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-05.png" alt="jvm"></p>
+<h2 id="对象创建方式"><a href="#对象创建方式" class="headerlink" title="对象创建方式"></a>对象创建方式</h2><p>​        使用new关键字创建对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A a = <span class="keyword">new</span> A();</span><br></pre></td></tr></table></figure>
+
+<p>​        使用Class类的newInstance方法(反射机制)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A a = A<span class="class">.<span class="keyword">class</span>.<span class="title">newInstance</span>()</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​        使用Constructor类的newInstance方法(反射机制)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Constructor&lt;A&gt; constructor = A<span class="class">.<span class="keyword">class</span>.<span class="title">getConstructor</span>()</span>;</span><br><span class="line">A a = constructor.newInstance();</span><br></pre></td></tr></table></figure>
+
+<p>​        使用Clone方法创建对象</p>
+<p>​        使用(反)序列化机制创建对象</p>
+<h2 id="对象创建过程"><a href="#对象创建过程" class="headerlink" title="对象创建过程"></a>对象创建过程</h2><p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-07.png" alt="jvm"></p>
+<h3 id="加载-class-loading"><a href="#加载-class-loading" class="headerlink" title="加载(class loading)"></a>加载(class loading)</h3><blockquote>
+<p>1.通过一个类的全限定名来获取定义此类的二进制字节流。</p>
+<p>2.将这个字节流所代表的的静态存储结构转化成访问区的运行时数据结构。</p>
+<p>3.在内存中生成一个代表这个类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口。</p>
+</blockquote>
+<h3 id="验证-class-verification"><a href="#验证-class-verification" class="headerlink" title="验证(class verification)"></a>验证(class verification)</h3><p>文件格式验证、元数据验证、字节码验证、符号引用验证等等。</p>
+<p>如验证是否以0xCAFEBABE开头</p>
+<h3 id="准备-class-preparation"><a href="#准备-class-preparation" class="headerlink" title="准备(class preparation)"></a>准备(class preparation)</h3><p>为类变量分配内存并设置类变量初始值的阶段，这些变量所使用的内存都将在方法区中进行分配。</p>
+<p><strong>这时候进行内存分配的仅包括类变量（被static修饰的变量），而不包括实例变量，实例变量将会在对象实例化时随着对象一起分配到Java堆中。</strong></p>
+<p><strong>正常情况下，这里初始化的值是静态变量的数据类型的默认值，而不是属性指定的值，如果它还被final修饰了，那么将会在这个阶段直接初始化成属性指定的值。</strong></p>
+<h3 id="解析-class-resolution"><a href="#解析-class-resolution" class="headerlink" title="解析(class resolution)"></a>解析(class resolution)</h3><p>解析阶段是虚拟机将常量池内的符号引用替换为直接引用的过程。</p>
+<h3 id="类初始化-class-initalizing"><a href="#类初始化-class-initalizing" class="headerlink" title="类初始化(class initalizing)"></a>类初始化(class initalizing)</h3><p>类初始化就是执行<code>&lt;clinit&gt;()</code>方法，<code>&lt;clinit&gt;()</code>方法是由编译器自动收集类中的所有类变量的赋值动作和静态语句块中的语句合并产生的，<strong>静态语句块中只能访问到定义在静态语句之前的变量</strong>。</p>
+<p>也就是说，静态属性和静态代码块的赋值和调用在<strong>初始化</strong>过程中执行，先执行父类的，再执行子类的。</p>
+<h3 id="实例初始化"><a href="#实例初始化" class="headerlink" title="实例初始化"></a>实例初始化</h3><p>实例初始化过程，就是执行<code>&lt;init&gt;()</code>方法<br>         <code>&lt;init&gt;()</code>方法可能重载有多个，有几个构造器就有几个<code>&lt;init&gt;</code>方法<br>         <code>&lt;init&gt;()</code>方法由非静态实例变量显示赋值代码和非静态代码块、对应构造器代码组成<br>         非静态实例变量显示赋值代码和非静态代码块代码从上到下顺序执行，而对应构造器的代码最后执行<br>         每次创建实例对象，调用对应构造器，执行的就是对应的<code>&lt;init&gt;</code>方法<br>         <code>&lt;init&gt;()</code>方法的首行是surper(或super(实参列表),即对应父类的<code>&lt;init&gt;</code>方法</p>
+<h3 id="类初始化与实例初始化，在子父类内部执行顺序"><a href="#类初始化与实例初始化，在子父类内部执行顺序" class="headerlink" title="类初始化与实例初始化，在子父类内部执行顺序"></a>类初始化与实例初始化，在子父类内部执行顺序</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">父类静态成员</span><br><span class="line">父类静态代码块</span><br><span class="line">	-&gt;子类静态成员</span><br><span class="line">	-&gt;子类静态代码块</span><br><span class="line">		-&gt;父类代码块</span><br><span class="line">		-&gt;父类成员变量</span><br><span class="line">		-&gt;父类构造器</span><br><span class="line">			-&gt;子类代码块</span><br><span class="line">			-&gt;子类成员变量</span><br><span class="line">			-&gt;子类构造器</span><br><span class="line">类初始化</span><br><span class="line">	静态成员赋值的代码、静态代码块（两者先后看顺序）</span><br><span class="line">实例初始化</span><br><span class="line">	super()</span><br><span class="line">	非静态赋值的代码、非静态代码块（两者先后看顺序）</span><br><span class="line">	无参构造</span><br></pre></td></tr></table></figure>
+
+<p>​        样例：</p>
+<img src="http://yrlzero.gitee.io/images/jvm/jvm-base/类实例化和类初始化.jpg" style="zoom:80%;" />
+
+<p>上图执行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">5、1、10、6、9、3、2、9、8、7</span><br><span class="line">9、3、2、9、8、7</span><br><span class="line"></span><br><span class="line">类初始化与实例初始化</span><br><span class="line">5  父类静态成员j调用父类的静态方法method()，静态方法不可重写，所以不会调用子类的</span><br><span class="line">1  父类静态代码块</span><br><span class="line">10 子类静态成员j调用子类的静态方法method()</span><br><span class="line">6  子类静态代码块</span><br><span class="line">9  父类成员变量i调用子类的test(),非静态方法默认的调用对象是this,this对象在构造器或者说&lt;init&gt;方法中就是正在创建的对象</span><br><span class="line">3  父类代码块，与成员变量之前的执行先后取决于位置的前后</span><br><span class="line">2  父类构造器</span><br><span class="line">9  子类成员变量i调用子类的test(),非静态方法默认的调用对象是this,this对象在构造器或者说&lt;init&gt;方法中就是正在创建的对象</span><br><span class="line">8  子类代码块，与成员变量之前的执行先后取决于位置的前后</span><br><span class="line">7  子类构造器</span><br><span class="line"></span><br><span class="line">再次实例初始化</span><br><span class="line">9  父类成员变量i调用子类的test(),非静态方法默认的调用对象是this,this对象在构造器或者说&lt;init&gt;方法中就是正在创建的对象</span><br><span class="line">3  父类代码块，与成员变量之前的执行先后取决于位置的前后</span><br><span class="line">2  父类构造器</span><br><span class="line">9  子类成员变量i调用子类的test(),非静态方法默认的调用对象是this,this对象在构造器或者说&lt;init&gt;方法中就是正在创建的对象</span><br><span class="line">8  子类代码块，与成员变量之前的执行先后取决于位置的前后</span><br><span class="line">7  子类构造器</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T001_ClassLoadingProcedure</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ClassLoader加载T对象：</span></span><br><span class="line">        <span class="comment">//1.加载(loading)</span></span><br><span class="line">        <span class="comment">//2.验证(verification)</span></span><br><span class="line">        <span class="comment">//3.准备(preparation)--初始化静态变量默认值count = 0; T t = null</span></span><br><span class="line">        <span class="comment">//4.解析(resolution)</span></span><br><span class="line">        <span class="comment">//5.初始化(initalizing)--按照顺序赋值静态变量 count = 2; T t = new T();---&gt;调用构造方法--&gt;count++;</span></span><br><span class="line">        System.out.println(T.count); <span class="comment">//输出3</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">2</span>; <span class="comment">//0</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T t = <span class="keyword">new</span> T(); <span class="comment">// null</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">T</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count ++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T001_ClassLoadingProcedure</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ClassLoader加载T对象：</span></span><br><span class="line">        <span class="comment">//1.加载(loading)</span></span><br><span class="line">        <span class="comment">//2.验证(verification)</span></span><br><span class="line">        <span class="comment">//3.准备(preparation)--初始化静态变量默认值count = 0; T t = null</span></span><br><span class="line">        <span class="comment">//4.解析(resolution)</span></span><br><span class="line">        <span class="comment">//5.初始化(initalizing)--按照顺序赋值静态变量 T t = new T();---&gt;调用构造方法--&gt;count++; count = 1;</span></span><br><span class="line">        <span class="comment">//--按照顺序赋值静态变量 count = 2;（覆盖掉之前的值）</span></span><br><span class="line">        System.out.println(T.count); <span class="comment">//输出2</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T t = <span class="keyword">new</span> T(); <span class="comment">// null</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">2</span>; <span class="comment">//0</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">T</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count ++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>如果是<code>Object o = new Object()</code>，有以下几步：</strong></p>
+<p>1、申请内存空间，这时候成员变量均是默认值</p>
+<p>2、调用构造方法，初始化成员变量值</p>
+<p>3、建立栈上和堆内存对象的关联关系</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//当我们调用构造方法时，java的底层的字节码指令如下：</span></span><br><span class="line">0: new           #2                  // class java/lang/Object		申请内存空间</span><br><span class="line"><span class="number">3</span>: dup								 <span class="comment">// 复制内存空间地址，供以调用构造方法时出栈使用</span></span><br><span class="line">4: invokespecial #1                  // Method java/lang/Object."&lt;init&gt;":()V    调用构造方法</span><br><span class="line"><span class="number">7</span>: astore_1							 <span class="comment">// Object o 指向开辟的内存地址</span></span><br><span class="line"><span class="number">8</span>: <span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h2><p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-08.png" alt="jvm"></p>
+<p><img src="http://yrlzero.gitee.io/images/jvm/jvm-base/jvm-09.png" alt="jvm"></p>
+<p>如果一个类加载器收到了类加载的请求，它不会先尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一层次的类加载器都是如此，因此所有的加载请求最终都应该传送到顶层的启动类加载器中，只有当父类加载器反馈自己无法完成这个加载请求（它的搜索范围中没有找到所需的类）时，子加载器才会尝试自己加载。</p>
+<p><strong>这里的父-子是通过使用组合关系，成员变量有个叫做parent的属性记录上层的类加载器，而不是继承关系。</strong></p>
+<p><strong>父类加载器不是类加载器的加载器，也不是类加载器的父类加载器。双亲委派是一个孩子向父亲方向，然后父亲向孩子方向的双亲委派过程。</strong></p>
+<blockquote>
+<p>为什么用双亲委派机制？</p>
+<p>安全，保证了Java程序的稳定运行。避免核心类库被用户覆盖。</p>
+</blockquote>
+<p>查看各个类加载器加载的路径及信息可以查阅<code>Launcher.java</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BootStrap ClassLoader:sun.boot.class.path</span><br><span class="line">ExtClassLoader:java.ext.dirs</span><br><span class="line">AppClassLoader：java.class.path</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK破坏双亲委派机制的历史</p>
+<p>双亲委派模型的第一次被破坏发生在双亲委派模型出现之前，由于双亲委派模型在JDK1.2之后才被引入，为了向前兼容，JDK1.2之后添加了一个findClass()方法。</p>
+<p>双亲委派模型的第二次被破坏是由于模型自身的缺陷导致的，有些标准服务是由启动类加载器（Bootstrap）去加载的，但它又需要调用独立厂商实现并部署在应用程序的ClassPath下的代码，为了解决这个问题，引入了<strong>线程上下文类加载器</strong>，如果有了线程上下文类加载器，父类加载器将会请求子类加载器去完成类加载动作。</p>
+<p>双亲委派模型的第三次被破坏是由于用户对程序动态性的追求导致的。如热替换、热部署。</p>
+<p>假设每个程序都有一个自己的类加载器，当需要更换一个代码片段时，就把这个代码片段连同类加载器一起换掉实现代码的热替换。</p>
+</blockquote>
+<p>当我们需要定义自己的类加载器时，继承ClassLoad，重写findClass()方法，当调用loadClass()加载class，找不到时会调用我们自定义的findClass()，读取要加载的文件流，调用defineClass()去真正加载，保证了双亲委派机制</p>
+<p>若要破坏双亲委派模型，我们可以直接重写loadClass()方法，直接加载指定的class，没有的情况下再走parent的loadClass()。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; findClass(String name) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//File To byte[]</span></span><br><span class="line">        <span class="keyword">byte</span>[] bytes = FileUtils.readFileToByteArray(<span class="keyword">new</span> File(<span class="string">"xxx"</span>));</span><br><span class="line">        <span class="comment">//调用父类的defineClass装载</span></span><br><span class="line">        <span class="keyword">return</span> defineClass(name, bytes, <span class="number">0</span>, bytes.length);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">super</span>.findClass(name); <span class="comment">//throws ClassNotFoundException</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译器和解释器"><a href="#编译器和解释器" class="headerlink" title="编译器和解释器"></a>编译器和解释器</h2><p>Java默认采用混合模式，初期通过编译器编译Class文件的代码，当出现热点代码时，会通过<code>JIT</code>解释器把热点代码解释成本地代码，提高运行效率。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 热点代码的阈值频次</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">CompileThreshold = 10000</span></span><br><span class="line"><span class="comment"># 使用编译器运行</span></span><br><span class="line"><span class="attr">-Xcomp</span></span><br><span class="line"><span class="comment">#使用解释器运行</span></span><br><span class="line"><span class="attr">-Xint</span></span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/03/jvm%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/" rel="prev" title="JVM（一） 运行时数据区域">
+      <i class="fa fa-chevron-left"></i> JVM（一） 运行时数据区域
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Class格式"><span class="nav-number">1.</span> <span class="nav-text">Class格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#无符号数"><span class="nav-number">1.1.</span> <span class="nav-text">无符号数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#表"><span class="nav-number">1.2.</span> <span class="nav-text">表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对象创建方式"><span class="nav-number">2.</span> <span class="nav-text">对象创建方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对象创建过程"><span class="nav-number">3.</span> <span class="nav-text">对象创建过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加载-class-loading"><span class="nav-number">3.1.</span> <span class="nav-text">加载(class loading)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证-class-verification"><span class="nav-number">3.2.</span> <span class="nav-text">验证(class verification)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#准备-class-preparation"><span class="nav-number">3.3.</span> <span class="nav-text">准备(class preparation)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解析-class-resolution"><span class="nav-number">3.4.</span> <span class="nav-text">解析(class resolution)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类初始化-class-initalizing"><span class="nav-number">3.5.</span> <span class="nav-text">类初始化(class initalizing)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实例初始化"><span class="nav-number">3.6.</span> <span class="nav-text">实例初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类初始化与实例初始化，在子父类内部执行顺序"><span class="nav-number">3.7.</span> <span class="nav-text">类初始化与实例初始化，在子父类内部执行顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载器"><span class="nav-number">4.</span> <span class="nav-text">类加载器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译器和解释器"><span class="nav-number">5.</span> <span class="nav-text">编译器和解释器</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
