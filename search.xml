@@ -1019,7 +1019,7 @@
 </li>
 </ul>
 <p><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-6.png" alt="memory-6"></p>
-<p>​        如上图，代码 <code>int j = i++</code>，赋值操作发生在自增前。</p>
+<p>​        如上图，代码 <code>int j = i++</code>，因为是后++操作，i的值先进入操作数栈，自身再在局部变量表进行自增，操作数栈的值赋值给j。</p>
 <ul>
 <li><p>把局部变量表中的 <code>i</code> 的值 <strong>1</strong> 压入操作数栈中</p>
 </li>
@@ -1033,17 +1033,13 @@
 <ul>
 <li><p>把局部变量表中的 <code>i</code> 的值 <strong>2</strong> 压入操作数栈中</p>
 </li>
-<li><p>把局部变量表中的 <code>i</code> 变量自增 <strong>1</strong>，此时 <code>i</code> 的值为 <strong>3</strong></p>
-</li>
-<li><p>把局部变量表中的 <code>i</code> 的值 <strong>3</strong> 压入操作数栈中（<code>++i</code>），此时 <code>i</code> 的值为 <strong>3</strong></p>
-</li>
-<li><p>再把局部变量表中的 <code>i</code> 的值 <strong>3</strong> 压入操作数栈中（<code>i++</code>），此时 <code>i</code> 的值为 <strong>3</strong></p>
+<li><p>++i是先++，所以局部变量表中的 <code>i</code> 变量自增 <strong>1</strong>，再压入操作数栈中，此时 <code>i</code> 的值为 <strong>3</strong>，</p>
 </li>
 </ul>
 <p><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-8.png" alt="memory-8"></p>
 <p>如上图</p>
 <ul>
-<li>把局部变量表中的 <code>i</code> 变量自增 <strong>1</strong>，此时 <code>i</code>的值为 <strong>4</strong></li>
+<li>i++是后自增，i的值先进入操作数栈，而后局部变量表中的 <code>i</code> 变量自增 <strong>1</strong>，此时 <code>i</code>的值为 <strong>4</strong></li>
 <li>把操作数栈中前两个弹出求乘积<strong>（3 * 3 = 9）</strong>，将结果再次压入操作数栈中</li>
 <li>把操作数栈中前两个弹出求和<strong>（9 + 2 = 11）</strong>，将结果再次压入操作数栈中</li>
 <li>将操作数栈中的值 <strong>11</strong> 赋值给局部变量表中的 <code>k</code> 变量，此时 <code>k</code> 的值为 <strong>11</strong></li>
