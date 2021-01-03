@@ -1147,7 +1147,7 @@
 <ul>
 <li><p>在 <code>JDK 1.6</code> 中，调用 <code>intern()</code> 首先会在字符串池中寻找<code>equal()</code> 相等的字符串，假如字符串存在就返回该字符串在字符串池中的引用；假如字符串不存在，<strong>虚拟机会重新在永久代上创建一个实例</strong>，将 <code>StringTable</code> 的一个表项指向这个新创建的实例。<br><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-12.png" alt="memory-12"></p>
 </li>
-<li><p>在 <code>JDK 1.7</code> 中，由于字符串池不在永久代了，<code>intern()</code> 做了一些修改，更方便地利用堆中的对象。字符串存在时和 <code>JDK 1.6</code>一样返回常量池的引用，不存在时也不需要再拷贝字符串的实例到常量池，既然字符串常量池已经移到Java堆中，只需要在常量池里记录一下首次出现的实例引用即可。<br><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-13.png" alt="memory-13"></p>
+<li><p>在 <code>JDK 1.7</code> 中，由于字符串池不在永久代了，<code>intern()</code> 做了一些修改，更方便地利用堆中的对象。字符串存在时和 <code>JDK 1.6</code>一样返回常量池的引用，不存在时如果堆中存在，那也不需要再拷贝字符串的实例到常量池，既然字符串常量池已经移到Java堆中，只需要在常量池里记录一下首次出现的实例引用即可。<br><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-13.png" alt="memory-13"></p>
 </li>
 </ul>
 <p>我们基于JDK1.7版本，来看个例子：</p>
