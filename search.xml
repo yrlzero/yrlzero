@@ -1101,9 +1101,7 @@
 <h3 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h3><p>​        方法区（<code>Method Area</code>）与 Java 堆一样，<strong>是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码</strong>等数据。虽然<br><strong>Java 虚拟机规范把方法区描述为堆的一个逻辑部分</strong>，但是它却有一个别名叫做 <code>Non-Heap</code>（非堆），目的应该是与 Java 堆区分开来。</p>
 <p>​        Java 虚拟机规范对方法区的限制非常宽松，除了和 Java 堆一样不需要连续的内存和可以选择固定大小或者可扩展外，还可以选择不实现垃圾收集。垃圾收集行为在这个区域是比较少出现的，其内存回收目标主要是针对常量池的回收和对类型的卸载。当方法区无法满足内存分配需求时，将抛出 <code>OutOfMemoryError</code> 异常。</p>
 <h4 id="HotSpot-虚拟机"><a href="#HotSpot-虚拟机" class="headerlink" title="HotSpot 虚拟机"></a><code>HotSpot</code> 虚拟机</h4><p>​        它是<code>Sun JDK</code>和<code>OpenJDK</code>中所带的虚拟机，也是目前使用范围最广的 Java 虚拟机。<br>在2008年和2009年，Oracle公司分别收购了BEA公司和Sun公司，Oracle同时拥有了两款优秀的Java虚拟机：<code>JRockit VM</code>和<code>HotSpot VM</code>。<br><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-10.png" alt="memory-10"></p>
-<h4 id="永久代"><a href="#永久代" class="headerlink" title="永久代"></a>永久代</h4><p>​        对于习惯在<code>HotSpot</code> 虚拟机上开发、部署程序的开发者来说,<strong>很多人更愿意把方法区称为“永久代”(<code>Permanent Generation</code>)，本质上两者并不等价，仅仅是因为<code>HotSpot</code>虚拟机的设计团队把 <code>GC</code> 分代收集扩展至方法区，或者说，使用永久代来实现方法区而已。</strong></p>
-<p>​        <strong>目的是为了方法区也可以用堆内存的 <code>GC</code> 垃圾回收器，而不用重新针对方法区做 <code>GC</code> 操作，所以称永久代是方法区的一个存储实现。</strong></p>
-<p>​        方法区只是 <code>JVM</code> 的一种规范，不同的虚拟机实现的原理不一样，只有<code>HotSpot</code>虚拟机才有永久代的概念。</p>
+<h4 id="永久代、元空间"><a href="#永久代、元空间" class="headerlink" title="永久代、元空间"></a>永久代、元空间</h4><p>​        方法区只是 <code>JVM</code> 的一种规范，不同的虚拟机实现的原理不一样，只有JDK1.7及以下才有永久代的概念，JDK1.8称为元空间。</p>
 <h3 id="常量池"><a href="#常量池" class="headerlink" title="常量池"></a>常量池</h3><h4 id="class常量池"><a href="#class常量池" class="headerlink" title="class常量池"></a>class常量池</h4><p>​        我们写的每一个 Java 类被编译后，就会形成一份<code>class</code> 文件。<code>class</code> 文件中除了包含类的<strong>版本、字段、方法、接口等描述信息外，还有一项信息就是常量池</strong>(<code>constant pool table</code>)，用于存放编译器生成的各种<strong>字面量</strong>(<code>Literal</code>)和<strong>符号引用</strong>(<code>Symbolic References</code>)。</p>
 <p>​        每个class文件都有一个class常量池。</p>
 <p>字面量包括：</p>
@@ -1149,7 +1147,7 @@
 <ul>
 <li><p>在 <code>JDK 1.6</code> 中，调用 <code>intern()</code> 首先会在字符串池中寻找<code>equal()</code> 相等的字符串，假如字符串存在就返回该字符串在字符串池中的引用；假如字符串不存在，<strong>虚拟机会重新在永久代上创建一个实例</strong>，将 <code>StringTable</code> 的一个表项指向这个新创建的实例。<br><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-12.png" alt="memory-12"></p>
 </li>
-<li><p>在 <code>JDK 1.7</code> 中，由于字符串池不在永久代了，<code>intern()</code> 做了一些修改，更方便地利用堆中的对象。字符串存在时和 <code>JDK 1.6</code>一样，但是<strong>字符串不存在时不再需要重新创建实例，可以直接指向堆上的实例</strong>。<br><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-13.png" alt="memory-13"></p>
+<li><p>在 <code>JDK 1.7</code> 中，由于字符串池不在永久代了，<code>intern()</code> 做了一些修改，更方便地利用堆中的对象。字符串存在时和 <code>JDK 1.6</code>一样返回常量池的引用，不存在时也不需要再拷贝字符串的实例到常量池，既然字符串常量池已经移到Java堆中，只需要在常量池里记录一下首次出现的实例引用即可。<br><img src="http://yrlzero.gitee.io/images/jvm/jvm-memory/memory-13.png" alt="memory-13"></p>
 </li>
 </ul>
 <p>我们基于JDK1.7版本，来看个例子：</p>
