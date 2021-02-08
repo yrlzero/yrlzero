@@ -1035,7 +1035,7 @@
       </categories>
       <tags>
         <tag>security</tag>
-        <tag>oauth2</tag>
+        <tag>oauth2 - cloud</tag>
       </tags>
   </entry>
   <entry>
@@ -1081,6 +1081,7 @@
         <category>安全框架</category>
       </categories>
       <tags>
+        <tag>spring boot</tag>
         <tag>security</tag>
       </tags>
   </entry>
@@ -1135,6 +1136,7 @@
         <category>安全框架</category>
       </categories>
       <tags>
+        <tag>spring boot</tag>
         <tag>security</tag>
       </tags>
   </entry>
