@@ -1405,6 +1405,8 @@
 <h1 id="为什么需要使用新的时间类"><a href="#为什么需要使用新的时间类" class="headerlink" title="为什么需要使用新的时间类"></a>为什么需要使用新的时间类</h1><p>1、Date如果不格式化，打印出的日期可读性差【Tue Sep 10 09:34:04 CST 2019】；</p>
 <p>2、使用 SimpleDateFormat 对时间进行格式化，但 SimpleDateFormat 是线程不安全的；</p>
 <p>3、获取时间一些参数需要转换为calendar类获取……</p>
+<a id="more"></a>
+
 <h1 id="JDK8新特性提供的时间操作类"><a href="#JDK8新特性提供的时间操作类" class="headerlink" title="JDK8新特性提供的时间操作类"></a>JDK8新特性提供的时间操作类</h1><p>1、LocalDate    【日期】</p>
 <p>2、LocalTime    【时间】</p>
 <p>3、LocalDateTime    【日期时间】</p>
