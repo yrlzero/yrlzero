@@ -1463,7 +1463,7 @@
   <entry>
     <title>JDK1.8 HashMap和ConcurrentHashMap 源码和实现</title>
     <url>/2021/03/31/jdk8-hashmap/</url>
-    <content><![CDATA[<h1 id="1-8HashMap及ConcurrentHashMap的源码和分析"><a href="#1-8HashMap及ConcurrentHashMap的源码和分析" class="headerlink" title="1.8HashMap及ConcurrentHashMap的源码和分析"></a>1.8HashMap及ConcurrentHashMap的源码和分析</h1><h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><blockquote>
+    <content><![CDATA[<h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><blockquote>
 <p>AVL树：</p>
 <p>在计算机科学中，<strong>AVL树</strong>是最先发明的自平衡二叉查找树。在AVL树中任何节点的两个子树的<strong>高度最大差别为1</strong>，所以它也被称为<strong>高度平衡树</strong>。增加和删除可能需要通过一次或多次树旋转来重新平衡这个树。</p>
 <p>特点：</p>
@@ -1674,7 +1674,7 @@
   <entry>
     <title>JDK1.7 HashMap和ConcurrentHashMap 源码和实现</title>
     <url>/2021/03/31/jdk7-hashmap/</url>
-    <content><![CDATA[<h1 id="1-7HashMap及ConcurrentHashMap的源码和分析"><a href="#1-7HashMap及ConcurrentHashMap的源码和分析" class="headerlink" title="1.7HashMap及ConcurrentHashMap的源码和分析"></a>1.7HashMap及ConcurrentHashMap的源码和分析</h1><h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><blockquote>
+    <content><![CDATA[<h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><blockquote>
 <p>问题：JDK1.7中，HashMap是通过什么原理实现的呢？</p>
 <p>答案：数组+链表</p>
 <p>问题：什么叫哈希碰撞（哈希冲突）？</p>
