@@ -1513,7 +1513,7 @@
 
 
 
-<h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p><img src="H:%5Chexo%5Csource_posts%5Credis%E6%8C%81%E4%B9%85%E5%8C%96%5Credis-03.png" alt=""></p>
+<h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p><img src="http://yrlzero.gitee.io/images/linux/redis/redis-03.png" alt=""></p>
 <h3 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.满足条件时触发重写</span><br><span class="line">	4.0以前，重写时，删除抵消命令，合并重复命令</span><br><span class="line">	4.0后，重写时，将旧数据RDB到aof文件中，之后将增量数据append到aof中</span><br><span class="line">2.redis是内存数据库，写操作触发io，造成性能下降</span><br><span class="line">3.aof可以修改触发级别：no、always、everysec</span><br><span class="line">4.如果RDB、AOF两个都配了优先加载AOF</span><br></pre></td></tr></table></figure>
 
 <h3 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.数据安全，aof持久化可以配置appendfsync属性，有always，每进行一 次 命令操作就记录到aof文件中一次。 </span><br><span class="line">2.AOF 机制的 rewrite 模式。AOF 文件没被 rewrite 之前（文件过大时会对命 令 进行合并重写），可以删除其中的某些命令（比如误操作的 flushall）)</span><br></pre></td></tr></table></figure>
