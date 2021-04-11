@@ -2073,8 +2073,108 @@
       </tags>
   </entry>
   <entry>
-    <title>redis-常用命令</title>
-    <url>/2021/04/10/redis%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</url>
+    <title>redis-布隆过滤器</title>
+    <url>/2021/04/10/redis%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/</url>
+    <content><![CDATA[<h2 id="bloom机制"><a href="#bloom机制" class="headerlink" title="bloom机制"></a>bloom机制</h2><p><img src="http://yrlzero.gitee.io/images/linux/redis/redis-01.png" alt=""></p>
+<a id="more"></a>
+
+<h2 id="下载BLOOM模块zip包"><a href="#下载BLOOM模块zip包" class="headerlink" title="下载BLOOM模块zip包"></a><a href="https://github.com/RedisBloom/RedisBloom" target="_blank" rel="noopener">下载BLOOM模块zip包</a></h2><h2 id="解压zip包"><a href="#解压zip包" class="headerlink" title="解压zip包"></a>解压zip包</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum install unzip</span><br><span class="line">unzip RedisBloom-master.zip</span><br></pre></td></tr></table></figure>
+
+<img src="http://yrlzero.gitee.io/images/linux/redis/unzip安装.jpg" style="zoom: 50%;" />
+
+<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%96%E8%AF%91bloom.jpg" alt=""></p>
+<p>将编译后出现的redisbloom.so文件拷贝到/opt/redis/下</p>
+<h2 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;redis&#x2F;6379.conf</span><br><span class="line"># 添加以下配置</span><br><span class="line">loadmodule &#x2F;opt&#x2F;redis&#x2F;redisbloom.so</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%8C%87%E5%AE%9A%E5%8A%A0%E8%BD%BD%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E6%A8%A1%E5%9D%97.jpg" alt=""></p>
+<h2 id="启动redis"><a href="#启动redis" class="headerlink" title="启动redis"></a>启动redis</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">service redis_6379 start</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E5%90%AF%E5%8A%A8%E6%88%90%E5%8A%9F2.jpg" alt=""></p>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>db</tag>
+        <tag>redis</tag>
+        <tag>nosql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>redis-持久化</title>
+    <url>/2021/04/11/redis%E6%8C%81%E4%B9%85%E5%8C%96/</url>
+    <content><![CDATA[<h2 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h2><p><img src="H:%5Chexo%5Csource_posts%5Credis%E6%8C%81%E4%B9%85%E5%8C%96%5Credis-02.png" alt=""></p>
+<h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">默认开启rdb</span><br></pre></td></tr></table></figure>
+
+<h4 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.只有一个文件 dump.rdb，方便持久化。 </span><br><span class="line">2.性能大化，主进程不会进行任何 IO 操作，保证了 redis 的高性能 ，使用fork()创建子进程来进行RDB备份操作，子进程拥有父进程数据的指针，不需要全部数据拷贝一份，当有主进程有新数据进行修改时，触发系统内核的copy on write写时复制的机制，新数据写入新的内存位置，之后再操作旧数据的指针，而子进程的指针仍指向旧数据，因此两个进程的数据是隔离的，也保证了数据备份的时点性，</span><br><span class="line">3.二进制文件，相比于aof恢复比较快</span><br><span class="line">4.存在数据丢失的可能性</span><br></pre></td></tr></table></figure>
+
+<h5 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.数据安全性低。RDB 是间隔一段时间进行持久化，如果持久化之间 redis 发 生故障，会发生数据丢失。</span><br></pre></td></tr></table></figure>
+
+<h5 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">################################ SNAPSHOTTING  ################################</span><br><span class="line">#RDB触发规则，多少秒触发了多少次则执行RDB，“”表示不开启RDB，可以多个save规则同时配置</span><br><span class="line">#   save &quot;&quot;</span><br><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br><span class="line"></span><br><span class="line"># bgsave快照出错时是否停止数据写入</span><br><span class="line">stop-writes-on-bgsave-error yes</span><br><span class="line"></span><br><span class="line"># 是否开启压缩</span><br><span class="line">rdbcompression yes</span><br><span class="line"></span><br><span class="line"># 是否设置检查点</span><br><span class="line">rdbchecksum yes</span><br><span class="line"></span><br><span class="line"># rdb文件名称</span><br><span class="line">dbfilename dump.rdb</span><br><span class="line"></span><br><span class="line"># 是否同步删除rdb文件</span><br><span class="line">rdb-del-sync-files no</span><br><span class="line"></span><br><span class="line"># 持久化文件存放的目录（RDB和AOF问备份文件都会放在这里）</span><br><span class="line">dir &#x2F;var&#x2F;lib&#x2F;redis&#x2F;6379</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p><img src="H:%5Chexo%5Csource_posts%5Credis%E6%8C%81%E4%B9%85%E5%8C%96%5Credis-03.png" alt=""></p>
+<h5 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.满足条件时触发重写</span><br><span class="line">	4.0以前，重写时，删除抵消命令，合并重复命令</span><br><span class="line">	4.0后，重写时，将旧数据RDB到aof文件中，之后将增量数据append到aof中</span><br><span class="line">2.redis是内存数据库，写操作触发io，造成性能下降</span><br><span class="line">3.aof可以修改触发级别：no、always、everysec</span><br><span class="line">4.如果RDB、AOF两个都配了优先加载AOF</span><br></pre></td></tr></table></figure>
+
+<h5 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.数据安全，aof持久化可以配置appendfsync属性，有always，每进行一 次 命令操作就记录到aof文件中一次。 </span><br><span class="line">2.AOF 机制的 rewrite 模式。AOF 文件没被 rewrite 之前（文件过大时会对命 令 进行合并重写），可以删除其中的某些命令（比如误操作的 flushall）)</span><br></pre></td></tr></table></figure>
+
+<h5 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.AOF 文件比 RDB 文件大，且恢复速度慢。</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="配置-1"><a href="#配置-1" class="headerlink" title="配置"></a>配置</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">############################## APPEND ONLY MODE ###############################</span><br><span class="line"># 是否开启aof</span><br><span class="line">appendonly no</span><br><span class="line"></span><br><span class="line"># aof文件名</span><br><span class="line">appendfilename &quot;appendonly.aof&quot;</span><br><span class="line"></span><br><span class="line"># aof触发策略</span><br><span class="line">appendfsync always #每个动作都追加</span><br><span class="line">appendfsync everysec #默认配置，每秒都追加</span><br><span class="line">appendfsync no #等待内核缓冲区满了在一起追加</span><br><span class="line"></span><br><span class="line">#当有其他子进程在对磁盘进行写操作（rdb）或者重写操作时，no表示不参与争抢，此时不进行aof操作</span><br><span class="line">no-appendfsync-on-rewrite no  </span><br><span class="line"></span><br><span class="line"># 重写配置</span><br><span class="line">auto-aof-rewrite-percentage 100   </span><br><span class="line">auto-aof-rewrite-min-size 64mb #aof达到64MB时触发重写</span><br><span class="line"></span><br><span class="line">aof-load-truncated yes</span><br><span class="line"></span><br><span class="line">#是否混合使用RDB和AOF备份，重写时会将旧数据以RDB形势放入aof文件前面，新数据以追加日志方式写入，[RDB file][AOF tail]，当打开aof文件时前面出现&quot;REDIS&quot;证明是开启RDB前置的新AOF混合文件，4.0之后才有的新功能</span><br><span class="line">aof-use-rdb-preamble yes</span><br></pre></td></tr></table></figure>
+
+<h2 id="持久化选择"><a href="#持久化选择" class="headerlink" title="持久化选择"></a>持久化选择</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">- 一般来说， 如果想达到足以媲美PostgreSQL的数据安全性，你应该 同时使用两种持久化功能。在这种情况下，当 Redis 重启的时候会优先载入AOF文件来恢复原始的数据，因为在通常情况下AOF文件保存的数据集要比RDB文件保存的数据集要完整。 </span><br><span class="line">- 如果非常关心数据，但仍然可以承受数分钟以内的数据丢失，那么可以只使用RDB持久化。 </span><br><span class="line">- 有很多用户都只使用AOF持久化，但并不推荐这种方式，因为定时生成RDB快照（snapshot）非常便于进行数据库备份， 并且 RDB 恢复数据集的速度也要比AOF恢复的速度要快，除此之外，使用RDB还可以避免AOF程序的bug。 </span><br><span class="line">- 如果只希望数据在服务器运行的时候存在，你也可以不使用任何持久化方式。</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>db</tag>
+        <tag>redis</tag>
+        <tag>nosql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>redis-过期、淘汰</title>
+    <url>/2021/04/11/redis%E8%BF%87%E6%9C%9F%E5%92%8C%E6%B7%98%E6%B1%B0/</url>
+    <content><![CDATA[<h2 id="key过期-删除策略"><a href="#key过期-删除策略" class="headerlink" title="key过期-删除策略"></a>key过期-删除策略</h2><h3 id="定时删除"><a href="#定时删除" class="headerlink" title="定时删除"></a>定时删除</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">含义：</span><br><span class="line">	在设置key的过期时间的同时，为该key创建一个定时器，让定时器在key的过期时间来临时，对key进行删除</span><br><span class="line">优点：</span><br><span class="line">	保证内存被尽快释放</span><br><span class="line">缺点：</span><br><span class="line">	若过期key很多，删除这些key会占用很多的CPU时间，在CPU时间紧张的情况下，CPU不能把所有的时间用来做要紧的事儿，还需要去花时间删除这些key定时器的创建耗时，若为每一个设置过期时间的key创建一个定时器（将会有大量的定时器产生），性能影响严重</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h3 id="惰性删除"><a href="#惰性删除" class="headerlink" title="惰性删除"></a>惰性删除</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">含义：</span><br><span class="line">	key过期的时候不删除，每次通过key获取值的时候去检查是否过期，若过期，则删除，返回null（用的时候再检查删除）。</span><br><span class="line">优点：</span><br><span class="line">	删除操作只在通过key取值的时候发生，而且只删除当前key，所以对CPU时间的占用是比较少的.</span><br><span class="line">缺点：</span><br><span class="line">	若大量的key在超出超时时间后，很久一段时间内，都没有被获取过，那么可能发生内存泄露（无用的垃圾占用了大量的内存）</span><br></pre></td></tr></table></figure>
+
+<h3 id="定期删除"><a href="#定期删除" class="headerlink" title="定期删除"></a>定期删除</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">含义：</span><br><span class="line">	每隔一段时间执行一次删除过期key操作</span><br><span class="line">优点：</span><br><span class="line">	通过限制删除操作的时长和频率，该策略是前两者的一个折中方案</span><br><span class="line">缺点：</span><br><span class="line">	在内存友好方面，不如&quot;定时过期&quot;（会造成一定的内存占用，但是没有“惰性过期”那么占用内存）在CPU时间友好方面，不如&quot;惰性过期&quot;（会定期的去进行比较和删除操作，cpu方面不如“惰性过期”，但是比“定时过期”好）</span><br></pre></td></tr></table></figure>
+
+<p>Redis中同时使用了惰性过期和定期过期两种过期策略。</p>
+<h2 id="内存不足-淘汰策略"><a href="#内存不足-淘汰策略" class="headerlink" title="内存不足-淘汰策略"></a>内存不足-淘汰策略</h2><p>redis内存满了使用的淘汰策略</p>
+<p>​        设置maxmemory为0代表没有内存限制。对于64位的系统这是个默认值，对于32位的系统默认内存限制为3GB。<br>当指定的内存限制大小达到时，需要选择不同的行为，也就是策略。 Redis可以仅仅对命令返回错误，这将使得内存被使用得更多，或者回收一些旧的数据来使得添加数据时可以避免内存限制。<br>​        当maxmemory限制达到的时候Redis会使用的行为由 Redis的maxmemory-policy配置指令来进行配置。<br>以下的策略是可用的:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># volatile-lru -&gt; </span><br><span class="line">	Evict using approximated LRU, only keys with an expire set.</span><br><span class="line">	在过期集合的键中，尝试回收最少使用的键（LRU）,使得新添加的数据有空间存放。</span><br><span class="line"># allkeys-lru -&gt; </span><br><span class="line">	Evict any key using approximated LRU.</span><br><span class="line">	在所有的键中，尝试回收最少使用的键（LRU），使得新添加的数据有空间存放。</span><br><span class="line"># volatile-lfu -&gt; </span><br><span class="line">	Evict using approximated LFU, only keys with an expire set.</span><br><span class="line">	在过期集合的键中，驱逐使用频率最少的键（LFU），使得新添加的数据有空间存放。</span><br><span class="line"># allkeys-lfu -&gt; </span><br><span class="line">	Evict any key using approximated LFU.</span><br><span class="line">	在所有的键中，驱逐使用频率最少的键（LFU），使得新添加的数据有空间存放。</span><br><span class="line"># volatile-random -&gt; </span><br><span class="line">	Remove a random key having an expire set.</span><br><span class="line">	在过期集合的键中，随机回收键，使得新添加的数据有空间存放。</span><br><span class="line"># allkeys-random -&gt; </span><br><span class="line">	Remove a random key, any key.</span><br><span class="line">	在所有的键中，随机回收键，使得新添加的数据有空间存放。</span><br><span class="line"># volatile-ttl -&gt; </span><br><span class="line">	Remove the key with the nearest expire time (minor TTL)</span><br><span class="line">	在过期集合的键，优先回收存活时间（TTL）较短的键,使得新添加的数据有空间存放。</span><br><span class="line"># noeviction -&gt; </span><br><span class="line">	Don&#39;t evict anything, just return an error on write operations.</span><br><span class="line">	返回错误当内存限制达到并且客户端尝试执行会让更多内存被使用的命令（大部分的写入指令，但DEL和几个例外）</span><br></pre></td></tr></table></figure>
+
+<p>一般的经验规则:</p>
+<ul>
+<li>使用<strong>allkeys-lru</strong>策略：当你希望你的请求符合一个幂定律分布，也就是说，你希望部分的子集元素将比其它其它元素被访问的更多。如果你不确定选择什么，这是个很好的选择。.</li>
+<li>使用<strong>allkeys-random</strong>：如果你是循环访问，所有的键被连续的扫描，或者你希望请求分布正常（所有元素被访问的概率都差不多）。</li>
+<li>使用<strong>volatile-ttl</strong>：如果你想要通过创建缓存对象时设置TTL值，来决定哪些对象应该被过期。</li>
+</ul>
+<p>当想要单一的实例实现缓存及持久化一些键时，allkeys-lru 和 volatile-random策略很有用。不过一般运行两个实例是解决这个问题的更好方法。<br>当内存有压力时，没有必要为键取设置过期时间，因为为了键设置过期时间也是需要消耗内存的。</p>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>db</tag>
+        <tag>redis</tag>
+        <tag>nosql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>redis-命令</title>
+    <url>/2021/04/10/redis%E5%91%BD%E4%BB%A4/</url>
     <content><![CDATA[<h3 id="常见命令"><a href="#常见命令" class="headerlink" title="常见命令"></a>常见命令</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">redis-cli #链接客户端</span><br><span class="line">select dbnum #选择数据库</span><br><span class="line">flushdb #清除当前数据库数据</span><br><span class="line">flushall #清除所有数据库数据</span><br><span class="line">scan #游标扫描匹配的key</span><br><span class="line">KEYS  # 查找所有符合给定模式 pattern 的 key</span><br><span class="line">dbsize #返回当前数据库的 key 的数量</span><br><span class="line">del # 删除给定的一个或多个 key</span><br></pre></td></tr></table></figure>
 
 <a id="more"></a>
@@ -2095,36 +2195,6 @@
 
 <h3 id="BloomFilter"><a href="#BloomFilter" class="headerlink" title="BloomFilter"></a>BloomFilter</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">BF.ADD key ...options...</span><br><span class="line">    # 添加key到bloom中</span><br><span class="line"></span><br><span class="line">BF.EXISTS key ...options...</span><br><span class="line">	# 判断是否存在对应的key</span><br></pre></td></tr></table></figure>
 
-]]></content>
-      <categories>
-        <category>linux</category>
-      </categories>
-      <tags>
-        <tag>db</tag>
-        <tag>redis</tag>
-        <tag>nosql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>redis-布隆过滤器</title>
-    <url>/2021/04/10/redis%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/</url>
-    <content><![CDATA[<h2 id="bloom机制"><a href="#bloom机制" class="headerlink" title="bloom机制"></a>bloom机制</h2><p><img src="http://yrlzero.gitee.io/images/linux/redis/redis-01.png" alt=""></p>
-<a id="more"></a>
-
-<h2 id="下载BLOOM模块zip包"><a href="#下载BLOOM模块zip包" class="headerlink" title="下载BLOOM模块zip包"></a><a href="https://github.com/RedisBloom/RedisBloom" target="_blank" rel="noopener">下载BLOOM模块zip包</a></h2><h2 id="解压zip包"><a href="#解压zip包" class="headerlink" title="解压zip包"></a>解压zip包</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum install unzip</span><br><span class="line">unzip RedisBloom-master.zip</span><br></pre></td></tr></table></figure>
-
-<img src="http://yrlzero.gitee.io/images/linux/redis/unzip安装.jpg" style="zoom: 50%;" />
-
-<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make</span><br></pre></td></tr></table></figure>
-
-<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%96%E8%AF%91bloom.jpg" alt=""></p>
-<p>将编译后出现的redisbloom.so文件拷贝到/opt/redis/下</p>
-<h2 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;redis&#x2F;6379.conf</span><br><span class="line"># 添加以下配置</span><br><span class="line">loadmodule &#x2F;opt&#x2F;redis&#x2F;redisbloom.so</span><br></pre></td></tr></table></figure>
-
-<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%8C%87%E5%AE%9A%E5%8A%A0%E8%BD%BD%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E6%A8%A1%E5%9D%97.jpg" alt=""></p>
-<h2 id="启动redis"><a href="#启动redis" class="headerlink" title="启动redis"></a>启动redis</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">service redis_6379 start</span><br></pre></td></tr></table></figure>
-
-<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E5%90%AF%E5%8A%A8%E6%88%90%E5%8A%9F2.jpg" alt=""></p>
 ]]></content>
       <categories>
         <category>linux</category>
