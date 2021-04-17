@@ -21,17 +21,17 @@
     var CONFIG = {"hostname":"yrlzero.gitee.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="穿透数据库不存在，redis不存在  key设置null值  布隆过滤器（存在一定的误差）">
+  <meta name="description" content="一、穿透数据库不存在，redis不存在  key设置null值  布隆过滤器（存在一定的误差）">
 <meta property="og:type" content="article">
 <meta property="og:title" content="redis-常见问题">
 <meta property="og:url" content="http://yrlzero.gitee.io/2021/04/17/redis%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="yrl&#39;s blog">
-<meta property="og:description" content="穿透数据库不存在，redis不存在  key设置null值  布隆过滤器（存在一定的误差）">
+<meta property="og:description" content="一、穿透数据库不存在，redis不存在  key设置null值  布隆过滤器（存在一定的误差）">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B401.png">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B404.png">
 <meta property="article:published_time" content="2021-04-17T09:19:15.040Z">
-<meta property="article:modified_time" content="2021-04-17T10:07:33.706Z">
+<meta property="article:modified_time" content="2021-04-17T10:09:17.150Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="db">
 <meta property="article:tag" content="redis">
@@ -214,7 +214,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-04-17 17:19:15 / 修改时间：18:07:33" itemprop="dateCreated datePublished" datetime="2021-04-17T17:19:15+08:00">2021-04-17</time>
+              <time title="创建时间：2021-04-17 17:19:15 / 修改时间：18:09:17" itemprop="dateCreated datePublished" datetime="2021-04-17T17:19:15+08:00">2021-04-17</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -237,7 +237,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="穿透"><a href="#穿透" class="headerlink" title="穿透"></a>穿透</h2><p>数据库不存在，redis不存在</p>
+        <h2 id="一、穿透"><a href="#一、穿透" class="headerlink" title="一、穿透"></a>一、穿透</h2><p>数据库不存在，redis不存在</p>
 <ul>
 <li><p>key设置null值</p>
 </li>
@@ -246,23 +246,23 @@
 
 </li>
 </ul>
-<h2 id="击穿"><a href="#击穿" class="headerlink" title="击穿"></a>击穿</h2><p>某个key，数据库存在，redis不存在（首次请求、key过期），大量（相同key）的请求一次性进来</p>
+<h2 id="二、击穿"><a href="#二、击穿" class="headerlink" title="二、击穿"></a>二、击穿</h2><p>某个key，数据库存在，redis不存在（首次请求、key过期），大量（相同key）的请求一次性进来</p>
 <ul>
 <li>过期时间随机</li>
 <li>锁方案（见下文）</li>
 </ul>
-<h2 id="雪崩"><a href="#雪崩" class="headerlink" title="雪崩"></a>雪崩</h2><p>缓存击穿的情况*N，一批key，数据库存在，redis不存在（首次请求、key过期），大量（不同key）的请求一次性进来</p>
+<h2 id="三、雪崩"><a href="#三、雪崩" class="headerlink" title="三、雪崩"></a>三、雪崩</h2><p>缓存击穿的情况*N，一批key，数据库存在，redis不存在（首次请求、key过期），大量（不同key）的请求一次性进来</p>
 <ul>
 <li>过期时间随机</li>
 <li>锁方案（见下文）</li>
 </ul>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><h4 id="布隆过滤器方案"><a href="#布隆过滤器方案" class="headerlink" title="布隆过滤器方案"></a>布隆过滤器方案</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1、客户端实现过滤拦截</span><br><span class="line">2、客户端实现布隆算法，映射到redis的bitmap实现</span><br><span class="line">3、使用redis的bloomfilter组件</span><br><span class="line"></span><br><span class="line">问题：	</span><br><span class="line">	1、只能key的映射增加不能删除（布谷鸟过滤器可以解决）</span><br><span class="line">	2、不存在的key有一定程度可能跟存在的key出现映射重合，存在一定的误差</span><br></pre></td></tr></table></figure>
+<h2 id="四、解决方案"><a href="#四、解决方案" class="headerlink" title="四、解决方案"></a>四、解决方案</h2><h4 id="布隆过滤器方案"><a href="#布隆过滤器方案" class="headerlink" title="布隆过滤器方案"></a>布隆过滤器方案</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1、客户端实现过滤拦截</span><br><span class="line">2、客户端实现布隆算法，映射到redis的bitmap实现</span><br><span class="line">3、使用redis的bloomfilter组件</span><br><span class="line"></span><br><span class="line">问题：	</span><br><span class="line">	1、只能key的映射增加不能删除（布谷鸟过滤器可以解决）</span><br><span class="line">	2、不存在的key有一定程度可能跟存在的key出现映射重合，存在一定的误差</span><br></pre></td></tr></table></figure>
 
 <h4 id="锁方案"><a href="#锁方案" class="headerlink" title="锁方案"></a>锁方案</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1、请求redis，没有值</span><br><span class="line">2、抢锁setnx px</span><br><span class="line">	2.1、抢到锁的查询DB</span><br><span class="line">	2.2、抢不到锁的sleep（或者服务治理返回）</span><br><span class="line">3、更新redis数据，删除锁</span><br><span class="line">4、sleep苏醒的线程回到第一步</span><br><span class="line"></span><br><span class="line">问题：引入分布式锁，需要解决这个问题</span><br></pre></td></tr></table></figure>
 
 <h4 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">使用SET key value [EX seconds] [PX milliseconds] [NX] 或 setnx + EXPIRE </span><br><span class="line">1.setnx</span><br><span class="line">2.过期时间</span><br><span class="line">3.多线程（守护吸纳成）延长过期</span><br><span class="line"></span><br><span class="line">问题：</span><br><span class="line">1、线程使用setnx抢占之后可能宕机造成锁未释放，出现死锁？</span><br><span class="line">	引入过期时间</span><br><span class="line">2、业务执行时间过久，造成锁已失效，期间其他线程抢占了锁，当前线程执行解锁误删其他线程的锁？</span><br><span class="line">	设置value当前线程的操作标识（可以是随机数），删除时取出该值进行判断，看是否为当前线程持有的锁，是的话才进行删除</span><br><span class="line">3、当前线程取出value值判断锁为本线程持有，到删除之间存在时间差，可能因为锁失效缘故造成其他线程再次期间抢占到了锁？</span><br><span class="line">	保证get操作和del操作的原子性，使用lua脚本或者事务</span><br><span class="line">4、当前业务未执行完，锁已经失效？</span><br><span class="line">	多线程监控（守护线程），对key延长失效时间，可以使用redisson解决方案</span><br></pre></td></tr></table></figure>
 
-<h2 id="缓存双写一致"><a href="#缓存双写一致" class="headerlink" title="缓存双写一致"></a>缓存双写一致</h2><h4 id="先更新数据库，后更新缓存"><a href="#先更新数据库，后更新缓存" class="headerlink" title="先更新数据库，后更新缓存"></a>先更新数据库，后更新缓存</h4><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B401.png" alt=""></p>
+<h2 id="五、缓存双写一致"><a href="#五、缓存双写一致" class="headerlink" title="五、缓存双写一致"></a>五、缓存双写一致</h2><h4 id="先更新数据库，后更新缓存"><a href="#先更新数据库，后更新缓存" class="headerlink" title="先更新数据库，后更新缓存"></a>先更新数据库，后更新缓存</h4><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B401.png" alt=""></p>
 <p>由图可知：</p>
 <ul>
 <li>请求A先更新DB</li>
@@ -368,7 +368,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#穿透"><span class="nav-text">穿透</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#击穿"><span class="nav-text">击穿</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#雪崩"><span class="nav-text">雪崩</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-text">解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#布隆过滤器方案"><span class="nav-text">布隆过滤器方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#锁方案"><span class="nav-text">锁方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分布式锁"><span class="nav-text">分布式锁</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存双写一致"><span class="nav-text">缓存双写一致</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#先更新数据库，后更新缓存"><span class="nav-text">先更新数据库，后更新缓存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#先更新数据库，后删除缓存"><span class="nav-text">先更新数据库，后删除缓存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#先更新缓存，后更新数据库"><span class="nav-text">先更新缓存，后更新数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#先删除缓存，后更新数据库"><span class="nav-text">先删除缓存，后更新数据库</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、穿透"><span class="nav-text">一、穿透</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、击穿"><span class="nav-text">二、击穿</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、雪崩"><span class="nav-text">三、雪崩</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、解决方案"><span class="nav-text">四、解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#布隆过滤器方案"><span class="nav-text">布隆过滤器方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#锁方案"><span class="nav-text">锁方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分布式锁"><span class="nav-text">分布式锁</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、缓存双写一致"><span class="nav-text">五、缓存双写一致</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#先更新数据库，后更新缓存"><span class="nav-text">先更新数据库，后更新缓存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#先更新数据库，后删除缓存"><span class="nav-text">先更新数据库，后删除缓存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#先更新缓存，后更新数据库"><span class="nav-text">先更新缓存，后更新数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#先删除缓存，后更新数据库"><span class="nav-text">先删除缓存，后更新数据库</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
