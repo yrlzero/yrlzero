@@ -2340,7 +2340,7 @@
 <h4 id="还原实例"><a href="#还原实例" class="headerlink" title="还原实例"></a>还原实例</h4><p>​    清除配置、日志、持久化文件 <code>./create-cluster clean</code></p>
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/cluster-%E6%B8%85%E9%99%A4%E9%85%8D%E7%BD%AE%E8%BF%98%E5%8E%9F.jpg" alt=""></p>
 <h4 id="手动启动"><a href="#手动启动" class="headerlink" title="手动启动"></a>手动启动</h4><p>修改redis配置，之后启动redis时加载此配置 <code>redis-server ./6379.conf</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">################################ REDIS CLUSTER  ###############################</span><br><span class="line"># 以集群节点的方式启动。为了启动一个Redis实例</span><br><span class="line"># cluster-enabled yes</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">################################ REDIS CLUSTER  ###############################</span><br><span class="line"># 以集群节点的方式启动时，需要开启此配置</span><br><span class="line">cluster-enabled yes</span><br></pre></td></tr></table></figure>
 
 
 
