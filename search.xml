@@ -2486,7 +2486,7 @@
   <entry>
     <title>redis-常见问题</title>
     <url>/2021/04/17/redis%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="一、穿透"><a href="#一、穿透" class="headerlink" title="一、穿透"></a>一、穿透</h2><p>数据库不存在，redis不存在</p>
+    <content><![CDATA[<h3 id="一、穿透"><a href="#一、穿透" class="headerlink" title="一、穿透"></a>一、穿透</h3><p>数据库不存在，redis不存在</p>
 <ul>
 <li><p>key设置null值</p>
 </li>
@@ -2495,17 +2495,17 @@
 
 </li>
 </ul>
-<h2 id="二、击穿"><a href="#二、击穿" class="headerlink" title="二、击穿"></a>二、击穿</h2><p>某个key，数据库存在，redis不存在（首次请求、key过期），大量（相同key）的请求一次性进来</p>
+<h3 id="二、击穿"><a href="#二、击穿" class="headerlink" title="二、击穿"></a>二、击穿</h3><p>某个key，数据库存在，redis不存在（首次请求、key过期），大量（相同key）的请求一次性进来</p>
 <ul>
 <li>过期时间随机</li>
 <li>锁方案（见下文）</li>
 </ul>
-<h2 id="三、雪崩"><a href="#三、雪崩" class="headerlink" title="三、雪崩"></a>三、雪崩</h2><p>缓存击穿的情况*N，一批key，数据库存在，redis不存在（首次请求、key过期），大量（不同key）的请求一次性进来</p>
+<h3 id="三、雪崩"><a href="#三、雪崩" class="headerlink" title="三、雪崩"></a>三、雪崩</h3><p>缓存击穿的情况*N，一批key，数据库存在，redis不存在（首次请求、key过期），大量（不同key）的请求一次性进来</p>
 <ul>
 <li>过期时间随机</li>
 <li>锁方案（见下文）</li>
 </ul>
-<h2 id="四、解决方案"><a href="#四、解决方案" class="headerlink" title="四、解决方案"></a>四、解决方案</h2><h4 id="布隆过滤器方案"><a href="#布隆过滤器方案" class="headerlink" title="布隆过滤器方案"></a>布隆过滤器方案</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1、客户端实现过滤拦截</span><br><span class="line">2、客户端实现布隆算法，映射到redis的bitmap实现</span><br><span class="line">3、使用redis的bloomfilter组件</span><br><span class="line"></span><br><span class="line">问题：	</span><br><span class="line">1、只能key的映射增加不能删除（布谷鸟过滤器可以解决）</span><br><span class="line">2、不存在的key有一定程度可能跟存在的key出现映射重合，存在一定的误差</span><br></pre></td></tr></table></figure>
+<h3 id="四、解决方案"><a href="#四、解决方案" class="headerlink" title="四、解决方案"></a>四、解决方案</h3><h4 id="布隆过滤器方案"><a href="#布隆过滤器方案" class="headerlink" title="布隆过滤器方案"></a>布隆过滤器方案</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1、客户端实现过滤拦截</span><br><span class="line">2、客户端实现布隆算法，映射到redis的bitmap实现</span><br><span class="line">3、使用redis的bloomfilter组件</span><br><span class="line"></span><br><span class="line">问题：	</span><br><span class="line">1、只能key的映射增加不能删除（布谷鸟过滤器可以解决）</span><br><span class="line">2、不存在的key有一定程度可能跟存在的key出现映射重合，存在一定的误差</span><br></pre></td></tr></table></figure>
 
 <h4 id="锁方案"><a href="#锁方案" class="headerlink" title="锁方案"></a>锁方案</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1、请求redis，没有值</span><br><span class="line">2、抢锁setnx px</span><br><span class="line">	2.1、抢到锁的查询DB</span><br><span class="line">	2.2、抢不到锁的sleep（或者服务治理返回）</span><br><span class="line">3、更新redis数据，删除锁</span><br><span class="line">4、sleep苏醒的线程回到第一步</span><br><span class="line"></span><br><span class="line">问题：引入分布式锁，需要解决这个问题</span><br></pre></td></tr></table></figure>
 
@@ -2513,7 +2513,8 @@
 
 
 
-<h2 id="五、缓存双写一致"><a href="#五、缓存双写一致" class="headerlink" title="五、缓存双写一致"></a>五、缓存双写一致</h2><h4 id="先更新数据库，后更新缓存"><a href="#先更新数据库，后更新缓存" class="headerlink" title="先更新数据库，后更新缓存"></a>先更新数据库，后更新缓存</h4><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B401.png" alt=""></p>
+<h3 id="五、缓存双写一致"><a href="#五、缓存双写一致" class="headerlink" title="五、缓存双写一致"></a>五、缓存双写一致</h3><p>先更新数据库，后更新缓存</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B401.png" alt=""></p>
 <p>由图可知：</p>
 <ul>
 <li>请求A先更新DB</li>
@@ -2521,17 +2522,20 @@
 <li>但是因为网络等原因，B却比A更早更新了缓存。</li>
 <li>导致数据的不一致，出现脏数据</li>
 </ul>
-<h4 id="先更新数据库，后删除缓存"><a href="#先更新数据库，后删除缓存" class="headerlink" title="先更新数据库，后删除缓存"></a>先更新数据库，后删除缓存</h4><ul>
+<p>先更新数据库，后删除缓存</p>
+<ul>
 <li>更新DB成功</li>
 <li>删除缓存失败</li>
 <li>导致缓存数据为旧数据，出现脏数据</li>
 </ul>
-<h4 id="先更新缓存，后更新数据库"><a href="#先更新缓存，后更新数据库" class="headerlink" title="先更新缓存，后更新数据库"></a>先更新缓存，后更新数据库</h4><ul>
+<p>先更新缓存，后更新数据库</p>
+<ul>
 <li>更新缓存成功</li>
 <li>更新DB失败</li>
 <li>导致数据不一致，出现脏数据</li>
 </ul>
-<h4 id="先删除缓存，后更新数据库"><a href="#先删除缓存，后更新数据库" class="headerlink" title="先删除缓存，后更新数据库"></a>先删除缓存，后更新数据库</h4><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B404.png" alt=""></p>
+<p>先删除缓存，后更新数据库</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B404.png" alt=""></p>
 <p>由图可知：</p>
 <pre><code>- 如果同时有一个请求A先删除，再进行更新操作
 - 中间另一个请求B进行查询发现没有缓存，查询了DB更新了缓存
