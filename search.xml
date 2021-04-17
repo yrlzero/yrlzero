@@ -2511,6 +2511,8 @@
 
 <h4 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">使用SET key value [EX seconds] [PX milliseconds] [NX] 或 setnx + EXPIRE </span><br><span class="line">1.setnx</span><br><span class="line">2.过期时间</span><br><span class="line">3.多线程（守护线程）延长过期</span><br><span class="line"></span><br><span class="line">问题：</span><br><span class="line">1、线程使用setnx抢占之后可能宕机造成锁未释放，出现死锁？</span><br><span class="line">引入过期时间</span><br><span class="line"></span><br><span class="line">2、业务执行时间过久，造成锁已失效，期间其他线程抢占了锁，当前线程执行解锁误删其他线程的锁？</span><br><span class="line">设置value当前线程的操作标识（可以是随机数），删除时取出该值进行判断，看是否为当前线程持有的锁，是的话才进行删除</span><br><span class="line"></span><br><span class="line">3、当前线程取出value值判断锁为本线程持有，到删除之间存在时间差，可能因为锁失效缘故造成其他线程再次期间抢占到了锁？</span><br><span class="line">保证get操作和del操作的原子性，使用lua脚本或者事务</span><br><span class="line"></span><br><span class="line">4、当前业务未执行完，锁已经失效？</span><br><span class="line">多线程监控（守护线程），对key延长失效时间，可以使用redisson解决方案</span><br></pre></td></tr></table></figure>
 
+
+
 <h2 id="五、缓存双写一致"><a href="#五、缓存双写一致" class="headerlink" title="五、缓存双写一致"></a>五、缓存双写一致</h2><h4 id="先更新数据库，后更新缓存"><a href="#先更新数据库，后更新缓存" class="headerlink" title="先更新数据库，后更新缓存"></a>先更新数据库，后更新缓存</h4><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E7%BC%93%E5%AD%98%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B401.png" alt=""></p>
 <p>由图可知：</p>
 <ul>
