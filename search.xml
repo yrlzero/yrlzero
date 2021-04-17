@@ -1612,30 +1612,37 @@
   <entry>
     <title>redis-安装</title>
     <url>/2020/12/12/redis%E5%AE%89%E8%A3%85/</url>
-    <content><![CDATA[<h3 id="一、下载地址"><a href="#一、下载地址" class="headerlink" title="一、下载地址"></a>一、<a href="https://redis.io/download" target="_blank" rel="noopener">下载地址</a></h3><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%B8%8B%E8%BD%BD.jpg" alt=""></p>
+    <content><![CDATA[<h4 id="一、下载地址"><a href="#一、下载地址" class="headerlink" title="一、下载地址"></a>一、<a href="https://redis.io/download" target="_blank" rel="noopener">下载地址</a></h4><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%B8%8B%E8%BD%BD.jpg" alt=""></p>
 <a id="more"></a>
 
-<h3 id="二、安装gcc依赖"><a href="#二、安装gcc依赖" class="headerlink" title="二、安装gcc依赖"></a>二、安装gcc依赖</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 查看gcc版本是否在9.3以上，centos7.6默认安装4.8.5</span><br><span class="line">gcc -v</span><br></pre></td></tr></table></figure>
+<h4 id="二、安装gcc依赖"><a href="#二、安装gcc依赖" class="headerlink" title="二、安装gcc依赖"></a>二、安装gcc依赖</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 查看gcc版本是否在9.3以上，centos7.6默认安装4.8.5</span><br><span class="line">gcc -v</span><br></pre></td></tr></table></figure>
 
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/%E6%9F%A5%E7%9C%8Bgcc%E7%89%88%E6%9C%AC.jpg" alt=""></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># redis6以上,gcc版本不能低于5,升级gcc到9.3及以上,如下：</span><br><span class="line">升级到gcc 9.3：</span><br><span class="line">yum -y install centos-release-scl</span><br><span class="line">yum -y install devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils</span><br><span class="line"></span><br><span class="line">scl enable devtoolset-9 bash</span><br><span class="line">需要注意的是scl命令启用只是临时的，退出shell或重启就会恢复原系统gcc版本。</span><br><span class="line">如果要长期使用gcc 9.3的话：</span><br><span class="line"></span><br><span class="line">echo &quot;source &#x2F;opt&#x2F;rh&#x2F;devtoolset-9&#x2F;enable&quot; &gt;&gt;&#x2F;etc&#x2F;profile</span><br><span class="line">这样退出shell重新打开就是新版的gcc了</span><br><span class="line">以下其他版本同理，修改devtoolset版本号即可。</span><br></pre></td></tr></table></figure>
 
-<h3 id="三、上传安装"><a href="#三、上传安装" class="headerlink" title="三、上传安装"></a>三、上传安装</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#上传安装包、解压、编译</span><br><span class="line">tar zxf redis-6.0.9.tar.gz </span><br><span class="line">cd redis-6.0.9</span><br><span class="line">make</span><br><span class="line"></span><br><span class="line">#安装并指定安装目录</span><br><span class="line">make install PREFIX&#x3D;&#x2F;usr&#x2F;local&#x2F;redis</span><br></pre></td></tr></table></figure>
+<h4 id="三、上传安装"><a href="#三、上传安装" class="headerlink" title="三、上传安装"></a>三、上传安装</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#上传安装包、解压、编译</span><br><span class="line">tar zxf redis-6.0.9.tar.gz </span><br><span class="line">cd redis-6.0.9</span><br><span class="line">make</span><br><span class="line"></span><br><span class="line">#安装并指定安装目录</span><br><span class="line">make install PREFIX&#x3D;&#x2F;usr&#x2F;local&#x2F;redis</span><br></pre></td></tr></table></figure>
 
-<h3 id="四、启动"><a href="#四、启动" class="headerlink" title="四、启动"></a>四、启动</h3><h5 id="方式一"><a href="#方式一" class="headerlink" title="方式一"></a>方式一</h5><h5 id="前台启动"><a href="#前台启动" class="headerlink" title="前台启动"></a>前台启动</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;local&#x2F;redis&#x2F;bin&#x2F;</span><br><span class="line">.&#x2F;redis-server</span><br></pre></td></tr></table></figure>
+<h4 id="四、启动"><a href="#四、启动" class="headerlink" title="四、启动"></a>四、启动</h4><h5 id="方式一"><a href="#方式一" class="headerlink" title="方式一"></a>方式一</h5><h6 id="前台启动"><a href="#前台启动" class="headerlink" title="前台启动"></a>前台启动</h6><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;local&#x2F;redis&#x2F;bin&#x2F;</span><br><span class="line">.&#x2F;redis-server</span><br></pre></td></tr></table></figure>
 
-<h5 id="后台启动"><a href="#后台启动" class="headerlink" title="后台启动"></a>后台启动</h5><h6 id="1-从-redis-的源码目录中复制-redis-conf-到-redis-的安装目录"><a href="#1-从-redis-的源码目录中复制-redis-conf-到-redis-的安装目录" class="headerlink" title="1.从 redis 的源码目录中复制 redis.conf 到 redis 的安装目录"></a>1.从 redis 的源码目录中复制 redis.conf 到 redis 的安装目录</h6><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp &#x2F;usr&#x2F;local&#x2F;redis-6.0.9&#x2F;redis.conf &#x2F;usr&#x2F;local&#x2F;redis&#x2F;bin&#x2F;</span><br></pre></td></tr></table></figure>
+<h6 id="后台启动"><a href="#后台启动" class="headerlink" title="后台启动"></a>后台启动</h6><p>1.从 redis 的源码目录中复制 redis.conf 到 redis 的安装目录</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp &#x2F;usr&#x2F;local&#x2F;redis-6.0.9&#x2F;redis.conf &#x2F;usr&#x2F;local&#x2F;redis&#x2F;bin&#x2F;</span><br></pre></td></tr></table></figure>
 
-<h6 id="2-修改-redis-conf-文件，把-daemonize-no-改为-daemonize-yes"><a href="#2-修改-redis-conf-文件，把-daemonize-no-改为-daemonize-yes" class="headerlink" title="2.修改 redis.conf 文件，把 daemonize no 改为 daemonize yes"></a>2.修改 redis.conf 文件，把 daemonize no 改为 daemonize yes</h6><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%BF%AE%E6%94%B9conf%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-%E5%AE%88%E6%8A%A4%E6%A8%A1%E5%BC%8F.jpg" alt=""></p>
-<h6 id="3-注释掉-bind-127-0-0-1，并修改-protected-mode-yes-改为-protected-mode-no"><a href="#3-注释掉-bind-127-0-0-1，并修改-protected-mode-yes-改为-protected-mode-no" class="headerlink" title="3.注释掉 # bind 127.0.0.1，并修改 protected-mode yes 改为 protected-mode no"></a>3.注释掉 # bind 127.0.0.1，并修改 protected-mode yes 改为 protected-mode no</h6><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%BF%AE%E6%94%B9conf%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6.jpg" alt=""></p>
-<h6 id="4-设置密码"><a href="#4-设置密码" class="headerlink" title="4.设置密码"></a>4.设置密码</h6><p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%BF%AE%E6%94%B9conf%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-%E8%AE%BE%E7%BD%AE%E5%AF%86%E7%A0%81.jpg" alt=""></p>
-<h6 id="5-启动命令"><a href="#5-启动命令" class="headerlink" title="5.启动命令"></a>5.启动命令</h6><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 启动</span><br><span class="line">.&#x2F;redis-server redis.conf</span><br><span class="line"># 停止</span><br><span class="line">.&#x2F;redis-cli shutdown</span><br></pre></td></tr></table></figure>
+<p>2.修改 redis.conf 文件，把 daemonize no 改为 daemonize yes</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%BF%AE%E6%94%B9conf%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-%E5%AE%88%E6%8A%A4%E6%A8%A1%E5%BC%8F.jpg" alt=""></p>
+<p>3.注释掉 # bind 127.0.0.1，并修改 protected-mode yes 改为 protected-mode no</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%BF%AE%E6%94%B9conf%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6.jpg" alt=""></p>
+<p>4.设置密码</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%BF%AE%E6%94%B9conf%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-%E8%AE%BE%E7%BD%AE%E5%AF%86%E7%A0%81.jpg" alt=""></p>
+<p>5.启动命令</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 启动</span><br><span class="line">.&#x2F;redis-server redis.conf</span><br><span class="line"># 停止</span><br><span class="line">.&#x2F;redis-cli shutdown</span><br></pre></td></tr></table></figure>
 
-<h5 id="方式二"><a href="#方式二" class="headerlink" title="方式二"></a>方式二</h5><h6 id="1-修改redis环境变量方便之后使用redis命令"><a href="#1-修改redis环境变量方便之后使用redis命令" class="headerlink" title="1.修改redis环境变量方便之后使用redis命令"></a>1.修改redis环境变量方便之后使用redis命令</h6><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;profile</span><br><span class="line">source &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
+<h5 id="方式二"><a href="#方式二" class="headerlink" title="方式二"></a>方式二</h5><p>1.修改redis环境变量方便之后使用redis命令</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;profile</span><br><span class="line">source &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
 
 <img src="http://yrlzero.gitee.io/images/linux/redis/redis_etc_profile.jpg" style="zoom: 80%;" />
 
-<h6 id="2-执行安装服务脚本"><a href="#2-执行安装服务脚本" class="headerlink" title="2.执行安装服务脚本"></a>2.执行安装服务脚本</h6><p>回到压缩包解压目录的 utils文件夹中，执行install_server.sh脚本</p>
+<p>2.执行安装服务脚本</p>
+<p>回到压缩包解压目录的 utils文件夹中，执行install_server.sh脚本</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;local&#x2F;redis-6.0.9&#x2F;utils</span><br><span class="line">.&#x2F;install_server.sh</span><br></pre></td></tr></table></figure>
 
 <p>2.1执行失败</p>
@@ -1644,11 +1651,12 @@
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%BF%AE%E6%94%B9install_server%E6%96%87%E4%BB%B6.jpg" alt=""></p>
 <p>2.2执行成功</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/%E5%AE%89%E8%A3%85redis%E6%9C%8D%E5%8A%A1.jpg" alt=""></p>
-<h6 id="3-启动成功"><a href="#3-启动成功" class="headerlink" title="3.启动成功"></a>3.启动成功</h6><p>之后可以通过service redis_6379 start/stop/status等命令进行操作</p>
+<p>3.启动成功</p>
+<p>之后可以通过service redis_6379 start/stop/status等命令进行操作</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/%E5%90%AF%E5%8A%A8%E6%88%90%E5%8A%9F.jpg" alt=""></p>
-<h3 id="五、开放防火墙"><a href="#五、开放防火墙" class="headerlink" title="五、开放防火墙"></a>五、开放防火墙</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 防火墙中打开6379端口</span><br><span class="line">firewall-cmd --zone&#x3D;public --add-port&#x3D;6379&#x2F;tcp --permanent</span><br><span class="line"></span><br><span class="line">–zone：作用域</span><br><span class="line">–add-port&#x3D;6379&#x2F;tcp：添加端口，格式为：端口&#x2F;通讯协议</span><br><span class="line">–permanent：永久生效，没有此参数重启后失效</span><br><span class="line"></span><br><span class="line"># 重启防火墙</span><br><span class="line">firewall-cmd --reload</span><br><span class="line"># 查看已经开放的端口</span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line"></span><br><span class="line"># 停止防火墙</span><br><span class="line">systemctl stop firewalld.service</span><br><span class="line"># 启动防火墙</span><br><span class="line">systemctl start firewalld.service</span><br><span class="line"># 禁止防火墙开机启动</span><br><span class="line">systemctl disable firewalld.service</span><br></pre></td></tr></table></figure>
+<h4 id="五、开放防火墙"><a href="#五、开放防火墙" class="headerlink" title="五、开放防火墙"></a>五、开放防火墙</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 防火墙中打开6379端口</span><br><span class="line">firewall-cmd --zone&#x3D;public --add-port&#x3D;6379&#x2F;tcp --permanent</span><br><span class="line"></span><br><span class="line">–zone：作用域</span><br><span class="line">–add-port&#x3D;6379&#x2F;tcp：添加端口，格式为：端口&#x2F;通讯协议</span><br><span class="line">–permanent：永久生效，没有此参数重启后失效</span><br><span class="line"></span><br><span class="line"># 重启防火墙</span><br><span class="line">firewall-cmd --reload</span><br><span class="line"># 查看已经开放的端口</span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line"></span><br><span class="line"># 停止防火墙</span><br><span class="line">systemctl stop firewalld.service</span><br><span class="line"># 启动防火墙</span><br><span class="line">systemctl start firewalld.service</span><br><span class="line"># 禁止防火墙开机启动</span><br><span class="line">systemctl disable firewalld.service</span><br></pre></td></tr></table></figure>
 
-<h3 id="六、远端登录"><a href="#六、远端登录" class="headerlink" title="六、远端登录"></a>六、远端登录</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">redis-cli -h 192.168.243.131 -p 6379 -a passsword</span><br></pre></td></tr></table></figure>
+<h4 id="六、远端登录"><a href="#六、远端登录" class="headerlink" title="六、远端登录"></a>六、远端登录</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">redis-cli -h 192.168.243.131 -p 6379 -a passsword</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
