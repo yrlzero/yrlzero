@@ -2784,6 +2784,7 @@
 <td>通过redo log来保证</td>
 </tr>
 </tbody></table>
+<hr>
 <h2 id="二、log"><a href="#二、log" class="headerlink" title="二、log"></a>二、log</h2><h3 id="1、bin-log（二进制日志、归档日志）"><a href="#1、bin-log（二进制日志、归档日志）" class="headerlink" title="1、bin log（二进制日志、归档日志）"></a>1、bin log（二进制日志、归档日志）</h3><p>server层面的日志，属于逻辑日志，以二进制形式记录相关语句的原始逻辑，没有crash-safe能力</p>
 <h3 id="2、redo-log（重做日志）"><a href="#2、redo-log（重做日志）" class="headerlink" title="2、redo log（重做日志）"></a>2、redo log（重做日志）</h3><ul>
 <li>是innodb存储引擎的日志，当发生数据修改时，先写到redolog中并更新内存；</li>
@@ -2820,6 +2821,7 @@
 
 <h3 id="5、undo-log（回滚日志）"><a href="#5、undo-log（回滚日志）" class="headerlink" title="5、undo log（回滚日志）"></a>5、undo log（回滚日志）</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">备份数据，实现事务的回滚操作保证原子性，当出现错误或者执行rollback语句，系统利用undo log中的备份数据恢复到事务开始之前的状态</span><br><span class="line">提供innodb中实现MVCC功能</span><br><span class="line">undo log采用回滚段方式记录，5.5之后每个回滚段中有1024个undo log segment</span><br><span class="line">当删除时不会从undo log直接删除，只会记录delete_flag，之后再由purge线程判断是否删除</span><br></pre></td></tr></table></figure>
 
+<hr>
 <h2 id="三、MVCC"><a href="#三、MVCC" class="headerlink" title="三、MVCC"></a>三、MVCC</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MVCC，全称Multi-Version Concurrency Control，即多版本并发控制。</span><br><span class="line">MVCC是一种并发控制的方法，一般在数据库管理系统中，实现对数据库的并发访问，在编程语言中实现事务内存。</span><br><span class="line"></span><br><span class="line">MVCC在MySQL InnoDB中的实现主要是为了提高数据库并发性能，用更好的方式去处理读写冲突，做到即使有读写冲突时，也能做到不加锁，非阻塞并发读。</span><br></pre></td></tr></table></figure>
 
 <h3 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">像select lock in share mode(共享锁), select for update ; update, insert ,delete(排他锁)这些操作都是一种当前读;</span><br><span class="line"></span><br><span class="line">为什么叫当前读？</span><br><span class="line">就是它读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁。</span><br></pre></td></tr></table></figure>
