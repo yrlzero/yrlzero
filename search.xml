@@ -2747,7 +2747,7 @@
 <td></td>
 </tr>
 </tbody></table>
-<h3 id="2-4、不同级别出现的问题"><a href="#2-4、不同级别出现的问题" class="headerlink" title="2.4、不同级别出现的问题"></a>2.4、不同级别出现的问题</h3><h4 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h4><p>一个事务读到了另一个事务未提交的事务</p>
+<h4 id="2-4、不同级别出现的问题"><a href="#2-4、不同级别出现的问题" class="headerlink" title="2.4、不同级别出现的问题"></a>2.4、不同级别出现的问题</h4><h4 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h4><p>一个事务读到了另一个事务未提交的事务</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E8%84%8F%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
 <h4 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h4><p>一个事务多次读取数据结果不一致</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%8D%E5%8F%AF%E9%87%8D%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
@@ -2755,7 +2755,7 @@
 <p>如何实现？</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">读未提交，每次都读取最新的数据</span><br><span class="line">读已提交，每次读取之前创建read view，通过mvcc控制</span><br><span class="line">可重复读，第一次读取才创建read view，通过mvcc控制</span><br><span class="line">序列化，加锁</span><br></pre></td></tr></table></figure>
 
-<h3 id="2-5、事务四大特点"><a href="#2-5、事务四大特点" class="headerlink" title="2.5、事务四大特点"></a>2.5、事务四大特点</h3><table>
+<h3 id="3、事务四大特点"><a href="#3、事务四大特点" class="headerlink" title="3、事务四大特点"></a>3、事务四大特点</h3><table>
 <thead>
 <tr>
 <th>事务特性</th>
