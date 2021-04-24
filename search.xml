@@ -2691,7 +2691,7 @@
 <h4 id="1-2、自动提交"><a href="#1-2、自动提交" class="headerlink" title="1.2、自动提交"></a>1.2、自动提交</h4><p><code>set autocommit=1</code>开启自动提交</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MySQL的每⼀条DML(增删改)语句都是⼀个单独的事务，每条语句都会⾃动开启⼀个事务，执⾏完毕⾃</span><br><span class="line">动提交事务，MySQL默认开始⾃动提交事务</span><br></pre></td></tr></table></figure>
 
-<h4 id="1-3、回滚点"><a href="#1-3、回滚点" class="headerlink" title="1.3、回滚点"></a>1.3、回滚点</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">在某些成功的操作完成之后，后续的操作有可能成功有可能失败，但是不管成功还是失败，前⾯操作都已</span><br><span class="line">经成功，可以在当前成功的位置设置⼀个回滚点。可以供后续失败操作返回到该位置，⽽不是返回所有操</span><br><span class="line">作，这个点称之为回滚点。</span><br></pre></td></tr></table></figure>
+<h4 id="1-3、回滚点"><a href="#1-3、回滚点" class="headerlink" title="1.3、回滚点"></a>1.3、回滚点</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">在某些成功的操作完成之后，后续的操作有可能成功有可能失败，但是不管成功还是失败，前⾯操作都已经成功，可以在当前成功的位置设置⼀个回滚点。可以供后续失败操作返回到该位置，⽽不是返回所有操作，这个点称之为回滚点。</span><br></pre></td></tr></table></figure>
 
 <p>设置回滚点语法： <code>savepoint 回滚点名字</code></p>
 <p>回到回滚点语法：<code>rollback to 回滚点名字</code></p>
