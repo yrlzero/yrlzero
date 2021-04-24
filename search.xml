@@ -2752,11 +2752,9 @@
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E8%84%8F%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
 <h5 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h5><p>一个事务多次读取数据结果不一致</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%8D%E5%8F%AF%E9%87%8D%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
-<h5 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h5><p>在一个事务中多次查询数据数量不一致，一般是insert或delete引起的</p>
-<p>示例1</p>
-<p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E5%B9%BB%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
-<p>示例2</p>
-<p><img src="http://yrlzero.gitee.io/images/linux/mysql/mysql%E4%BA%8B%E5%8A%A1%E3%80%81%E6%97%A5%E5%BF%97%5C%E5%B9%BB%E8%AF%BB.jpg" alt=""></p>
+<h5 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h5><p>一个事务(同一个read view)在前后两次查询同一范围的时候，后一次查询看到了前一次查询没有看到的行。</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E5%B9%BB%E8%AF%BB.jpg" alt=""></p>
+<p>图中第四步的update是当前读，更新了数据的同时也更新了隐藏字段的<code>DB_TRX_ID</code>，之后在进行select快照读时，此数据对于当前事务课件，所以会将该数据读出</p>
 <p>如何实现？</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">读未提交，每次都读取最新的数据</span><br><span class="line">读已提交，每次读取之前创建read view，通过mvcc控制</span><br><span class="line">可重复读，第一次读取才创建read view，通过mvcc控制</span><br><span class="line">序列化，加锁</span><br></pre></td></tr></table></figure>
 
