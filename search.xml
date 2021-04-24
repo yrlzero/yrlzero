@@ -2729,7 +2729,7 @@
 <td>Oracle、Sql Server</td>
 </tr>
 <tr>
-<td>可重复度</td>
+<td>可重复读</td>
 <td>REPEATABLE READ</td>
 <td align="center">×</td>
 <td align="center">×</td>
@@ -2750,7 +2750,7 @@
 <h3 id="2-4、不同级别出现的问题"><a href="#2-4、不同级别出现的问题" class="headerlink" title="2.4、不同级别出现的问题"></a>2.4、不同级别出现的问题</h3><h4 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h4><p>一个事务读到了另一个事务未提交的事务</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E8%84%8F%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
 <h4 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h4><p>一个事务多次读取数据结果不一致</p>
-<p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%8D%E5%8F%AF%E9%87%8D%E8%AF%BB%E6%BC%94%E7%A4%BA-1619018090875.jpg" alt=""></p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%8D%E5%8F%AF%E9%87%8D%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
 <h4 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h4><p>在一个事务中多次查询数据数量不一致，一般是insert或delete引起的<img src="http://yrlzero.gitee.io/images/linux/mysql/%E5%B9%BB%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt="不可重读演示"></p>
 <p>如何实现？</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">读未提交，每次都读取最新的数据</span><br><span class="line">读已提交，每次读取之前创建read view，通过mvcc控制</span><br><span class="line">可重复读，第一次读取才创建read view，通过mvcc控制</span><br><span class="line">序列化，加锁</span><br></pre></td></tr></table></figure>
