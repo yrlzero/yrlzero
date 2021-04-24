@@ -459,6 +459,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>jdk</category>
       </categories>
       <tags>
         <tag>jdk</tag>
@@ -523,6 +524,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>maven</category>
       </categories>
   </entry>
   <entry>
@@ -1387,6 +1389,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>nginx</category>
       </categories>
   </entry>
   <entry>
@@ -1440,6 +1443,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>redis</category>
       </categories>
       <tags>
         <tag>db</tag>
@@ -1532,6 +1536,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>redis</category>
       </categories>
       <tags>
         <tag>db</tag>
@@ -1565,6 +1570,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>redis</category>
       </categories>
       <tags>
         <tag>db</tag>
@@ -1602,6 +1608,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>redis</category>
       </categories>
       <tags>
         <tag>db</tag>
@@ -1661,6 +1668,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>redis</category>
       </categories>
       <tags>
         <tag>db</tag>
@@ -1693,6 +1701,7 @@
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1.自定义登录过滤器</span><br><span class="line">​	不同的登录形式我们可以继承AbstractAuthenticationProcessingFilter定义自己的登录过滤器（默认UsernamePasswordAuthenticationFilter）</span><br><span class="line">​	根据指定的url匹配到该过滤器，目的是生成自定义继承AbstractAuthenticationToken的子类token(默认UsernamePasswordAuthenticationToken)</span><br><span class="line"></span><br><span class="line">2.认证管理器</span><br><span class="line">​	调用环境指定的认证管理器对未认真的Authentication进行认证处理（默认ProviderManager）</span><br><span class="line"></span><br><span class="line">3.覆写provider、abstractAuthenticationToken、userDetailServicec</span><br><span class="line">​	实现AuthenticationProvider自定义自己的provider（默认DaoAuthenticationProvider），认证管理器根据我们重写的public boolean supports(Class&lt;?&gt; authentication)方法对当前环境的authentication进行判断，选取合适我的provider进行认证处理</span><br><span class="line">​	provider会调用自定义的userDerailService查询用户信息进行校验</span><br><span class="line"></span><br><span class="line">4.覆写成功、失败的handler</span><br><span class="line">​	认证期间，失败，会抛出对应的异常；成功，则生成已认证的Authentication返回</span><br><span class="line">​	覆写AuthenticationFailureHandler、AuthenticationSuccessHandler可以在认证成功或失败时进行自定义处理</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>安全框架</category>
+        <category>security</category>
       </categories>
       <tags>
         <tag>security - login</tag>
@@ -1836,6 +1845,7 @@
 ]]></content>
       <categories>
         <category>安全框架</category>
+        <category>ouath2</category>
       </categories>
       <tags>
         <tag>security</tag>
@@ -1891,6 +1901,7 @@
 ]]></content>
       <categories>
         <category>安全框架</category>
+        <category>security</category>
       </categories>
       <tags>
         <tag>spring boot</tag>
@@ -1916,6 +1927,7 @@
 ]]></content>
       <categories>
         <category>安全框架</category>
+        <category>security</category>
       </categories>
       <tags>
         <tag>spring boot</tag>
@@ -2484,6 +2496,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>redis</category>
       </categories>
       <tags>
         <tag>db</tag>
@@ -2552,6 +2565,7 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1、消息队列</span><br><span class="line">2、canal</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>linux</category>
+        <category>redis</category>
       </categories>
       <tags>
         <tag>db</tag>
@@ -2672,6 +2686,7 @@
 <h2 id="七、页合并"><a href="#七、页合并" class="headerlink" title="七、页合并"></a>七、页合并</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">当你删了一行记录时，实际上记录并没有被物理删除，记录被标记（flaged）为删除并且它的空间变得允许被其他记录声明使用。</span><br><span class="line"></span><br><span class="line">当页中删除的记录达到MERGE_THRESHOLD（默认页体积的50%），InnoDB会开始寻找最靠近的页（前或后）看看是否可以将两个页合并以优化空间使用。</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>linux</category>
+        <category>mysql</category>
       </categories>
       <tags>
         <tag>mysql</tag>
@@ -2884,6 +2899,7 @@
 ]]></content>
       <categories>
         <category>linux</category>
+        <category>mysql</category>
       </categories>
       <tags>
         <tag>mysql</tag>
