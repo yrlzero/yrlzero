@@ -2684,7 +2684,17 @@
 
 <h2 id="六、页分裂"><a href="#六、页分裂" class="headerlink" title="六、页分裂"></a>六、页分裂</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">页可能填充至100%，在页填满了之后，下一页会继续接管新的记录。但如果下一页也满了，数据又需要按顺序插入，就会产生页分裂。</span><br><span class="line"></span><br><span class="line">InnoDB的做法是（简化版）：</span><br><span class="line">    创建新页</span><br><span class="line">    判断当前页可以从哪里进行分裂（记录行层面）</span><br><span class="line">    移动记录行</span><br><span class="line">    重新定义页之间的关系</span><br><span class="line">    </span><br><span class="line">等于创建了一个新页，并且把当前页的数据迁移部分到新页中，然后插入在当前页和下一页的中间。</span><br></pre></td></tr></table></figure>
 
-<h2 id="七、页合并"><a href="#七、页合并" class="headerlink" title="七、页合并"></a>七、页合并</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">当你删了一行记录时，实际上记录并没有被物理删除，记录被标记（flaged）为删除并且它的空间变得允许被其他记录声明使用。</span><br><span class="line"></span><br><span class="line">当页中删除的记录达到MERGE_THRESHOLD（默认页体积的50%），InnoDB会开始寻找最靠近的页（前或后）看看是否可以将两个页合并以优化空间使用。</span><br></pre></td></tr></table></figure>]]></content>
+<h2 id="七、页合并"><a href="#七、页合并" class="headerlink" title="七、页合并"></a>七、页合并</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">当你删了一行记录时，实际上记录并没有被物理删除，记录被标记（flaged）为删除并且它的空间变得允许被其他记录声明使用。</span><br><span class="line"></span><br><span class="line">当页中删除的记录达到MERGE_THRESHOLD（默认页体积的50%），InnoDB会开始寻找最靠近的页（前或后）看看是否可以将两个页合并以优化空间使用。</span><br></pre></td></tr></table></figure>
+
+<h2 id="八-、Sql-Join"><a href="#八-、Sql-Join" class="headerlink" title="八 、Sql Join"></a>八 、Sql Join</h2><p>​        MySQL是只支持一种Join算法Nested-Loop Join(嵌套循环连接)，并不支持哈希连接和合并连接，不过在mysql中包含了多种变种，能够帮助MySQL提高join执行的效率。</p>
+<h3 id="1、Simple-Nested-Loop-Join"><a href="#1、Simple-Nested-Loop-Join" class="headerlink" title="1、Simple Nested-Loop Join"></a><strong>1、Simple Nested-Loop Join</strong></h3><p>​        这个算法相对来说就是很简单了，从驱动表中取出R1匹配S表所有列，然后R2，R3,直到将R表中的所有数据匹配完，然后合并数据，可以看到这种算法要对S表进行RN次访问，虽然简单，但是相对来说开销还是太大了。</p>
+<h3 id="2、Index-Nested-Loop-Join"><a href="#2、Index-Nested-Loop-Join" class="headerlink" title="2、Index Nested-Loop Join"></a><strong>2、Index Nested-Loop Join</strong></h3><p>​        索引嵌套联系由于非驱动表上有索引，所以比较的时候不再需要一条条记录进行比较，而可以通过索引来减少比较，从而加速查询。这也就是平时我们在做关联查询的时候必须要求关联字段有索引的一个主要原因。</p>
+<p>​        这种算法在链接查询的时候，驱动表会根据关联字段的索引进行查找，当在索引上找到了符合的值，再回表进行查询，也就是只有当匹配到索引以后才会进行回表。至于驱动表的选择，MySQL优化器一般情况下是会选择记录数少的作为驱动表，但是当SQL特别复杂的时候不排除会出现错误选择。</p>
+<p>​        在索引嵌套链接的方式下，如果非驱动表的关联键是主键的话，这样来说性能就会非常的高，如果不是主键的话，关联起来如果返回的行数很多的话，效率就会特别的低，因为要多次的回表操作。先关联索引，然后根据二级索引的主键ID进行回表的操作。这样来说的话性能相对就会很差。</p>
+<h3 id="3、Block-Nested-Loop-Join"><a href="#3、Block-Nested-Loop-Join" class="headerlink" title="3、Block Nested-Loop Join"></a><strong>3、Block Nested-Loop Join</strong></h3><p>​        在有索引的情况下，MySQL会尝试去使用Index Nested-Loop Join算法，在有些情况下，可能Join的列就是没有索引，那么这时MySQL的选择绝对不会是最先介绍的Simple Nested-Loop Join算法，而是会优先使用Block Nested-Loop Join的算法。</p>
+<p>​        Block Nested-Loop Join对比Simple Nested-Loop Join多了一个中间处理的过程，也就是join buffer，使用join buffer将驱动表的查询JOIN相关列都给缓冲到了JOIN BUFFER当中，然后批量与非驱动表进行比较，这也来实现的话，可以将多次比较合并到一次，降低了非驱动表的访问频率。也就是只需要访问一次S表。这样来说的话，就不会出现多次访问非驱动表的情况了，也只有这种情况下才会访问join buffer。</p>
+<p>​        在MySQL当中，我们可以通过参数join_buffer_size来设置join buffer的值，然后再进行操作。默认情况下join_buffer_size=256K，在查找的时候MySQL会将所有的需要的列缓存到join buffer当中，包括select的列，而不是仅仅只缓存关联列。在一个有N个JOIN关联的SQL当中会在执行时候分配N-1个join buffer。</p>
+]]></content>
       <categories>
         <category>linux</category>
         <category>mysql</category>
@@ -2763,17 +2773,47 @@
 <td></td>
 </tr>
 </tbody></table>
-<p>总的来说，数据库的隔离级别依靠<code>MVCC</code>和<code>锁</code>实现；而<code>MVCC</code>依靠<code>隐藏字段</code>、<code>read view</code>、<code>undo log</code>实现。</p>
 <h4 id="2-4、不同级别出现的问题"><a href="#2-4、不同级别出现的问题" class="headerlink" title="2.4、不同级别出现的问题"></a>2.4、不同级别出现的问题</h4><h5 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h5><p>一个事务读到了另一个事务未提交的事务</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E8%84%8F%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
 <h5 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h5><p>一个事务多次读取数据结果不一致</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%8D%E5%8F%AF%E9%87%8D%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
 <h5 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h5><p>一个事务(同一个read view)在前后两次查询同一范围的时候，后一次查询看到了前一次查询没有看到的行。</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E5%B9%BB%E8%AF%BB.jpg" alt=""></p>
-<p>图中第四步的update是当前读，更新了数据的同时也更新了隐藏字段的<code>DB_TRX_ID</code>，之后在进行select快照读时，此数据对于当前事务课件，所以会将该数据读出</p>
-<p>如何实现？</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">读未提交，每次都读取最新的数据</span><br><span class="line">读已提交，每次读取之前创建read view，通过mvcc控制</span><br><span class="line">可重复读，第一次读取才创建read view，通过mvcc控制</span><br><span class="line">序列化，加锁</span><br></pre></td></tr></table></figure>
+<p>图中第四步的update是当前读，更新了数据的同时也更新了隐藏字段的<code>DB_TRX_ID</code>，之后在进行select快照读时，此数据对于当前事务课件，所以会将该数据读出。</p>
+<p><strong>如果事务中都是用快照读，那么不会产生幻读的问题，但是快照读和当前读一起使用的时候就会产生幻读</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>事务1</th>
+<th>事务2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td>begin;</td>
+<td></td>
+</tr>
+<tr>
+<td>T1</td>
+<td>select * from user where age =20 for update;</td>
+<td></td>
+</tr>
+<tr>
+<td>T2</td>
+<td></td>
+<td>insert into user values(25,’25’,20);此时会阻塞等待锁</td>
+</tr>
+<tr>
+<td>T3</td>
+<td>select * from user where age =20 for update;</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>此时，可以看到事务2被阻塞了，需要等待事务1提交事务之后才能完成，其实本质上来说采用的是间隙锁的机制解决幻读问题。</p>
+<h4 id="2-5、如何实现？"><a href="#2-5、如何实现？" class="headerlink" title="2.5、如何实现？"></a>2.5、如何实现？</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">读未提交，每次都读取最新的数据</span><br><span class="line">读已提交，每次读取之前创建read view，通过mvcc控制</span><br><span class="line">可重复读，第一次读取才创建read view，通过mvcc控制</span><br><span class="line">序列化，加锁</span><br></pre></td></tr></table></figure>
 
+<p>​    <strong>总的来说，数据库的隔离级别依靠<code>MVCC</code>和<code>锁</code>实现；而<code>MVCC</code>依靠<code>隐藏字段</code>、<code>read view</code>、<code>undo log</code>实现。</strong></p>
 <h3 id="3、事务四大特点"><a href="#3、事务四大特点" class="headerlink" title="3、事务四大特点"></a>3、事务四大特点</h3><table>
 <thead>
 <tr>
@@ -2843,7 +2883,7 @@
 <hr>
 <h2 id="三、MVCC"><a href="#三、MVCC" class="headerlink" title="三、MVCC"></a>三、MVCC</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MVCC，全称Multi-Version Concurrency Control，即多版本并发控制。</span><br><span class="line">MVCC是一种并发控制的方法，一般在数据库管理系统中，实现对数据库的并发访问，在编程语言中实现事务内存。</span><br><span class="line"></span><br><span class="line">MVCC在MySQL InnoDB中的实现主要是为了提高数据库并发性能，用更好的方式去处理读写冲突，做到即使有读写冲突时，也能做到不加锁，非阻塞并发读。</span><br></pre></td></tr></table></figure>
 
-<h3 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">像select lock in share mode(共享锁), select for update ; update, insert ,delete(排他锁)这些操作都是一种当前读;</span><br><span class="line"></span><br><span class="line">为什么叫当前读？</span><br><span class="line">就是它读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁。</span><br></pre></td></tr></table></figure>
+<h3 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">像select lock in share mode(共享锁), select...for update; update, insert ,delete(排他锁)这些操作都是一种当前读;</span><br><span class="line"></span><br><span class="line">为什么叫当前读？</span><br><span class="line">就是它读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁。</span><br></pre></td></tr></table></figure>
 
 <h3 id="快照读"><a href="#快照读" class="headerlink" title="快照读"></a>快照读</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">像不加锁的select操作就是快照读，即不加锁的非阻塞读；</span><br><span class="line">快照读的前提是隔离级别不是串行级别，串行级别下的快照读会退化成当前读；</span><br><span class="line">之所以出现快照读的情况，是基于提高并发性能的考虑;</span><br><span class="line">快照读的实现是基于多版本并发控制，即MVCC,可以认为MVCC是行锁的一个变种，但它在很多情况下，避免了加锁操作，降低了开销；</span><br><span class="line">既然是基于多版本，即快照读可能读到的并不一定是数据的最新版本，而有可能是之前的历史版本</span><br></pre></td></tr></table></figure>
 
