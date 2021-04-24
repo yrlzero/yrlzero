@@ -2636,7 +2636,7 @@
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-b%E6%A0%91.jpg" alt="B树"></p>
 <h3 id="5、B-树"><a href="#5、B-树" class="headerlink" title="5、B+树"></a>5、B+树</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">非叶子结点不存储data，数据只在叶子结点存储，这样mysql每次io读取的记录数能够得到较大提升</span><br></pre></td></tr></table></figure>
 
-<img src="http://yrlzero.gitee.io/images/linux/mysql/数据结构-b+树-1619013586051.jpg" alt="B+树" style="zoom:150%;" />
+<img src="http://yrlzero.gitee.io/images/linux/mysql/数据结构-b+树.jpg" alt="B+树" style="zoom:150%;" />
 
 <h2 id="三、执行引擎"><a href="#三、执行引擎" class="headerlink" title="三、执行引擎"></a>三、执行引擎</h2><p>MyiSAM与Innodb对比如下</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/myisam%E4%B8%8Einnodb.png" alt="对比图"></p>
