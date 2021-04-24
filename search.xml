@@ -2853,10 +2853,10 @@
 <p>​        <code>up_limit_id</code>：记录trx_list列表中事务ID最小的ID，以下用min_trx_id 来表示方便理解</p>
 <p>​        <code>low_limit_id</code>：Read View生成时刻系统尚未分配的下一个事务ID，以下用max_trx_id来表示方便理解</p>
 <p>​        <code>create_trx_id</code>：当前事务id</p>
-<h4 id="数据可见性判断"><a href="#数据可见性判断" class="headerlink" title="数据可见性判断"></a>数据可见性判断</h4><p>​    当出现数据不可见时，根据undo log中的数据版本链往上追溯进行判断</p>
-<p>​    情况一：</p>
+<h4 id="数据可见性判断"><a href="#数据可见性判断" class="headerlink" title="数据可见性判断"></a>数据可见性判断</h4><p>​    情况一：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#96;DB_TRX_ID &#96;与&#96;create_trx_id&#96;相等，表明该数据是当前事务修改的记录</span><br></pre></td></tr></table></figure>
 
+<p>​    当出现数据事务id不等于当前事务id时，根据undo log中的数据版本链往上追溯进行判断</p>
 <p>​    情况二：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">首先比较&#96;DB_TRX_ID&#96; &lt;&#96; min_trx_id &#96;，当前&#96;DB_TRX_ID (&#96;记录的事务id)小于&#96;min_trx_id &#96;(最小活跃事务id)，这表明这条记录在其他活跃事务事前已经提交，所以数据对于当前事务可见</span><br></pre></td></tr></table></figure>
 
