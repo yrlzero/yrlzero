@@ -2747,7 +2747,7 @@
 <td></td>
 </tr>
 </tbody></table>
-<p>总的来说，数据库的隔离级别依靠<code>MVCC</code>和<code>锁</code>实现；而<code>MVCC</code>依靠<code>隐藏字段</code>、<code>read view</code>、<code>undo log</code>实现.</p>
+<p>总的来说，数据库的隔离级别依靠<code>MVCC</code>和<code>锁</code>实现；而<code>MVCC</code>依靠<code>隐藏字段</code>、<code>read view</code>、<code>undo log</code>实现。</p>
 <h4 id="2-4、不同级别出现的问题"><a href="#2-4、不同级别出现的问题" class="headerlink" title="2.4、不同级别出现的问题"></a>2.4、不同级别出现的问题</h4><h5 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h5><p>一个事务读到了另一个事务未提交的事务</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E8%84%8F%E8%AF%BB%E6%BC%94%E7%A4%BA.jpg" alt=""></p>
 <h5 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h5><p>一个事务多次读取数据结果不一致</p>
