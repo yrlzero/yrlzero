@@ -2820,9 +2820,9 @@
 
 <h3 id="5、undo-log（回滚日志）"><a href="#5、undo-log（回滚日志）" class="headerlink" title="5、undo log（回滚日志）"></a>5、undo log（回滚日志）</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">备份数据，实现事务的回滚操作保证原子性，当出现错误或者执行rollback语句，系统利用undo log中的备份数据恢复到事务开始之前的状态</span><br><span class="line">提供innodb中实现MVCC功能</span><br><span class="line">undo log采用回滚段方式记录，5.5之后每个回滚段中有1024个undo log segment</span><br><span class="line">当删除时不会从undo log直接删除，只会记录delete_flag，之后再由purge线程判断是否删除</span><br></pre></td></tr></table></figure>
 
-<h2 id="三、MVCC"><a href="#三、MVCC" class="headerlink" title="三、MVCC"></a>三、MVCC</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MVCC，全称Multi-Version Concurrency Control，即多版本并发控制。MVCC是一种并发控制的方法，一般在数据库管理系统中，实现对数据库的并发访问，在编程语言中实现事务内存。</span><br><span class="line"></span><br><span class="line">MVCC在MySQL InnoDB中的实现主要是为了提高数据库并发性能，用更好的方式去处理读写冲突，做到即使有读写冲突时，也能做到不加锁，非阻塞并发读。</span><br></pre></td></tr></table></figure>
+<h2 id="三、MVCC"><a href="#三、MVCC" class="headerlink" title="三、MVCC"></a>三、MVCC</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MVCC，全称Multi-Version Concurrency Control，即多版本并发控制。</span><br><span class="line">MVCC是一种并发控制的方法，一般在数据库管理系统中，实现对数据库的并发访问，在编程语言中实现事务内存。</span><br><span class="line"></span><br><span class="line">MVCC在MySQL InnoDB中的实现主要是为了提高数据库并发性能，用更好的方式去处理读写冲突，做到即使有读写冲突时，也能做到不加锁，非阻塞并发读。</span><br></pre></td></tr></table></figure>
 
-<h3 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">像select lock in share mode(共享锁), select for update ; update, insert ,delete(排他锁)这些操作都是一种当前读;</span><br><span class="line">为什么叫当前读？就是它读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁。</span><br></pre></td></tr></table></figure>
+<h3 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">像select lock in share mode(共享锁), select for update ; update, insert ,delete(排他锁)这些操作都是一种当前读;</span><br><span class="line"></span><br><span class="line">为什么叫当前读？</span><br><span class="line">就是它读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁。</span><br></pre></td></tr></table></figure>
 
 <h3 id="快照读"><a href="#快照读" class="headerlink" title="快照读"></a>快照读</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">像不加锁的select操作就是快照读，即不加锁的非阻塞读；</span><br><span class="line">快照读的前提是隔离级别不是串行级别，串行级别下的快照读会退化成当前读；</span><br><span class="line">之所以出现快照读的情况，是基于提高并发性能的考虑;</span><br><span class="line">快照读的实现是基于多版本并发控制，即MVCC,可以认为MVCC是行锁的一个变种，但它在很多情况下，避免了加锁操作，降低了开销；</span><br><span class="line">既然是基于多版本，即快照读可能读到的并不一定是数据的最新版本，而有可能是之前的历史版本</span><br></pre></td></tr></table></figure>
 
@@ -2835,14 +2835,19 @@
 </li>
 <li><p>其实Read View的最大作用是用来做可见性判断的，也就是说当某个事务在执行快照读的时候，对该记录创建一个Read View的视图，把它当作条件去判断当前事务能够看到哪个版本的数据，有可能读取到的是最新的数据，也有可能读取的是当前行记录的undolog中某个版本的数据</p>
 </li>
-<li><p>Read View遵循的可见性算法主要是将要被修改的数据的最新记录中的DB_TRX_ID（当前事务id）取出来，与系统当前其他活跃事务的id去对比，如果DB_TRX_ID跟Read View的属性做了比较，不符合可见性，那么就通过DB_ROLL_PTR回滚指针去取出undolog中的DB_TRX_ID做比较，即遍历链表中的DB_TRX_ID，直到找到满足条件的DB_TRX_ID,这个DB_TRX_ID所在的旧记录就是当前事务能看到的最新老版本数据。</p>
+<li><p>Read View遵循的可见性算法主要是将要被修改的数据的最新记录中的DB_TRX_ID（当前事务id）取出来，与系统当前其他活跃事务的id去对比，如果DB_TRX_ID跟Read View的属性做了比较，不符合可见性，那么就通过DB_ROLL_PTR回滚指针去取出undolog中的DB_TRX_ID做比较，即遍历链表中的DB_TRX_ID，直到找到满足条件的DB_TRX_ID，这个DB_TRX_ID所在的旧记录就是当前事务能看到的最新老版本数据。</p>
 </li>
 </ul>
 <h4 id="read-view生成时机"><a href="#read-view生成时机" class="headerlink" title="read view生成时机"></a>read view生成时机</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">RC-读已提交：每次读取数据前，都生成read view</span><br><span class="line">RR-可重复读：在第一次读取数据前，生成read view</span><br></pre></td></tr></table></figure>
 
-<p>​        1、在RR（可重复读）级别下的某个事务的对某条记录的第一次快照读会创建一个快照即Read View，将当前系统活跃的其他事务记录起来，此后在调用快照读的时候，还是使用的是同一个Read View；只要当前事务在其他事务提交更新之前使用过快照读，那么之后的快照读使用的都是同一个Read View，所以对之后的修改不可见</p>
-<p>​        2、在RR（可重复读）级别下，快照读生成Read View时，Read View会记录此时所有其他活动和事务的快照，这些事务的修改对于当前事务都是不可见的，而早于Read View创建的事务所做的修改均是可见</p>
-<p>​        3、在RC（可重复读）级别下，事务中，每次快照读都会新生成一个快照和Read View,这就是我们在RC级别下的事务中可以看到别的事务提交的更新的原因。</p>
+<ul>
+<li><p>在RR（可重复读）级别下的某个事务的对某条记录的第一次快照读会创建一个快照即Read View，将当前系统活跃的其他事务记录起来，此后在调用快照读的时候，还是使用的是同一个Read View；只要当前事务在其他事务提交更新之前使用过快照读，那么之后的快照读使用的都是同一个Read View，所以对之后的修改不可见</p>
+</li>
+<li><p>在RR（可重复读）级别下，快照读生成Read View时，Read View会记录此时所有其他活动和事务的快照，这些事务的修改对于当前事务都是不可见的，而早于Read View创建的事务所做的修改均是可见</p>
+</li>
+<li><p>在RC（可重复读）级别下，事务中，每次快照读都会新生成一个快照和Read View,这就是我们在RC级别下的事务中可以看到别的事务提交的更新的原因。</p>
+</li>
+</ul>
 <p>​        <strong>总结：在RC（可重复读）隔离级别下，是每个快照读都会生成并获取最新的Read View；而在RR（可重复读）隔离级别下，则是同一个事务中的第一个快照读才会创建Read View，之后的快照读获取的都是同一个Read View.</strong></p>
 <h4 id="Read-View的全局属性"><a href="#Read-View的全局属性" class="headerlink" title="Read View的全局属性"></a>Read View的全局属性</h4><p>​        <code>trx_list</code>：一个数值列表，用来维护Read View生成时刻系统正活跃的事务ID</p>
 <p>​        <code>up_limit_id</code>：记录trx_list列表中事务ID最小的ID，以下用min_trx_id 来表示方便理解</p>
