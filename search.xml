@@ -2784,14 +2784,10 @@
 <li><p>自增锁：对自增字段所采用的特殊表级锁</p>
 </li>
 </ul>
-<h4 id="锁模式的含义"><a href="#锁模式的含义" class="headerlink" title="锁模式的含义"></a>锁模式的含义</h4><p>​            IX：意向排它锁</p>
-<p>​            X：锁定记录本身和记录之前的间隙</p>
-<p>​            S：锁定记录本身和记录之前的间隙</p>
-<p>​            X,REC_NOT_GAP：只锁定记录本身</p>
-<p>​            S，REC_NOT_GAP：只锁定记录本身</p>
-<p>​            X，GAP：间隙锁，不锁定记录本身</p>
-<p>​            S，GAP：间隙锁，不锁定记录本身</p>
-<p>​            X，GAP,INSERT_INTENTION：插入意向锁</p>
+<h4 id="锁模式的含义"><a href="#锁模式的含义" class="headerlink" title="锁模式的含义"></a>锁模式的含义</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">IX：意向排它锁</span><br><span class="line"></span><br><span class="line">X：锁定记录本身和记录之前的间隙</span><br><span class="line"></span><br><span class="line">S：锁定记录本身和记录之前的间隙</span><br><span class="line"></span><br><span class="line">X,REC_NOT_GAP：只锁定记录本身</span><br><span class="line"></span><br><span class="line">S，REC_NOT_GAP：只锁定记录本身</span><br><span class="line"></span><br><span class="line">X，GAP：间隙锁，不锁定记录本身</span><br><span class="line"></span><br><span class="line">S，GAP：间隙锁，不锁定记录本身</span><br><span class="line"></span><br><span class="line">X，GAP,INSERT_INTENTION：插入意向锁</span><br></pre></td></tr></table></figure>
+
+
+
 ]]></content>
       <categories>
         <category>linux</category>
