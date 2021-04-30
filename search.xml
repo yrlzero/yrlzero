@@ -3093,7 +3093,9 @@
         <category>mysql</category>
       </categories>
       <tags>
-        <tag>mysql，db，mycat</tag>
+        <tag>mysql</tag>
+        <tag>db</tag>
+        <tag>mycat</tag>
       </tags>
   </entry>
   <entry>
@@ -3149,7 +3151,8 @@
         <category>mysql</category>
       </categories>
       <tags>
-        <tag>mysql，db</tag>
+        <tag>mysql</tag>
+        <tag>db</tag>
       </tags>
   </entry>
 </search>
