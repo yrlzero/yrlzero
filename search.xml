@@ -1167,6 +1167,8 @@
     <url>/2021/04/28/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/</url>
     <content><![CDATA[<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>​        MySQL 主从复制是指数据可以从一个MySQL数据库服务器主节点复制到一个或多个从节点。</p>
 <p>​        MySQL 默认采用异步复制方式，这样从节点不用一直访问主服务器来更新自己的数据，数据的更新可以在远程连接上进行，从节点可以复制主数据库中的所有数据库或者特定的数据库，或者特定的表。</p>
+<a id="more"></a>
+
 <p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png" alt=""></p>
 <p>​        （1）master服务器将数据的改变记录二进制binlog日志，当master上的数据发生改变时，则将其改变写入二进制日志中；</p>
 <p>​        （2）slave服务器会在一定时间间隔内对master二进制日志进行探测其是否发生改变，如果发生改变，则开始一个I/OThread请求master二进制事件</p>
@@ -1194,11 +1196,11 @@
 <p>5、从库IO线程接收binlog  events，并存放到本地relay-log中，传送过来的信息，会记录到master.info中</p>
 <p>6、从库SQL线程应用relay-log，并且把应用过的记录到relay-log.info中，默认情况下，已经应用过的relay 会自动被清理purge</p>
 <hr>
-<h2 id="主从同步延迟"><a href="#主从同步延迟" class="headerlink" title="主从同步延迟"></a>主从同步延迟</h2><p>延迟问题请点击跳转<a href="">主从复制延迟专题</a></p>
+<h2 id="主从同步延迟"><a href="#主从同步延迟" class="headerlink" title="主从同步延迟"></a>主从同步延迟</h2><p>延迟问题请点击跳转<a href="https://yrlzero.gitee.io/2021/05/02/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98/#%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5%E5%BB%B6%E8%BF%9F">主从复制延迟专题</a></p>
 <h2 id="一主一从"><a href="#一主一从" class="headerlink" title="一主一从"></a>一主一从</h2><h3 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h3><p>修改<code>master</code>配置文件<code>vi /etc/my.cnf</code></p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#mysql服务唯一id，不同的mysql服务必须拥有全局唯一的id</span></span><br><span class="line">server-id=1</span><br><span class="line"><span class="comment">#启动二进制日志</span></span><br><span class="line"><span class="built_in">log</span>-bin=mysql-bin</span><br><span class="line"><span class="comment">#设置不要复制的数据库</span></span><br><span class="line">binlog-ignore-db=mysql</span><br><span class="line">binlog-ignore-db=information-schema</span><br><span class="line"><span class="comment">#设置需要复制的数据库</span></span><br><span class="line">binlog-do-db=mytest</span><br><span class="line"><span class="comment">#设置binlog的格式row（在binlog里面记录在哪个行上做了修改，逻辑语法）、statement（保存操作时的语句）、mixed（两种方式混合使用）</span></span><br><span class="line">binlog_format=statement</span><br></pre></td></tr></table></figure>
 
-<a id="more"></a>
+<!-- more -->
 
 <p>修改<code>slave</code>配置文件<code>vi /etc/my.cnf</code></p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#服务器唯一id</span></span><br><span class="line">server-id=2</span><br><span class="line"><span class="comment">#启动中继日志</span></span><br><span class="line">relay-log=mysql-relay</span><br></pre></td></tr></table></figure>
