@@ -3330,6 +3330,8 @@
 <li>slave的sql thread线程将主库的DDL和DML操作事件在slave中重放。DML和DDL的IO操作是随机的，不是顺序，所以成本要高很多</li>
 <li>另一方面，由于sql thread也是单线程的，当主库的并发较高时，产生的DML数量超过slave的SQL thread所能处理的速度，或者当slave中有大型query语句产生了锁等待，那么延时就产生了。</li>
 </ul>
+<a id="more"></a>
+
 <p>​        由此可以看出，延迟主要体现在<code>sql thread</code>处理数据入库阶段。</p>
 <hr>
 <h3 id="1、如何查看同步延迟状态？"><a href="#1、如何查看同步延迟状态？" class="headerlink" title="1、如何查看同步延迟状态？"></a>1、如何查看同步延迟状态？</h3><p>​            在从服务器上通过  show slave status 查看具体的参数，有几个参数比较重要：</p>
