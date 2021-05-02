@@ -179,6 +179,190 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/02/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/02/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">mysql主从复制延迟问题</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-05-02 18:08:24 / 修改时间：22:44:47" itemprop="dateCreated datePublished" datetime="2021-05-02T18:08:24+08:00">2021-05-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="主从同步延迟"><a href="#主从同步延迟" class="headerlink" title="主从同步延迟"></a>主从同步延迟</h2><p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png" alt=""></p>
+<ul>
+<li>mysql的主从复制都是单线程的操作，主库对所有DDL和DML产生的日志写进bin log，由于bin log是顺序写，所以效率很高。</li>
+<li>master和slave之间的数据传输依靠了内部网络或专线，一般来说也是比较快的</li>
+<li>slave读取master的数据写入relay log是追加日志，属于顺序io效率并不低</li>
+<li>slave的sql thread线程将主库的DDL和DML操作事件在slave中重放。DML和DDL的IO操作是随机的，不是顺序，所以成本要高很多</li>
+<li>另一方面，由于sql thread也是单线程的，当主库的并发较高时，产生的DML数量超过slave的SQL thread所能处理的速度，或者当slave中有大型query语句产生了锁等待，那么延时就产生了。</li>
+</ul>
+<p>​        由此可以看出，延迟主要体现在<code>sql thread</code>处理数据入库阶段。</p>
+<hr>
+<h3 id="1、如何查看同步延迟状态？"><a href="#1、如何查看同步延迟状态？" class="headerlink" title="1、如何查看同步延迟状态？"></a>1、如何查看同步延迟状态？</h3><p>​            在从服务器上通过  show slave status 查看具体的参数，有几个参数比较重要：</p>
+<p>​            <strong>master_log_file:    slave中的IO线程正在读取的主服务器二进制日志文件的名称</strong></p>
+<p>​            <strong>read_master_log_pos:    在当前的主服务器二进制日志中，slave中的IO线程已经读取的位置</strong></p>
+<p>​            <strong>relay_log_file:    sql线程当前正在读取和执行的中继日志文件的名称</strong></p>
+<p>​            <strong>relay_log_pos:    在当前的中继日志中，sql线程已经读取和执行的位置</strong></p>
+<p>​            <strong>relay_master_log_file:    由sql线程执行的包含多数近期事件的主服务器二进制日志文件的名称</strong></p>
+<p>​            <strong>slave_io_running:    IO线程是否被启动并成功的连接到主服务器上</strong></p>
+<p>​            <strong>slave_sql_running:    sql线程是否被启动</strong></p>
+<p>​            <strong>seconds_behind_master:    从属服务器sql线程和从属服务器IO线程之间的事件差距，单位以秒计</strong></p>
+<p>​            在观察同步延迟的时候，上述的几个参数都是比较重要的，其中有一个最最重要的参数需要我们引起注意，那就是<code>seconds_behind_master</code>，这个参数就表示当前备库延迟了多长时间，那么这个值是如何计算的呢？</p>
+<p>​            在进行主从复制的时候，需要注意以下几个关键的时刻：</p>
+<p>​            1、主库A执行完成一个事务，写入binlog，我们把这个时刻记为T1;</p>
+<p>​            2、之后传给备库B,我们把备库B接受完这个binlog的时刻记为T2;</p>
+<p>​            3、备库B执行完成这个事务，我们把这个时刻记为T3;</p>
+<p>​            所谓的主备延迟就是同一个事务，在备库执行完成的时间和主库执行完成的时间之间的差值，也就是T3-T1。SBM在进行计算的时候也是按照这样的方式，每个事务的binlog中都有一个时间字段，用于记录主库写入的时间，备库取出当前正在执行的事务的时间字段的值，计算它与当前系统时间的差值，得到SBM。</p>
+<p>​            如果刚刚的流程明白了，那么下面我们就要开始分析产生这个时间差值的原因有哪些了，以方便我们更好的解决生产环境中存在的问题。</p>
+<h3 id="2、主从复制延迟产生的原因有哪些？"><a href="#2、主从复制延迟产生的原因有哪些？" class="headerlink" title="2、主从复制延迟产生的原因有哪些？"></a>2、主从复制延迟产生的原因有哪些？</h3><p>​        2.1、在某些部署环境中，slave所在的机器性能要比master所在的机器性能差。此时如果机器的资源不足的话就会影响slave同步的效率。</p>
+<p>​        2.2、slave充当了读库，一般情况下主要写的压力在于master，那么slave会提供一部分读的压力，而如果slave的查询压力过大的话，slave的查询消耗了大量的CPU资源，那么必不可少的就会影响同步的速度。</p>
+<p>​        2.3、大事务执行，如果master的一个事务执行了10分钟，而bin log的写入必须要等待事务完成之后，才会传入slave，那么此时在开始执行的时候就已经延迟了10分钟了。</p>
+<p>​        2.4、master的对于bin log的写操作是追加日志，属于顺序写，slave单线程去master顺序读bin log，slave取到bin log之后在本地执行。mysql的主从复制都是<strong>单线程</strong>的操作，但是由于master是顺序写，所以效率很高，而slave也是顺序读取master的日志，此时的效率也是比较高的，但是当数据拉取回来之后，sql thread处理数据变成了随机的操作，而不是顺序的，所以此时成本会提高。</p>
+<p>​        2.5、 slave在同步数据的同时，可能跟其他查询的线程发生锁抢占的情况，此时也会发生延时。</p>
+<p>​        2.6、 当master的TPS并发非常高的时候，产生的DDL数量超过了一个线程所能承受的范围的时候，那么也可能带来延迟。</p>
+<p>​        2.7、 在进行bin log日志传输的时候，如果网络带宽也不是很好，那么网络延迟也可能造成数据同步延迟。</p>
+<p>​        这些就是可能会造成备库延迟的原因。</p>
+<h3 id="3、如何解决复制延迟的问题"><a href="#3、如何解决复制延迟的问题" class="headerlink" title="3、如何解决复制延迟的问题"></a>3、如何解决复制延迟的问题</h3><p>​        先说一些虚的东西，什么叫虚的东西呢？就是一听上去感觉很有道理，但是在实施或者实际的业务场景中可能难度很大或者很难实现，下面我们从几个方面来进行描述：</p>
+<h4 id="3-1、架构方面"><a href="#3-1、架构方面" class="headerlink" title="3.1、架构方面"></a>3.1、架构方面</h4><p>​            3.1.1、业务的持久化层的实现采用分库架构，让不同的业务请求分散到不同的数据库服务上，分散单台机器的压力</p>
+<p>​            3.1.2、服务的基础架构在业务和mysql之间加入缓存层，减少mysql的读的压力，但是需要注意的是，如果数据经常要发生修改，那么这种设计是不合理的，因为需要频繁的去更新缓存中的数据，保持数据的一致性，导致缓存的命中率很低，所以此时就要慎用缓存了</p>
+<p>​            3.1.3、使用更好的硬件设备，比如cpu，ssd等，但是这种方案一般对于公司而言不太能接受，原因也很简单，会增加公司的成本，而一般公司其实都很抠门，所以意义也不大，但是你要知道这也是解决问题的一个方法，只不过你需要评估的是投入产出比而已。</p>
+<h4 id="3-2、从库配置方面"><a href="#3-2、从库配置方面" class="headerlink" title="3.2、从库配置方面"></a>3.2、从库配置方面</h4><p>​        <strong>3.2.1、修改sync_binlog的参数的值</strong></p>
+<p>​        想要合理设置此参数的值必须要清楚的知道binlog的写盘的流程：</p>
+<img src="http://yrlzero.gitee.io/images/linux/mysql/sync_binlog.png" style="zoom:80%;" />
+
+<p>可以看到，每个线程有自己的bin log cache，但是共用同一份bin log。</p>
+<p>​        图中的write，指的就是把日志写入到文件系统的page cache，并没有把数据持久化到磁盘，所以速度快</p>
+<p>​        图中的fsync，才是将数据持久化到磁盘的操作。一般情况下，我们认为fsync才占用磁盘的IOPS</p>
+<p>​        而write和fsync的时机就是由参数sync_binlog来进行控制的。</p>
+<p>​        1、当sync_binlog=0的时候，表示每次提交事务都只write，不fsync</p>
+<p>​        2、当sync_binlog=1的时候，表示每次提交事务都执行fsync</p>
+<p>​        3、当sync_binlog=N的时候，表示每次提交事务都write，但积累N个事务后才fsync。</p>
+<p>​        一般在公司的大部分应用场景中，我们建议将此参数的值设置为1，因为这样的话能够保证数据的安全性，但是如果出现主从复制的延迟问题，可以考虑将此值设置为100~1000中的某个数值，非常不建议设置为0，因为设置为0的时候没有办法控制丢失日志的数据量，但是如果是对安全性要求比较高的业务系统，这个参数产生的意义就不是那么大了。        </p>
+<p>​        2、直接禁用salve上的bin log，当从库的数据在做同步的时候，有可能从库的binlog也会进行记录，此时的话肯定也会消耗io的资源，因此可以考虑将其关闭，但是需要注意，如果你搭建的集群是级联的模式的话，那么此时的bin log也会发送到另外一台从库里方便进行数据同步，此时的话，这个配置项也不会起到太大的作用。</p>
+<p>​        3、设置innodb_flush_log_at_trx_commit 属性，这个属性用来表示每一次的事务提交是否需要把日志都写入磁盘，这是很浪费时间的，一共有三个属性值，分别是0（每次写到服务缓存，一秒钟刷写一次），1（每次事务提交都刷写一次磁盘），2（每次写到os缓存，一秒钟刷写一次），一般情况下我们推荐设置成2，这样就算mysql的服务宕机了，卸载os缓存中的数据也会进行持久化。</p>
+<h3 id="4、从根本上解决主从复制的延迟问题"><a href="#4、从根本上解决主从复制的延迟问题" class="headerlink" title="4、从根本上解决主从复制的延迟问题"></a>4、从根本上解决主从复制的延迟问题</h3><p>​        大多数时候我们在线上的业务系统中都使用了mysql的主从复制，但是需要注意的是，并不是所有的场景都适合主从复制，一般情况下是读要远远多于写的应用，同时读的时效性要求不那么高的场景。如果真实场景中真的要求立马读取到更新之后的数据，那么就只能强制读取主库的数据，所以在进行实现的时候要考虑实际的应用场景，不要为了技术而技术，这是很严重的事情。</p>
+<p>​        在mysql5.6版本之后引入了一个概念，就是我们通常说的<code>MTS</code>-Multi Thread Slave（并行复制），如下图：</p>
+<img src="http://yrlzero.gitee.io/images/linux/mysql/并行复制.png" style="zoom:80%;" />
+
+<p>通过上图我们可以发现其实所谓的<code>MTS-并行复制</code>，就是在中间添加了一个分发的环节，也就是说原来的<code>sql thread</code>变成了现在的coordinator组件，当日志来了之后，coordinator负责读取日志信息以及分发事务，真正的日志执行的过程是放在了worker线程上，由多个线程并行的去执行。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看并行的slave的线程的个数，默认是0.表示单线程</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">global</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'slave_parallel_workers'</span>;</span><br><span class="line"><span class="comment">-- 根据实际情况保证开启多少线程</span></span><br><span class="line"><span class="keyword">set</span> <span class="keyword">global</span> slave_parallel_workers = <span class="number">4</span>;</span><br><span class="line"><span class="comment">-- 设置并发复制的方式，默认是一个线程处理一个库，值为database</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">global</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%slave_parallel_type%'</span>;</span><br><span class="line"><span class="comment">-- 停止slave</span></span><br><span class="line"><span class="keyword">stop</span> <span class="keyword">slave</span>;</span><br><span class="line"><span class="comment">-- 设置属性值</span></span><br><span class="line"><span class="keyword">set</span> <span class="keyword">global</span> slave_parallel_type=<span class="string">'logical_check'</span>;</span><br><span class="line"><span class="comment">-- 开启slave</span></span><br><span class="line"><span class="keyword">start</span> <span class="keyword">slave</span></span><br><span class="line"><span class="comment">-- 查看线程数</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">full</span> <span class="keyword">processlist</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​        通过上述的配置可以完成我们说的<code>MTS</code>-并行复制，但是此时需要思考几个问题</p>
+<blockquote>
+<p>1、在并行操作的时候，可能会有并发的事务问题，slave在执行的时候可以按照轮询的方式发送给各个worker吗？</p>
+<p>​        答案：不行，因为事务被分发给worker以后，不同的worker就开始独立执行了，但是，由于CPU的不同调度策略，很可能第二个事务最终比第一个事务先执行，而如果刚刚好他们修改的是同一行数据，那么因为执行顺序的问题，可能导致主备的数据不一致。</p>
+<p>2、同一个事务的多个更新语句，能不能分给不同的worker来执行呢？</p>
+<p>​        答案：不行，举个例子，一个事务更新了表t1和表t2中的各一行，如果这两条更新语句被分到不同worker的话，虽然最终的结果是主备一致的，但如果表t1执行完成的瞬间，备库上有一个查询，就会看到这个事务更新了一半的结果，破坏了事务逻辑的隔离性。</p>
+</blockquote>
+<p>​        我们通过讲解上述两个问题的最主要目的是为了说明一件事，就是coordinator在进行分发的时候，需要遵循的策略是什么？</p>
+<blockquote>
+<p>1、不能造成更新覆盖。这就要求更新同一行的两个事务，必须被分发到同一个worker中。</p>
+<p>2、同一个事务不能被拆开，必须放到同一个worker中。</p>
+</blockquote>
+<p>​        综上所述，我们来说一下具体实现的原理和过程。</p>
+<p>​        如果让我们自己来设计的话，我们应该如何操作呢？这是一个值得思考的问题。其实如果按照实际的操作的话，我们可以按照粒度进行分类，分为按库分发，按表分发，按行分发。</p>
+<p>​        其实不管按照什么方式进行分发，大家需要注意的就是在分发的时候必须要满足我们上面说的两条规则，所以当我们进行分发的时候要在每一个worker上定义一个hash表，用来保存当前这个work正在执行的事务所涉及到的表。hash表的key值按照不同的粒度需要存储不同的值：</p>
+<p>​        按库分发：key值是数据库的名字，这个比较简单</p>
+<p>​        按表分发：key值是库名+表名</p>
+<p>​        按行分发：key值是库名+表名+唯一键</p>
+<h4 id="4-1、MySQL5-6版本的并行复制策略"><a href="#4-1、MySQL5-6版本的并行复制策略" class="headerlink" title="4.1、MySQL5.6版本的并行复制策略"></a>4.1、MySQL5.6版本的并行复制策略</h4><p>​        其实从mysql的5.6版本开始就已经支持了并行复制，只是支持的粒度是按库并行，这也是为什么现在的版本中可以选择类型为database，其实说的就是支持按照库进行并行复制。</p>
+<p>​        但是其实用过的同学应该都知道，这个策略的并行效果，取决于压力模型。如果在主库上有多个DB，并且各个DB的压力均衡，使用这个策略的效果会很好，但是如果主库的所有表都放在同一DB上，那么所有的操作都会分发给一个worker，变成单线程操作了，那么这个策略的效果就不好了，因此在实际的生产环境中，用的并不是特别多。</p>
+<h4 id="4-2、mariaDB的并行复制策略"><a href="#4-2、mariaDB的并行复制策略" class="headerlink" title="4.2、mariaDB的并行复制策略"></a>4.2、mariaDB的并行复制策略</h4><p>​        在mysql5.7的时候采用的是基于组提交的并行复制，换句话说，slave服务器的回放与主机是一致的，即主库是如何并行执行的那么slave就如何怎样进行并行回放，这点其实是参考了mariaDB的并行复制，下面我们来看下其实现原理。</p>
+<p>​        mariaDB的并行复制策略利用的就是这个特性：</p>
+<p>​        1、能够在同一组里提交的事务，一定不会修改同一行；</p>
+<p>​        2、master上可以并行执行的事务，slave上也一定是可以并行执行的。</p>
+<p>​        在实现上，mariaDB是这么做的：</p>
+<p>​        1、在一组里面一起提交的事务，有一个相同的commit_id,下一组就是commit_id+1;</p>
+<p>​        2、commit_id直接写到binlog里面；</p>
+<p>​        3、传到slave应用的时候，相同commit_id的事务会分发到多个worker执行；</p>
+<p>​        4、这一组全部执行完成后，coordinator再去取下一批。</p>
+<p>​        这是mariaDB的并行复制策略，大体上看起来是没有问题的，但是你仔细观察的话会发现他并没有实现“真正的模拟主库并发度”这个目标，在主库上，一组事务在commit的时候，下一组事务是同时处于“执行中”状态的。</p>
+<p>​        我们真正想要达到的并行复制应该是如下的状态，也就是说当第一组事务提交的是，下一组事务是运行的状态，当第一组事务提交完成之后，下一组事务会立刻变成commit状态。</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mysql/mariaDB1.png" alt=""></p>
+<p>​        但是按照mariaDB的并行复制策略，那么备库上的执行状态会变成如下所示：</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mysql/mariaDB2.png" alt=""></p>
+<p>可以看到，这张图跟上面这张图的最大区别在于，slave上执行的时候必须要等第一组事务执行完成之后，第二组事务才能开始执行，这样系统的吞吐量就不够了。而且这个方案很容易被大事务拖后腿，如果trx2是一个大事务，那么在备库应用的时候，trx1和trx3执行完成之后，就只能等trx2完全执行完成，下一组才能开始执行，这段时间，只有一个worker线程在工作，是对资源的浪费。</p>
+<h4 id="4-3、mysql5-7的并行复制策略"><a href="#4-3、mysql5-7的并行复制策略" class="headerlink" title="4.3、mysql5.7的并行复制策略"></a>4.3、mysql5.7的并行复制策略</h4><p>​        mysql5.7版本的时候，根据mariaDB的并行复制策略，做了相应的优化调整后，提供了自己的并行复制策略，并且可以通过参数slave-parallel-type来控制并行复制的策略：</p>
+<p>​        1、当配置的值为DATABASE的时候，表示使用5.6版本的按库并行策略；</p>
+<p>​        2、当配置的值为LOGICAL_CLOCK的时候，表示跟mariaDB相同的策略。</p>
+<p>​        此时，大家需要思考一个问题：<strong>同时处于执行状态的所有事务，是否可以并行？</strong></p>
+<p>​        答案：不行，因为多个执行中的事务是有可能出现锁冲突的，锁冲突之后就会产生锁等待问题。</p>
+<p>​        在mariaDB中，所有处于commit状态的事务是可以并行，因为如果能commit的话就说明已经没有锁的问题，但是大家回想下，我们mysql的日志提交是两阶段提交，如下图，其实只要处于prepare状态就已经表示没有锁的问题了。</p>
+<img src="http://yrlzero.gitee.io/images/linux/mysql/两阶段提交.png" style="zoom: 45%;" />
+
+<p>因此，mysql5.7的并行复制策略的思想是：</p>
+<p>​        1、同时处于prepare状态的事务，在slave执行是可以并行的。</p>
+<p>​        2、处于prepare状态的事务，与处于commit状态的事务之间，在slave上执行也是可以并行的。</p>
+<p>​        基于这样的处理机制，我们可以将大部分的日志处于prepare状态，因此可以设置</p>
+<p>​        1、binlog_group_commit_sync_delay 参数，表示延迟多少微秒后才调用 fsync;</p>
+<p>​        2、binlog_group_commit_sync_no_delay_count 参数，表示累积多少次以后才调用 fsync。</p>
+<h3 id="5、基于GTID的主从复制问题"><a href="#5、基于GTID的主从复制问题" class="headerlink" title="5、基于GTID的主从复制问题"></a>5、基于GTID的主从复制问题</h3><p>​        在我们之前讲解的主从复制实操中，每次想要复制，必须要在备机上执行对应的命令，如下所示：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">change</span> <span class="keyword">master</span> <span class="keyword">to</span> master_host=<span class="string">'192.168.85.11'</span>,master_user=<span class="string">'root'</span>,master_password=<span class="string">'123456'</span>,master_port=<span class="number">3306</span>,master_log_file=<span class="string">'master-bin.000001'</span>,master_log_pos=<span class="number">154</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​        在此配置中我们必须要知道具体的bin log是哪个文件，同时在文件的哪个位置开始复制，正常情况下也没有问题，但是如果是一个主备主从集群，那么如果主机宕机，当从机开始工作的时候，那么备机就要同步从机的位置，此时位置可能跟主机的位置是不同的，因此在这种情况下，再去找位置就会比较麻烦，所以在5.6版本之后出来一个基于GTID的主从复制。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </p>
+<p>​        GTID(global transaction id)是对于一个已提交事务的编号，并且是一个全局唯一的编号。GTID实际上是由UUID+TID组成的，其中UUID是mysql实例的唯一标识，TID表示该实例上已经提交的事务数量，并且随着事务提交单调递增。这种方式保证事务在集群中有唯一的ID，强化了主备一致及故障恢复能力。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/04/29/mycat%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -296,7 +480,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-05-02 16:01:57" itemprop="dateModified" datetime="2021-05-02T16:01:57+08:00">2021-05-02</time>
+                <time title="修改时间：2021-05-02 22:44:50" itemprop="dateModified" datetime="2021-05-02T22:44:50+08:00">2021-05-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -323,7 +507,36 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>主从复制</p>
+          <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>​        MySQL 主从复制是指数据可以从一个MySQL数据库服务器主节点复制到一个或多个从节点。</p>
+<p>​        MySQL 默认采用异步复制方式，这样从节点不用一直访问主服务器来更新自己的数据，数据的更新可以在远程连接上进行，从节点可以复制主数据库中的所有数据库或者特定的数据库，或者特定的表。</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png" alt=""></p>
+<p>​        （1）master服务器将数据的改变记录二进制binlog日志，当master上的数据发生改变时，则将其改变写入二进制日志中；</p>
+<p>​        （2）slave服务器会在一定时间间隔内对master二进制日志进行探测其是否发生改变，如果发生改变，则开始一个I/OThread请求master二进制事件</p>
+<p>​        （3）同时主节点为每个I/O线程启动一个dump线程，用于向其发送二进制事件，并保存至从节点本地的中继日志中，从节点将启动SQL线程从中继日志中读取二进制日志，在本地重放，使得其数据和主节点的保持一致，最后I/OThread和SQLThread将进入睡眠状态，等待下一次被唤醒。        </p>
+<p><strong>也就是说</strong>：</p>
+<ul>
+<li>从库会生成两个线程,一个<code>I/O线程</code>,一个<code>SQL线程</code>;</li>
+<li><code>I/O线程</code>会去请求主库的binlog,并将得到的binlog写到本地的relay-log(中继日志)文件中;</li>
+<li>主库会生成一个log dump线程,用来给从库I/O线程传binlog;</li>
+<li><code>SQL线程</code>,会读取relay log文件中的日志,并解析成sql语句逐一执行;</li>
+</ul>
+<p><strong>注意</strong>：</p>
+<ul>
+<li>master将操作语句记录到binlog日志中，然后授予slave远程连接的权限（master一定要开启binlog二进制日志功能；通常为了数据安全考虑，slave也开启binlog功能）。</li>
+<li>slave开启两个线程：IO线程和SQL线程。其中：IO线程负责读取master的binlog内容到中继日志relay log里；SQL线程负责从relay log日志里读出binlog内容，并更新到slave的数据库里，这样就能保证slave数据和master数据保持一致了。</li>
+<li>Mysql复制至少需要两个Mysql的服务，当然Mysql服务可以分布在不同的服务器上，也可以在一台服务器上启动多个服务。</li>
+<li>Mysql复制最好确保master和slave服务器上的Mysql版本相同（如果不能满足版本一致，那么要保证master主节点的版本低于slave从节点的版本）</li>
+<li>master和slave两节点间时间需同步</li>
+</ul>
+<p><strong>具体步骤</strong>：</p>
+<p>1、从库通过手工执行change  master to 语句连接主库，提供了连接的用户一切条件（user 、password、port、ip），并且让从库知道，二进制日志的起点位置（file名 position 号）；    start  slave</p>
+<p>2、从库的IO线程和主库的dump线程建立连接。</p>
+<p>3、从库根据change  master  to 语句提供的file名和position号，IO线程向主库发起binlog的请求。</p>
+<p>4、主库dump线程根据从库的请求，将本地binlog以events的方式发给从库IO线程。</p>
+<p>5、从库IO线程接收binlog  events，并存放到本地relay-log中，传送过来的信息，会记录到master.info中</p>
+<p>6、从库SQL线程应用relay-log，并且把应用过的记录到relay-log.info中，默认情况下，已经应用过的relay 会自动被清理purge</p>
+<hr>
+<h2 id="主从同步延迟"><a href="#主从同步延迟" class="headerlink" title="主从同步延迟"></a>主从同步延迟</h2><p>延迟问题请点击跳转<a href="">主从复制延迟专题</a></p>
 <h2 id="一主一从"><a href="#一主一从" class="headerlink" title="一主一从"></a>一主一从</h2><h3 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h3><p>修改<code>master</code>配置文件<code>vi /etc/my.cnf</code></p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#mysql服务唯一id，不同的mysql服务必须拥有全局唯一的id</span></span><br><span class="line">server-id=1</span><br><span class="line"><span class="comment">#启动二进制日志</span></span><br><span class="line"><span class="built_in">log</span>-bin=mysql-bin</span><br><span class="line"><span class="comment">#设置不要复制的数据库</span></span><br><span class="line">binlog-ignore-db=mysql</span><br><span class="line">binlog-ignore-db=information-schema</span><br><span class="line"><span class="comment">#设置需要复制的数据库</span></span><br><span class="line">binlog-do-db=mytest</span><br><span class="line"><span class="comment">#设置binlog的格式row（在binlog里面记录在哪个行上做了修改，逻辑语法）、statement（保存操作时的语句）、mixed（两种方式混合使用）</span></span><br><span class="line">binlog_format=statement</span><br></pre></td></tr></table></figure>
           <!--noindex-->
@@ -950,91 +1163,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/04/10/redis%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/10/redis%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" class="post-title-link" itemprop="url">redis-布隆过滤器</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-10 22:58:28" itemprop="dateCreated datePublished" datetime="2021-04-10T22:58:28+08:00">2021-04-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-04-24 17:45:03" itemprop="dateModified" datetime="2021-04-24T17:45:03+08:00">2021-04-24</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/redis/" itemprop="url" rel="index"><span itemprop="name">redis</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="bloom机制"><a href="#bloom机制" class="headerlink" title="bloom机制"></a>bloom机制</h2><p><img src="http://yrlzero.gitee.io/images/linux/redis/redis-01.png" alt=""></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/10/redis%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1106,7 +1234,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">45</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
