@@ -829,7 +829,7 @@
 <li>在使用left join或right join时，on会优先执行，where条件在最后执行，所以再使用过程中，条件尽可能的在on语句中判断，减少where的执行</li>
 <li>少使用子查询，而用join</li>
 </ol>
-<p>​        mycat目前版本支持跨分配的join，主要有四种实现方式：<code>全局表</code>、<code>ER分片</code>、<code>catletT(人工智能)</code>、<code>ShareJoin</code></p>
+<p>​        mycat目前版本支持跨分配的join，主要有四种实现方式：<a href="https://yrlzero.gitee.io/2021/04/29/mycat%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8/#%E5%85%A8%E5%B1%80%E8%A1%A8"><code>全局表</code></a>、<a href="https://yrlzero.gitee.io/2021/04/29/mycat%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8/#ER%E5%88%86%E7%89%87"><code>ER分片</code></a>、<code>catletT(人工智能)</code>、<code>ShareJoin</code></p>
 <h3 id="全局表"><a href="#全局表" class="headerlink" title="全局表"></a><strong>全局表</strong></h3><p>​        在分片的情况下，当业务表因为规模而进行分片之后，业务表与这个字典表的之间关联会变得比较棘手，因此，在mycat中存在一种全局表，他具备以下特性：</p>
 <ol>
 <li>全局表的插入、更新操作会实时的在所有节点上执行，保持各个分片的数据一致性</li>
