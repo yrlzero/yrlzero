@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.gitee.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、安装1、下载2、解压解压安装包，-C指定安装目录 1tar -zxvf Mycat-server-1.6.7.5-release-20200422133810-linux.tar.gz -C &#x2F;usr&#x2F;local">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mycat基本安装及高可用部署">
+<meta property="og:url" content="http://yrlzero.gitee.io/2021/04/29/mycat%E5%9F%BA%E6%9C%AC%E5%AE%89%E8%A3%85%E5%8F%8A%E9%AB%98%E5%8F%AF%E7%94%A8%E9%83%A8%E7%BD%B2/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="一、安装1、下载2、解压解压安装包，-C指定安装目录 1tar -zxvf Mycat-server-1.6.7.5-release-20200422133810-linux.tar.gz -C &#x2F;usr&#x2F;local">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%9A%84bin%E7%9B%AE%E5%BD%95.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%9A%84help%E5%91%BD%E4%BB%A4.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%9A%84%E7%BC%BA%E5%B0%91%E6%97%A5%E5%BF%97%E7%9B%AE%E5%BD%95.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/%E6%9F%A5%E7%9C%8Bmycat%E7%9B%AE%E5%BD%95.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/%E8%BF%9E%E6%8E%A5mycat.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8console%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/mycat%E8%B4%9F%E8%BD%BD.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/start%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8.jpg">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%8A%B6%E6%80%81.jpg">
+<meta property="og:image" content="h:/hexo/source/_posts/mycat高可用/mycat高可用.png">
+<meta property="og:image" content="h:/hexo/source/_posts/mycat高可用/haproxy监控.jpg">
+<meta property="og:image" content="h:%5Chexo%5Csource_posts%5Cmycat%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8%5Ckeepalived%E5%90%AF%E5%8A%A8%E6%88%90%E5%8A%9F.jpg">
+<meta property="og:image" content="h:%5Chexo%5Csource_posts%5Cmycat%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8%5Cvip.jpg">
+<meta property="article:published_time" content="2021-04-29T14:33:00.792Z">
+<meta property="article:modified_time" content="2021-05-07T15:19:27.069Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="db">
+<meta property="article:tag" content="mycat">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%9A%84bin%E7%9B%AE%E5%BD%95.jpg">
+
+<link rel="canonical" href="http://yrlzero.gitee.io/2021/04/29/mycat%E5%9F%BA%E6%9C%AC%E5%AE%89%E8%A3%85%E5%8F%8A%E9%AB%98%E5%8F%AF%E7%94%A8%E9%83%A8%E7%BD%B2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mycat基本安装及高可用部署 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/04/29/mycat%E5%9F%BA%E6%9C%AC%E5%AE%89%E8%A3%85%E5%8F%8A%E9%AB%98%E5%8F%AF%E7%94%A8%E9%83%A8%E7%BD%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mycat基本安装及高可用部署
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-29 22:33:00" itemprop="dateCreated datePublished" datetime="2021-04-29T22:33:00+08:00">2021-04-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-07 23:19:27" itemprop="dateModified" datetime="2021-05-07T23:19:27+08:00">2021-05-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、安装"><a href="#一、安装" class="headerlink" title="一、安装"></a>一、安装</h2><h3 id="1、下载"><a href="#1、下载" class="headerlink" title="1、下载"></a>1、<a href="http://dl.mycat.org.cn/1.6.7.5/2020-4-10/" target="_blank" rel="noopener">下载</a></h3><h3 id="2、解压"><a href="#2、解压" class="headerlink" title="2、解压"></a>2、解压</h3><p>解压安装包，<code>-C</code>指定安装目录</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf Mycat-server-1.6.7.5-release-20200422133810-linux.tar.gz -C /usr/<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h3 id="3、前台启动"><a href="#3、前台启动" class="headerlink" title="3、前台启动"></a>3、前台启动</h3><p>进入mycat的bin目录下执行启动<code>cd /usr/local/mycat/bin</code></p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%9A%84bin%E7%9B%AE%E5%BD%95.jpg" alt=""></p>
+<p>通过执行<code>./mycat help</code>查看相关命令，其中<code>console</code>为控制台启动，其余命令为后台操作</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%9A%84help%E5%91%BD%E4%BB%A4.jpg" alt=""></p>
+<p><code>./mycat console</code>控制台启动后，如图可以看到缺少日志目录而报错</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%9A%84%E7%BC%BA%E5%B0%91%E6%97%A5%E5%BF%97%E7%9B%AE%E5%BD%95.jpg" alt="mycat的缺少日志目录"></p>
+<p>查看mycat目录，确实没有logs层级需要<code>mkdir /usr/local/mycat/logs</code>创建对应的层级目录</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mycat/%E6%9F%A5%E7%9C%8Bmycat%E7%9B%AE%E5%BD%95.jpg" alt=""></p>
+<h3 id="4、登录"><a href="#4、登录" class="headerlink" title="4、登录"></a>4、登录</h3><p>mycat有两个端口，<code>9066</code>是管理控制台端口、<code>8066</code>是操作端口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-- 使用8066端口连接mycat</span><br><span class="line">mysql -uroot -pRoot_123 -P 8066</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://yrlzero.gitee.io/images/linux/mycat/%E8%BF%9E%E6%8E%A5mycat.jpg" alt=""></p>
+<h3 id="5、环境变量"><a href="#5、环境变量" class="headerlink" title="5、环境变量"></a>5、环境变量</h3><p>配置环境变量，可以在任意地方直接使用<code>mycat</code>命令</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#增加环境变量</span></span><br><span class="line">vi /etc/profile</span><br><span class="line"><span class="built_in">export</span> MYCAT_HOME=/usr/<span class="built_in">local</span>/mycat</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$JAVA_HOME</span>/bin:<span class="variable">$MYCAT_HOME</span>/bin</span><br><span class="line"></span><br><span class="line"><span class="comment">#让添加的配置生效</span></span><br><span class="line"><span class="built_in">source</span> /etc/profile</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://yrlzero.gitee.io/images/linux/mycat/%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8console%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8.jpg" alt=""></p>
+<h3 id="6、配置"><a href="#6、配置" class="headerlink" title="6、配置"></a>6、配置</h3><h4 id="6-1、server-xml"><a href="#6-1、server-xml" class="headerlink" title="6.1、server.xml"></a>6.1、<code>server.xml</code></h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- - - Licensed under the Apache License, Version 2.0 (the "License"); </span></span><br><span class="line"><span class="comment">	- you may not use this file except in compliance with the License. - You </span></span><br><span class="line"><span class="comment">	may obtain a copy of the License at - - http://www.apache.org/licenses/LICENSE-2.0 </span></span><br><span class="line"><span class="comment">	- - Unless required by applicable law or agreed to in writing, software - </span></span><br><span class="line"><span class="comment">	distributed under the License is distributed on an "AS IS" BASIS, - WITHOUT </span></span><br><span class="line"><span class="comment">	WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. - See the </span></span><br><span class="line"><span class="comment">	License for the specific language governing permissions and - limitations </span></span><br><span class="line"><span class="comment">	under the License. --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">mycat</span>:server <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"server.dtd"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mycat:server</span> <span class="attr">xmlns:mycat</span>=<span class="string">"http://io.mycat/"</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">user</span> <span class="attr">name</span>=<span class="string">"root"</span> <span class="attr">defaultAccount</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"password"</span>&gt;</span>Root_123<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"schemas"</span>&gt;</span>TESTDB<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"defaultSchema"</span>&gt;</span>TESTDB<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mycat:server</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="6-2、schema-xml"><a href="#6-2、schema-xml" class="headerlink" title="6.2、schema.xml"></a>6.2、<code>schema.xml</code></h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0"?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">mycat</span>:schema <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"schema.dtd"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mycat:schema</span> <span class="attr">xmlns:mycat</span>=<span class="string">"http://io.mycat/"</span>&gt;</span></span><br><span class="line">          <span class="comment">&lt;!-- name：逻辑库名</span></span><br><span class="line"><span class="comment">             checkSQLschema ：是否自带库名</span></span><br><span class="line"><span class="comment">             sqlMaxLimit：默认数据查询限制，如果SQL语句没带限制，会默认带上，如果带了，则以带的为准</span></span><br><span class="line"><span class="comment">             dataNode:真实数据库节点</span></span><br><span class="line"><span class="comment">        --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">schema</span> <span class="attr">name</span>=<span class="string">"TESTDB"</span> <span class="attr">checkSQLschema</span>=<span class="string">"false"</span> <span class="attr">sqlMaxLimit</span>=<span class="string">"100"</span> <span class="attr">dataNode</span>=<span class="string">"dn1"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">schema</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    	<span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">			dataNode的name与schema的dataNode对应；</span></span><br><span class="line"><span class="comment">			dataHost属性与dataHost标签的name对应</span></span><br><span class="line"><span class="comment">			database:真正的库名</span></span><br><span class="line"><span class="comment">		--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dataNode</span> <span class="attr">name</span>=<span class="string">"dn1"</span> <span class="attr">dataHost</span>=<span class="string">"host1"</span> <span class="attr">database</span>=<span class="string">"mytest"</span> /&gt;</span></span><br><span class="line">    </span><br><span class="line">    	<span class="comment">&lt;!-- </span></span><br><span class="line"><span class="comment">			dbDriver="jdbc"修改为native </span></span><br><span class="line"><span class="comment">			maxCon:最大连接数</span></span><br><span class="line"><span class="comment">			minCon:最小连接数</span></span><br><span class="line"><span class="comment">			balance：读库和写库的负载均衡策略(具体策略看下文)</span></span><br><span class="line"><span class="comment">			writeType：表示写操作发送到哪台机器</span></span><br><span class="line"><span class="comment">			switchType：表示如何进行切换</span></span><br><span class="line"><span class="comment">		--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dataHost</span> <span class="attr">name</span>=<span class="string">"host1"</span> <span class="attr">maxCon</span>=<span class="string">"1000"</span> <span class="attr">minCon</span>=<span class="string">"10"</span> <span class="attr">balance</span>=<span class="string">"0"</span></span></span><br><span class="line"><span class="tag">                          <span class="attr">writeType</span>=<span class="string">"0"</span> <span class="attr">dbType</span>=<span class="string">"mysql"</span> <span class="attr">dbDriver</span>=<span class="string">"native"</span> <span class="attr">switchType</span>=<span class="string">"1"</span>  <span class="attr">slaveThreshold</span>=<span class="string">"100"</span>&gt;</span></span><br><span class="line">            	<span class="comment">&lt;!-- 心跳检测使用的sql语句 --&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">heartbeat</span>&gt;</span>select user()<span class="tag">&lt;/<span class="name">heartbeat</span>&gt;</span></span><br><span class="line">            </span><br><span class="line">            	<span class="comment">&lt;!-- 写库配置 --&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">writeHost</span> <span class="attr">host</span>=<span class="string">"hostM1"</span> <span class="attr">url</span>=<span class="string">"192.168.243.131:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span></span></span><br><span class="line"><span class="tag">                                   <span class="attr">password</span>=<span class="string">"Root_123"</span>&gt;</span></span><br><span class="line">	                    <span class="comment">&lt;!-- 读库配置，可以与写库在同一个库，可以不同（读写分离） --&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">readHost</span> <span class="attr">host</span>=<span class="string">"hostS1"</span> <span class="attr">url</span>=<span class="string">"192.168.243.132:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span> <span class="attr">password</span>=<span class="string">"Root_123"</span>&gt;</span><span class="tag">&lt;/<span class="name">readHost</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">writeHost</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dataHost</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mycat:schema</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="6-3、负载策略"><a href="#6-3、负载策略" class="headerlink" title="6.3、负载策略"></a>6.3、负载策略</h4><ul>
+<li>balance=0:不开启读写分离机制，所有读操作都发送到当前可用的writehost上</li>
+<li>balance=1:全部的readhost和stand by writehost参与select 语句的负载均衡，简单的说，当双主双从模式下，其他的节点都参与select语句的负载均衡</li>
+<li>balance=2:所有读操作都随机的在writehost，readhost上分发</li>
+<li>balance=3:所有读请求随机的分发到readhost执行，writehost不负担读压力</li>
+</ul>
+<p>修改<code>balance=&quot;2&quot;</code>，<code>mycat restart</code>重启mycat，测试负载情况</p>
+<img src="http://yrlzero.gitee.io/images/linux/mycat/mycat负载.jpg" style="zoom:80%;" />
+
+<h3 id="7、后台启动"><a href="#7、后台启动" class="headerlink" title="7、后台启动"></a>7、后台启动</h3><p><code>mycat start</code></p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mycat/start%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8.jpg" alt=""></p>
+<p><code>mycat status</code>查看状态</p>
+<p><img src="http://yrlzero.gitee.io/images/linux/mycat/mycat%E7%8A%B6%E6%80%81.jpg" alt=""></p>
+<hr>
+<h2 id="二、mycat的高可用"><a href="#二、mycat的高可用" class="headerlink" title="二、mycat的高可用"></a>二、mycat的高可用</h2><p>​        在之前的操作中，我们已经实现了mysql机器的高可用，可以动态切换master，那么如果mycat崩溃了呢？我们应该如何处理呢？所以此时就需要搭建mycat的高可用集群了。</p>
+<p>​        在mycat的权威指南中，介绍了多种高可用的方案，在这里我们讲解一种使用最多的方案，使用HAProxy+Keepalived配合使用来实现myact的高可用。</p>
+<p>​        HAproxy实现了mycat多借点的集群高可用和负载均衡，而HAProxy自身的高可用则可以通过Keepalived来实现。</p>
+<img src="H:\hexo\source\_posts\mycat高可用\mycat高可用.png" style="zoom:67%;" />
+
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>角色</th>
+<th>IP地址</th>
+<th>机器名</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>mycat1</td>
+<td>192.168.243.131</td>
+<td>node01</td>
+</tr>
+<tr>
+<td>2</td>
+<td>mycat2</td>
+<td>192.168.243.132</td>
+<td>node02</td>
+</tr>
+<tr>
+<td>3</td>
+<td>HAProxy(master)</td>
+<td>192.168.243.133</td>
+<td>node03</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Keepalived(master)</td>
+<td>192.168.243.133</td>
+<td>node03</td>
+</tr>
+<tr>
+<td>5</td>
+<td>HAProxy(backup)</td>
+<td>192.168.243.135</td>
+<td>node04</td>
+</tr>
+<tr>
+<td>6</td>
+<td>keepalived(backup)</td>
+<td>192.168.243.135</td>
+<td>node04</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="1、安装配置HAProxy"><a href="#1、安装配置HAProxy" class="headerlink" title="1、安装配置HAProxy"></a>1、安装配置HAProxy</h3><p>​    在node-3和node-4安装<a href="https://src.fedoraproject.org/repo/pkgs/haproxy/" target="_blank" rel="noopener">HAProxy</a></p>
+<h4 id="1-1、准备好HAProxy的安装包"><a href="#1-1、准备好HAProxy的安装包" class="headerlink" title="1.1、准备好HAProxy的安装包"></a>1.1、准备好HAProxy的安装包</h4><h4 id="1-2、解压到-usr-local目录"><a href="#1-2、解压到-usr-local目录" class="headerlink" title="1.2、解压到/usr/local目录"></a>1.2、解压到/usr/local目录</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf haproxy-1.8.25.tar.gz -C /usr/<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="1-3、进入到解压后的目录，查看内核版本，进行编译"><a href="#1-3、进入到解压后的目录，查看内核版本，进行编译" class="headerlink" title="1.3、进入到解压后的目录，查看内核版本，进行编译"></a>1.3、进入到解压后的目录，查看内核版本，进行编译</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/haproxy-1.8.25/</span><br><span class="line">uname -r</span><br><span class="line">make TARGET=generic</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-4、编译完成之后，开始进行安装"><a href="#1-4、编译完成之后，开始进行安装" class="headerlink" title="1.4、编译完成之后，开始进行安装"></a>1.4、编译完成之后，开始进行安装</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make install PREFIX=/usr/<span class="built_in">local</span>/haproxy</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-5、安装完成之后，创建目录，创建HAProxy配置文件"><a href="#1-5、安装完成之后，创建目录，创建HAProxy配置文件" class="headerlink" title="1.5、安装完成之后，创建目录，创建HAProxy配置文件"></a>1.5、安装完成之后，创建目录，创建HAProxy配置文件</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /usr/data/haproxy</span><br><span class="line">mkdir /usr/<span class="built_in">local</span>/haproxy/conf</span><br><span class="line">vi /usr/<span class="built_in">local</span>/haproxy/conf/haproxy.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-6、向配置文件中添加配置信息"><a href="#1-6、向配置文件中添加配置信息" class="headerlink" title="1.6、向配置文件中添加配置信息"></a>1.6、向配置文件中添加配置信息</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">global</span><br><span class="line">        <span class="built_in">log</span> 127.0.0.1 local0</span><br><span class="line">        <span class="comment">#log 127.0.0.1 local1 notice</span></span><br><span class="line">        <span class="comment">#log loghost local0 info</span></span><br><span class="line">        maxconn 4096</span><br><span class="line">        chroot /usr/<span class="built_in">local</span>/haproxy</span><br><span class="line">        pidfile /usr/data/haproxy/haproxy.pid</span><br><span class="line">        uid 99</span><br><span class="line">        gid 99</span><br><span class="line">        daemon</span><br><span class="line">        <span class="comment">#debug</span></span><br><span class="line">        <span class="comment">#quiet</span></span><br><span class="line">defaults</span><br><span class="line">		<span class="built_in">log</span> global</span><br><span class="line">		mode tcp</span><br><span class="line">		option abortonclose</span><br><span class="line">		option redispatch</span><br><span class="line">		retries 3</span><br><span class="line">		maxconn 2000</span><br><span class="line">		timeout connect 5000</span><br><span class="line">		timeout client 50000</span><br><span class="line">		timeout server 50000</span><br><span class="line">listen proxy_status</span><br><span class="line">	<span class="built_in">bind</span> :48066</span><br><span class="line">		mode tcp</span><br><span class="line">		balance roundrobin</span><br><span class="line">		server mycat_1 192.168.243.131:8066 check inter 10s</span><br><span class="line">		server mycat_2 192.168.242.132:8066 check inter 10s</span><br><span class="line">frontend admin_stats</span><br><span class="line">	<span class="built_in">bind</span> :7777</span><br><span class="line">		mode http</span><br><span class="line">		stats <span class="built_in">enable</span></span><br><span class="line">		option httplog</span><br><span class="line">		maxconn 10</span><br><span class="line">		stats refresh 30s</span><br><span class="line">		stats uri /admin</span><br><span class="line">		stats auth admin:123123</span><br><span class="line">		stats hide-version</span><br><span class="line">		stats admin <span class="keyword">if</span> TRUE</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-7、启动haproxy服务"><a href="#1-7、启动haproxy服务" class="headerlink" title="1.7、启动haproxy服务"></a>1.7、启动haproxy服务</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/<span class="built_in">local</span>/haproxy/sbin/haproxy -f /usr/<span class="built_in">local</span>/haproxy/conf/haproxy.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-8、查看haproxy的进程，如果存在则说明没有问题"><a href="#1-8、查看haproxy的进程，如果存在则说明没有问题" class="headerlink" title="1.8、查看haproxy的进程，如果存在则说明没有问题"></a>1.8、查看haproxy的进程，如果存在则说明没有问题</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -ef | grep haproxy</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-9、打开浏览器访问-用户名为admin，密码为123123"><a href="#1-9、打开浏览器访问-用户名为admin，密码为123123" class="headerlink" title="1.9、打开浏览器访问,用户名为admin，密码为123123"></a>1.9、打开浏览器访问,用户名为admin，密码为123123</h4><p>​        <code>http://192.168.85.113:7777/admin</code></p>
+<h4 id="1-10、任一连接一台haproxy登录访问"><a href="#1-10、任一连接一台haproxy登录访问" class="headerlink" title="1.10、任一连接一台haproxy登录访问"></a>1.10、任一连接一台haproxy登录访问</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql -uroot -pRoot_123 -h192.168.243.133 -P48066</span><br><span class="line">mysql -uroot -pRoot_123 -h192.168.243.134 -P48066</span><br></pre></td></tr></table></figure>
+
+<img src="H:\hexo\source\_posts\mycat高可用\haproxy监控.jpg"  />
+
+<hr>
+<h3 id="2、安装配置Keepalived"><a href="#2、安装配置Keepalived" class="headerlink" title="2、安装配置Keepalived"></a>2、安装配置Keepalived</h3><p>​        在node-3和node-4安装<a href="https://www.keepalived.org/download.html" target="_blank" rel="noopener">Keepalived</a></p>
+<h4 id="2-1、准备好Keepalived安装包"><a href="#2-1、准备好Keepalived安装包" class="headerlink" title="2.1、准备好Keepalived安装包"></a>2.1、准备好Keepalived安装包</h4><h4 id="2-2、解压到-usr-local目录"><a href="#2-2、解压到-usr-local目录" class="headerlink" title="2.2、解压到/usr/local目录"></a>2.2、解压到/usr/local目录</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf keepalived-1.4.5.tar.gz -C /usr/<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3、安装需要依赖的环境组件"><a href="#2-3、安装需要依赖的环境组件" class="headerlink" title="2.3、安装需要依赖的环境组件"></a>2.3、安装需要依赖的环境组件</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install gcc openssl-devel popt-devel -y</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4、进入到解压目录，进行编译"><a href="#2-4、进入到解压目录，进行编译" class="headerlink" title="2.4、进入到解压目录，进行编译"></a>2.4、进入到解压目录，进行编译</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/keepalived</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-5、编译完成之后，进行安装"><a href="#2-5、编译完成之后，进行安装" class="headerlink" title="2.5、编译完成之后，进行安装"></a>2.5、编译完成之后，进行安装</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-6、将keepalived的服务注册为系统服务"><a href="#2-6、将keepalived的服务注册为系统服务" class="headerlink" title="2.6、将keepalived的服务注册为系统服务"></a>2.6、将keepalived的服务注册为系统服务</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/<span class="built_in">local</span>/keepalived-1.4.5/keepalived/etc/init.d/keepalived /etc/init.d/</span><br><span class="line">mkdir /etc/keepalived</span><br><span class="line">cp /usr/<span class="built_in">local</span>/keepalived/etc/keepalived/keepalived.conf /etc/keepalived/</span><br><span class="line">cp /usr/<span class="built_in">local</span>/keepalived-1.4.5/keepalived/etc/sysconfig/keepalived /etc/sysconfig/</span><br><span class="line">cp /usr/<span class="built_in">local</span>/keepalived/sbin/keepalived /usr/sbin/</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-7、修改配置文件"><a href="#2-7、修改配置文件" class="headerlink" title="2.7、修改配置文件"></a>2.7、修改配置文件</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> etc/keepalived/</span><br><span class="line">vi keepalived.conf</span><br><span class="line"></span><br><span class="line">! Configuration File <span class="keyword">for</span> keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">     acassen@firewall.loc</span><br><span class="line">     failover@firewall.loc</span><br><span class="line">     sysadmin@firewall.loc</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from Alexandre.Cassen@firewall.loc</span><br><span class="line">   smtp_server 127.0.0.1</span><br><span class="line">   smtp_connect_timeout 30</span><br><span class="line">   router_id LVS_DEVEL</span><br><span class="line">   vrrp_skip_check_adv_addr</span><br><span class="line">   vrrp_garp_interval 0</span><br><span class="line">   vrrp_gna_interval 0</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER <span class="comment">#备机需要修改此配置 backof</span></span><br><span class="line">    interface ens33</span><br><span class="line">    virtual_router_id 51</span><br><span class="line">    priority 100</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.243.100/24 dev ens33 label ens33:3:</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-8、启动keepalived"><a href="#2-8、启动keepalived" class="headerlink" title="2.8、启动keepalived"></a>2.8、启动keepalived</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service keepalived start</span><br></pre></td></tr></table></figure>
+
+<p><img src="H:%5Chexo%5Csource_posts%5Cmycat%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8%5Ckeepalived%E5%90%AF%E5%8A%A8%E6%88%90%E5%8A%9F.jpg" alt=""></p>
+<p><img src="H:%5Chexo%5Csource_posts%5Cmycat%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8%5Cvip.jpg" alt=""></p>
+<h4 id="2-9、登录验证"><a href="#2-9、登录验证" class="headerlink" title="2.9、登录验证"></a>2.9、登录验证</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -uroot -pRoot_123 -h 192.168.243.100 -P 48066</span><br></pre></td></tr></table></figure>
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+              <a href="/tags/db/" rel="tag"># db</a>
+              <a href="/tags/mycat/" rel="tag"># mycat</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/28/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/" rel="prev" title="mysql主从复制">
+      <i class="fa fa-chevron-left"></i> mysql主从复制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/02/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98/" rel="next" title="mysql主从复制延迟问题">
+      mysql主从复制延迟问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、安装"><span class="nav-text">一、安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、下载"><span class="nav-text">1、下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、解压"><span class="nav-text">2、解压</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、前台启动"><span class="nav-text">3、前台启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、登录"><span class="nav-text">4、登录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、环境变量"><span class="nav-text">5、环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6、配置"><span class="nav-text">6、配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#6-1、server-xml"><span class="nav-text">6.1、server.xml</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-2、schema-xml"><span class="nav-text">6.2、schema.xml</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-3、负载策略"><span class="nav-text">6.3、负载策略</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7、后台启动"><span class="nav-text">7、后台启动</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、mycat的高可用"><span class="nav-text">二、mycat的高可用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、安装配置HAProxy"><span class="nav-text">1、安装配置HAProxy</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1、准备好HAProxy的安装包"><span class="nav-text">1.1、准备好HAProxy的安装包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2、解压到-usr-local目录"><span class="nav-text">1.2、解压到&#x2F;usr&#x2F;local目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3、进入到解压后的目录，查看内核版本，进行编译"><span class="nav-text">1.3、进入到解压后的目录，查看内核版本，进行编译</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4、编译完成之后，开始进行安装"><span class="nav-text">1.4、编译完成之后，开始进行安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-5、安装完成之后，创建目录，创建HAProxy配置文件"><span class="nav-text">1.5、安装完成之后，创建目录，创建HAProxy配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6、向配置文件中添加配置信息"><span class="nav-text">1.6、向配置文件中添加配置信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-7、启动haproxy服务"><span class="nav-text">1.7、启动haproxy服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-8、查看haproxy的进程，如果存在则说明没有问题"><span class="nav-text">1.8、查看haproxy的进程，如果存在则说明没有问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-9、打开浏览器访问-用户名为admin，密码为123123"><span class="nav-text">1.9、打开浏览器访问,用户名为admin，密码为123123</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-10、任一连接一台haproxy登录访问"><span class="nav-text">1.10、任一连接一台haproxy登录访问</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、安装配置Keepalived"><span class="nav-text">2、安装配置Keepalived</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1、准备好Keepalived安装包"><span class="nav-text">2.1、准备好Keepalived安装包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2、解压到-usr-local目录"><span class="nav-text">2.2、解压到&#x2F;usr&#x2F;local目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3、安装需要依赖的环境组件"><span class="nav-text">2.3、安装需要依赖的环境组件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4、进入到解压目录，进行编译"><span class="nav-text">2.4、进入到解压目录，进行编译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5、编译完成之后，进行安装"><span class="nav-text">2.5、编译完成之后，进行安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-6、将keepalived的服务注册为系统服务"><span class="nav-text">2.6、将keepalived的服务注册为系统服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-7、修改配置文件"><span class="nav-text">2.7、修改配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-8、启动keepalived"><span class="nav-text">2.8、启动keepalived</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-9、登录验证"><span class="nav-text">2.9、登录验证</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">45</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
