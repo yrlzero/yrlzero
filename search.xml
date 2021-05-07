@@ -3401,7 +3401,7 @@
 <h2 id="二、mycat的高可用"><a href="#二、mycat的高可用" class="headerlink" title="二、mycat的高可用"></a>二、mycat的高可用</h2><p>​        在之前的操作中，我们已经实现了mysql机器的高可用，可以动态切换master，那么如果mycat崩溃了呢？我们应该如何处理呢？所以此时就需要搭建mycat的高可用集群了。</p>
 <p>​        在mycat的权威指南中，介绍了多种高可用的方案，在这里我们讲解一种使用最多的方案，使用HAProxy+Keepalived配合使用来实现myact的高可用。</p>
 <p>​        HAproxy实现了mycat多借点的集群高可用和负载均衡，而HAProxy自身的高可用则可以通过Keepalived来实现。</p>
-<img src="H:\hexo\source\_posts\mycat高可用\mycat高可用.png" style="zoom:67%;" />
+<img src="http://yrlzero.gitee.io/images/linux/mycat/mycat高可用.png" style="zoom:67%;" />
 
 <table>
 <thead>
@@ -3468,7 +3468,7 @@
 <h4 id="1-9、打开浏览器访问-用户名为admin，密码为123123"><a href="#1-9、打开浏览器访问-用户名为admin，密码为123123" class="headerlink" title="1.9、打开浏览器访问,用户名为admin，密码为123123"></a>1.9、打开浏览器访问,用户名为admin，密码为123123</h4><p>​        <code>http://192.168.85.113:7777/admin</code></p>
 <h4 id="1-10、任一连接一台haproxy登录访问"><a href="#1-10、任一连接一台haproxy登录访问" class="headerlink" title="1.10、任一连接一台haproxy登录访问"></a>1.10、任一连接一台haproxy登录访问</h4><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">mysql -uroot -pRoot_123 -h192.168.243.133 -P48066</span><br><span class="line">mysql -uroot -pRoot_123 -h192.168.243.134 -P48066</span><br></pre></td></tr></table></figure>
 
-<img src="H:\hexo\source\_posts\mycat高可用\haproxy监控.jpg"  />
+<img src="http://yrlzero.gitee.io/images/linux/mycat/haproxy监控.jpg"  />
 
 <hr>
 <h3 id="2、安装配置Keepalived"><a href="#2、安装配置Keepalived" class="headerlink" title="2、安装配置Keepalived"></a>2、安装配置Keepalived</h3><p>​        在node-3和node-4安装<a href="https://www.keepalived.org/download.html" target="_blank" rel="noopener">Keepalived</a></p>
