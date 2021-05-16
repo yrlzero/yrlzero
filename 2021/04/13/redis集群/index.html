@@ -61,7 +61,7 @@
 <meta property="og:image" content="http://yrlzero.gitee.io/images/linux/redis/cluster-%E6%B8%85%E9%99%A4%E9%85%8D%E7%BD%AE%E8%BF%98%E5%8E%9F.jpg">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/linux/redis/cluster-%E7%A7%BB%E5%8A%A8%E6%A7%BD%E4%BD%8D-02.jpg">
 <meta property="article:published_time" content="2021-04-13T13:08:29.509Z">
-<meta property="article:modified_time" content="2021-04-30T14:27:12.520Z">
+<meta property="article:modified_time" content="2021-05-08T14:39:00.760Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="db">
 <meta property="article:tag" content="redis">
@@ -250,7 +250,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-04-30 22:27:12" itemprop="dateModified" datetime="2021-04-30T22:27:12+08:00">2021-04-30</time>
+                <time title="修改时间：2021-05-08 22:39:00" itemprop="dateModified" datetime="2021-05-08T22:39:00+08:00">2021-05-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -320,7 +320,7 @@
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-%E4%BB%8E%E8%8A%82%E7%82%B9%E7%9B%91%E6%8E%A7%E5%88%B0%E4%B8%BB%E8%8A%82%E7%82%B9%E5%AE%95%E6%9C%BA-05.jpg" alt="从节点监控到主节点宕机"></p>
 <p>从节点客户端执行<code>replicaof no one</code>指令，将自己从slave升级为master</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-%E4%BB%8E%E8%8A%82%E7%82%B9%E5%B0%86%E8%87%AA%E5%B7%B1%E5%8D%87%E7%BA%A7%E4%B8%BA%E4%B8%BB%E8%8A%82%E7%82%B9-06.jpg" alt="从节点升级为主节点"></p>
-<h3 id="8、配置"><a href="#8、配置" class="headerlink" title="8、配置"></a>8、配置</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># slave在首次接收master数据时，可以在slave中配置同步期间是否接收旧数据的访问，在首次同步之后，旧数据会被删除，然后再主线程加载新数据，此时slave会阻塞</span></span><br><span class="line">replica-serve-stale-data yes  </span><br><span class="line"></span><br><span class="line"><span class="comment">#从节点是否开启只读模式</span></span><br><span class="line">replica-read-only yes </span><br><span class="line"></span><br><span class="line"><span class="comment">#是否采用无磁盘模式传输，no表示走磁盘，yes走网络传输</span></span><br><span class="line">repl-diskless-sync no </span><br><span class="line"></span><br><span class="line"><span class="comment">#增量复制，当redis挂掉之后又恢复，主节点可以增量传输数据过来，但是增量的数据与当前的数据存在偏差，从节点可以通过传送offset从主节点再次拉回数据，此配置大小会关系到redis内存维护的队列大小，此操作的成功与否，数据量大于这个值会造成移除</span></span><br><span class="line"><span class="comment"># repl-backlog-size 1mb </span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果至少有 3 个 slave ，并且滞后小于 10 秒，则写入将被接受,如果条件不满足master的写操作将被拒绝。</span></span><br><span class="line"><span class="comment"># min-replicas-to-write 3</span></span><br><span class="line"><span class="comment"># min-replicas-max-lag 10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果master节点设置了密码，需要在此处进行配置对应表的访问密码</span></span><br><span class="line"><span class="comment"># masterauth &lt;master-password&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置追随的master节点</span></span><br><span class="line"><span class="comment"># replicaof &lt;masterip&gt; &lt;masterport&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="8、配置"><a href="#8、配置" class="headerlink" title="8、配置"></a>8、配置</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># slave在首次接收master数据时，可以在slave中配置同步期间是否接收旧数据的访问，在首次同步之后，旧数据会被删除，然后再主线程加载新数据，此时slave会阻塞</span></span><br><span class="line">replica-serve-stale-data yes  </span><br><span class="line"></span><br><span class="line"><span class="comment">#从节点是否开启只读模式</span></span><br><span class="line">replica-read-only yes </span><br><span class="line"></span><br><span class="line"><span class="comment">#是否采用无磁盘模式传输，no表示走磁盘，yes走网络传输</span></span><br><span class="line">repl-diskless-sync no </span><br><span class="line"></span><br><span class="line"><span class="comment">#增量复制，当redis挂掉之后又恢复，主节点可以增量传输数据过来，但是增量的数据与当前的数据存在偏差，从节点可以通过传送offset从主节点再次拉回数据，此配置大小会关系到redis内存维护的队列大小，此操作的成功与否，数据量大于这个值会造成溢出</span></span><br><span class="line"><span class="comment"># repl-backlog-size 1mb </span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果至少有 3 个 slave ，并且滞后小于 10 秒，则写入将被接受,如果条件不满足master的写操作将被拒绝。</span></span><br><span class="line"><span class="comment"># min-replicas-to-write 3</span></span><br><span class="line"><span class="comment"># min-replicas-max-lag 10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果master节点设置了密码，需要在此处进行配置对应表的访问密码</span></span><br><span class="line"><span class="comment"># masterauth &lt;master-password&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置追随的master节点</span></span><br><span class="line"><span class="comment"># replicaof &lt;masterip&gt; &lt;masterport&gt;</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="9、总结"><a href="#9、总结" class="headerlink" title="9、总结"></a>9、总结</h3><p>1、从节点追随主节点之后，旧数据会被删除，同时非阻塞方式同步主节点数据</p>
 <p><img src="http://yrlzero.gitee.io/images/linux/redis/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-%E4%BB%8E%E8%8A%82%E7%82%B9%E8%BF%BD%E9%9A%8F%E5%89%8D%E5%90%8E%E6%95%B0%E6%8D%AE%E5%8F%98%E5%8C%96-05.jpg" alt=""></p>
@@ -646,19 +646,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">46</span>
+          <span class="site-state-item-count">47</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-count">33</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
