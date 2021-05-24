@@ -4183,7 +4183,7 @@
   <entry>
     <title>elasticsearch(一)基本概念</title>
     <url>/2021/05/24/elasticsearch%EF%BC%88%E4%B8%80%EF%BC%89%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/</url>
-    <content><![CDATA[<h1 id="Elasticsearch"><a href="#Elasticsearch" class="headerlink" title="Elasticsearch"></a>Elasticsearch</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>ES是基于Lucene分布式搜索服务，可以存储整个对象或文档，分布式的实时文件存储，每个字段都被索引并可被搜索，分布式的实时分析搜索引擎，可以扩展到上百台服务器，处理PB级结构化或非结构化数据。</p>
+    <content><![CDATA[<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>ES是基于Lucene分布式搜索服务，可以存储整个对象或文档，分布式的实时文件存储，每个字段都被索引并可被搜索，分布式的实时分析搜索引擎，可以扩展到上百台服务器，处理PB级结构化或非结构化数据。</p>
 <a id="more"></a>
 
 <h3 id="与传统数据库的对比"><a href="#与传统数据库的对比" class="headerlink" title="与传统数据库的对比"></a>与传统数据库的对比</h3><p><img src="http://yrlzero.gitee.io/images/elk/elastic-search/es-01.png" alt=""></p>
@@ -4243,7 +4243,8 @@
 <p>ES不允许Primary和它的Replica放在同一个节点中，并且同一个节点不接受完全相同的两个Replica</p>
 <p>同一个节点允许多个索引的分片同时存在。</p>
 <h3 id="容错机制"><a href="#容错机制" class="headerlink" title="容错机制"></a>容错机制</h3><p>在局部出错异常的情况下，保证服务正常运行并且有自行恢复能力。</p>
-<p><img src="http://yrlzero.gitee.io/images/elk/elastic-search/es-03.png" alt="es"></p>
+<p><img src="http://yrlzero.gitee.io/images/elk/elastic-search/es-03-01.jpg" alt=""></p>
+<p><img src="http://yrlzero.gitee.io/images/elk/elastic-search/es-03-02.jpg" alt=""></p>
 <p><strong>Master节点会尝试重启故障机，故障机启动后将作为Slave节点</strong></p>
 <p>数据同步，Master会将宕机期间丢失的数据<strong>增量同步</strong>到重启机器对应的分片上去。</p>
 <p><strong>主节点的Shard分片和副本shard分片不能同时存在于同一个节点，横向扩容新节点时，ES会自动进行分片重新均衡。</strong></p>
