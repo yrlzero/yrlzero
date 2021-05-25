@@ -21,28 +21,34 @@
     var CONFIG = {"hostname":"yrlzero.gitee.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="yrl&#39;s blog">
-<meta property="og:url" content="http://yrlzero.gitee.io/index.html">
+  <meta name="description" content="prefix-前缀前缀查询：以xx开头的搜索，不计算相关度评分，和filter比，没有bitcache。前缀搜索，尽量把前缀长度设置的更长，性能差，因为它会扫描倒排索引整张表，匹配每个term是否包含xx。 1234567891011121314语法：GET index&#x2F;_search&amp;#123;    &quot;query&quot;: &amp;#123;        &quot;prefix&quot;: &amp;#123;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="elasticsearch(六)-前缀、通配符、正则、模糊查询">
+<meta property="og:url" content="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E5%85%AD%EF%BC%89%E5%89%8D%E7%BC%80%E3%80%81%E9%80%9A%E9%85%8D%E7%AC%A6%E3%80%81%E6%AD%A3%E5%88%99%E3%80%81%E6%A8%A1%E7%B3%8A%E6%9F%A5%E8%AF%A2/index.html">
 <meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="prefix-前缀前缀查询：以xx开头的搜索，不计算相关度评分，和filter比，没有bitcache。前缀搜索，尽量把前缀长度设置的更长，性能差，因为它会扫描倒排索引整张表，匹配每个term是否包含xx。 1234567891011121314语法：GET index&#x2F;_search&amp;#123;    &quot;query&quot;: &amp;#123;        &quot;prefix&quot;: &amp;#123;">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-05-25T14:04:15.577Z">
+<meta property="article:modified_time" content="2021-05-25T14:07:41.139Z">
 <meta property="article:author" content="yrl">
+<meta property="article:tag" content="elasticsearch">
+<meta property="article:tag" content="elk">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yrlzero.gitee.io/">
+<link rel="canonical" href="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E5%85%AD%EF%BC%89%E5%89%8D%E7%BC%80%E3%80%81%E9%80%9A%E9%85%8D%E7%AC%A6%E3%80%81%E6%AD%A3%E5%88%99%E3%80%81%E6%A8%A1%E7%B3%8A%E6%9F%A5%E8%AF%A2/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>yrl's blog</title>
+  <title>elasticsearch(六)-前缀、通配符、正则、模糊查询 | yrl's blog</title>
   
 
 
@@ -173,9 +179,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -191,10 +198,9 @@
       <meta itemprop="name" content="yrl's blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/25/elasticsearch%EF%BC%88%E5%85%AD%EF%BC%89%E5%89%8D%E7%BC%80%E3%80%81%E9%80%9A%E9%85%8D%E7%AC%A6%E3%80%81%E6%AD%A3%E5%88%99%E3%80%81%E6%A8%A1%E7%B3%8A%E6%9F%A5%E8%AF%A2/" class="post-title-link" itemprop="url">elasticsearch(六)-前缀、通配符、正则、模糊查询</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          elasticsearch(六)-前缀、通配符、正则、模糊查询
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -227,7 +233,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="prefix-前缀"><a href="#prefix-前缀" class="headerlink" title="prefix-前缀"></a>prefix-前缀</h2><p>前缀查询：以xx开头的搜索，不计算相关度评分，和filter比，没有bitcache。前缀搜索，尽量把前缀长度设置的更长，<strong>性能差，因为它会扫描倒排索引整张表，匹配每个term是否包含xx。</strong></p>
+        <h2 id="prefix-前缀"><a href="#prefix-前缀" class="headerlink" title="prefix-前缀"></a>prefix-前缀</h2><p>前缀查询：以xx开头的搜索，不计算相关度评分，和filter比，没有bitcache。前缀搜索，尽量把前缀长度设置的更长，<strong>性能差，因为它会扫描倒排索引整张表，匹配每个term是否包含xx。</strong></p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">语法：</span><br><span class="line">GET index/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"prefix"</span>: &#123;</span><br><span class="line">            <span class="attr">"title"</span>: &#123;</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"text"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">参数：</span><br><span class="line">index_prefixes: 默认   "min_chars" : 2,   "max_chars" : 5</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//类似于SQL的左Like查询</span></span><br><span class="line">GET my_index/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"prefix"</span>: &#123;</span><br><span class="line">            <span class="attr">"text"</span>: &#123;</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"myword"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -278,752 +284,35 @@
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//匹配 "text": "my english is good"</span></span><br><span class="line">GET /my_index/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"match_phrase"</span>: &#123;</span><br><span class="line">            <span class="attr">"text"</span>: <span class="string">"my eng is goo"</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/elasticsearch/" rel="tag"># elasticsearch</a>
+              <a href="/tags/elk/" rel="tag"># elk</a>
+          </div>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E4%BA%94%EF%BC%89%E5%88%86%E8%AF%8D%E5%99%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/25/elasticsearch%EF%BC%88%E4%BA%94%EF%BC%89%E5%88%86%E8%AF%8D%E5%99%A8/" class="post-title-link" itemprop="url">elasticsearch(五)-分词器</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-05-25 21:54:03 / 修改时间：22:03:03" itemprop="dateCreated datePublished" datetime="2021-05-25T21:54:03+08:00">2021-05-25</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">分析器：</span></span><br><span class="line"><span class="meta">1.character</span> <span class="string">filter（mapping）：分词之前预处理（过滤无用字符、标签等，转换一些&amp;=&gt;and 《es》=&gt; es</span></span><br><span class="line">   <span class="attr">HTML</span> <span class="string">Strip Character Filter：html_strip  自动过滤html标签</span></span><br><span class="line">   <span class="meta">参数：escaped_tags</span>   <span class="string">需要保留的html标签</span></span><br><span class="line"></span><br><span class="line">   <span class="attr">Mapping</span> <span class="string">Character Filter：type mapping</span></span><br><span class="line"></span><br><span class="line">   <span class="attr">Pattern</span> <span class="string">Replace Character Filter：type pattern_replace</span></span><br><span class="line"></span><br><span class="line"><span class="attr">4.tokenizer（分词器）：分词</span></span><br><span class="line"></span><br><span class="line"><span class="meta">5.token</span> <span class="string">filter：停用词、时态转换、大小写转换、同义词转换、语气词处理等。如：has=&gt;have  him=&gt;he  apples=&gt;apple</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/25/elasticsearch%EF%BC%88%E4%BA%94%EF%BC%89%E5%88%86%E8%AF%8D%E5%99%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E5%9B%9B%EF%BC%89painless/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/25/elasticsearch%EF%BC%88%E5%9B%9B%EF%BC%89painless/" class="post-title-link" itemprop="url">elasticsearch(四)-painless</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-05-25 21:45:24" itemprop="dateCreated datePublished" datetime="2021-05-25T21:45:24+08:00">2021-05-25</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Painless"><a href="#Painless" class="headerlink" title="Painless"></a>Painless</h2><p>Painless是一种专门用于Elasticsearch的简单,用于内联和存储脚本，类似于Java,也有注释、关键字、类型、变量、函数等，安全的脚本语言。它是Elasticsearch的默认脚本语言，可以安全地用于内联和存储脚本。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/25/elasticsearch%EF%BC%88%E5%9B%9B%EF%BC%89painless/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/25/elasticsearch%EF%BC%88%E4%BA%94%EF%BC%89%E5%88%86%E8%AF%8D%E5%99%A8/" rel="prev" title="elasticsearch(五)-分词器">
+      <i class="fa fa-chevron-left"></i> elasticsearch(五)-分词器
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
   
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">elasticsearch(三)-倒排索引和写入原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-05-25 21:01:29 / 修改时间：21:50:37" itemprop="dateCreated datePublished" datetime="2021-05-25T21:01:29+08:00">2021-05-25</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="底层原理"><a href="#底层原理" class="headerlink" title="底层原理"></a>底层原理</h2><blockquote>
-<p>正排索引（doc values ）VS 倒排索引</p>
-</blockquote>
-<p><strong>概念</strong>：从广义来说，<code>正排索引（doc values ）</code> 本质上是一个序列化的列式存储。列式存储 适用于聚合、排序、脚本等操作，所有的数字、地理坐标、日期、IP 和不分析（ not_analyzed ）字符类型都会默认开启。</p>
-<p>而<code>倒排索引</code>的优势在于查找包含某个项的文档，相反，也可以用它确定哪些项是否存在单个文档里。</p>
-<p><strong>优化</strong>：es官方是建议，es大量是基于os cache来进行缓存和提升性能的，不建议用jvm内存来进行缓存，那样会导致一定的gc开销和oom问题，给jvm更少的内存，给os cache更大的内存。比如64g服务器，给jvm最多4 ~ 16g（1/16 ~ 1/4），os cache可以提升doc value和倒排索引的缓存和查询效率。</p>
-<p><strong>总结：全文搜索需要用倒排索引，而排序和聚合则需要使用 正排索引。</strong></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/24/elasticsearch%EF%BC%88%E4%BA%8C%EF%BC%89%E6%9F%A5%E8%AF%A2%E8%AF%AD%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/24/elasticsearch%EF%BC%88%E4%BA%8C%EF%BC%89%E6%9F%A5%E8%AF%A2%E8%AF%AD%E6%B3%95/" class="post-title-link" itemprop="url">elasticsearch(二)-查询语法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-05-24 22:37:32" itemprop="dateCreated datePublished" datetime="2021-05-24T22:37:32+08:00">2021-05-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-05-25 21:53:25" itemprop="dateModified" datetime="2021-05-25T21:53:25+08:00">2021-05-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="查询语法"><a href="#查询语法" class="headerlink" title="查询语法"></a>查询语法</h2><h3 id="Searchtimeout："><a href="#Searchtimeout：" class="headerlink" title="Searchtimeout："></a>Searchtimeout：</h3><p>①   设置：默认没有timeout，如果设置了timeout，那么会执行timeout机制。</p>
-<p>②   Timeout机制：假设用户查询结果有1W条数据，但是需要10″才能查询完毕，但是用户设置了1″的timeout，那么不管当前一共查询到了多少数据，都会在1″后ES讲停止查询，并返回当前数据。</p>
-<p>③  用法：GET /_search?timeout=1s/ms/m</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/24/elasticsearch%EF%BC%88%E4%BA%8C%EF%BC%89%E6%9F%A5%E8%AF%A2%E8%AF%AD%E6%B3%95/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/24/elasticsearch%EF%BC%88%E4%B8%80%EF%BC%89%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/24/elasticsearch%EF%BC%88%E4%B8%80%EF%BC%89%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" class="post-title-link" itemprop="url">elasticsearch(一)-基本概念</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-05-24 21:43:31" itemprop="dateCreated datePublished" datetime="2021-05-24T21:43:31+08:00">2021-05-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-05-25 21:53:16" itemprop="dateModified" datetime="2021-05-25T21:53:16+08:00">2021-05-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>ES是基于Lucene分布式搜索服务，可以存储整个对象或文档，分布式的实时文件存储，每个字段都被索引并可被搜索，分布式的实时分析搜索引擎，可以扩展到上百台服务器，处理PB级结构化或非结构化数据。</p>
-<h3 id="与传统数据库的对比"><a href="#与传统数据库的对比" class="headerlink" title="与传统数据库的对比"></a>与传统数据库的对比</h3><p><img src="http://yrlzero.gitee.io/images/elk/elastic-search/es-01.png" alt=""></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/24/elasticsearch%EF%BC%88%E4%B8%80%EF%BC%89%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/16/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/16/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">线程池-执行原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-05-16 10:15:40 / 修改时间：10:33:22" itemprop="dateCreated datePublished" datetime="2021-05-16T10:15:40+08:00">2021-05-16</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" itemprop="url" rel="index"><span itemprop="name">线程池</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a>一、概念</h2><p>Java中的线程池核心实现类是<code>ThreadPoolExecutor</code>。</p>
-<img src="http://yrlzero.gitee.io/images/多线程/接口父类.jpg" style="zoom: 80%;" />
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/16/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/07/mcat%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/07/mcat%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">mycat使用</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-05-07 22:00:00 / 修改时间：23:28:56" itemprop="dateCreated datePublished" datetime="2021-05-07T22:00:00+08:00">2021-05-07</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、读写分离"><a href="#一、读写分离" class="headerlink" title="一、读写分离"></a>一、读写分离</h2><p>​    通过<a href="https://yrlzero.gitee.io/2021/04/29/mycat%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8/#%E5%AE%89%E8%A3%85">mycat</a>和<a href="https://yrlzero.gitee.io/2021/04/28/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/#%E4%B8%80%E4%B8%BB%E4%B8%80%E4%BB%8E">mysql的主从复制</a>配合搭建数据库的读写分离，可以实现mysql的高可用性。</p>
-<p>修改mycat的<code>schema.xml</code>配置</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/07/mcat%E4%BD%BF%E7%94%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/07/mycat%E5%9F%BA%E6%9C%AC%E5%AE%89%E8%A3%85%E5%8F%8A%E9%AB%98%E5%8F%AF%E7%94%A8%E9%83%A8%E7%BD%B2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/07/mycat%E5%9F%BA%E6%9C%AC%E5%AE%89%E8%A3%85%E5%8F%8A%E9%AB%98%E5%8F%AF%E7%94%A8%E9%83%A8%E7%BD%B2/" class="post-title-link" itemprop="url">mycat基本安装及高可用部署</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-05-07 21:00:00" itemprop="dateCreated datePublished" datetime="2021-05-07T21:00:00+08:00">2021-05-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-05-15 18:36:37" itemprop="dateModified" datetime="2021-05-15T18:36:37+08:00">2021-05-15</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、安装"><a href="#一、安装" class="headerlink" title="一、安装"></a>一、安装</h2><h3 id="1、下载"><a href="#1、下载" class="headerlink" title="1、下载"></a>1、<a href="http://dl.mycat.org.cn/1.6.7.5/2020-4-10/" target="_blank" rel="noopener">下载</a></h3><h3 id="2、解压"><a href="#2、解压" class="headerlink" title="2、解压"></a>2、解压</h3><p>解压安装包，<code>-C</code>指定安装目录</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf Mycat-server-1.6.7.5-release-20200422133810-linux.tar.gz -C /usr/<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/07/mycat%E5%9F%BA%E6%9C%AC%E5%AE%89%E8%A3%85%E5%8F%8A%E9%AB%98%E5%8F%AF%E7%94%A8%E9%83%A8%E7%BD%B2/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/02/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/02/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">mysql主从复制延迟问题</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-05-02 18:08:24 / 修改时间：22:47:17" itemprop="dateCreated datePublished" datetime="2021-05-02T18:08:24+08:00">2021-05-02</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="主从同步延迟"><a href="#主从同步延迟" class="headerlink" title="主从同步延迟"></a>主从同步延迟</h2><p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png" alt=""></p>
-<ul>
-<li>mysql的主从复制都是单线程的操作，主库对所有DDL和DML产生的日志写进bin log，由于bin log是顺序写，所以效率很高。</li>
-<li>master和slave之间的数据传输依靠了内部网络或专线，一般来说也是比较快的</li>
-<li>slave读取master的数据写入relay log是追加日志，属于顺序io效率并不低</li>
-<li>slave的sql thread线程将主库的DDL和DML操作事件在slave中重放。DML和DDL的IO操作是随机的，不是顺序，所以成本要高很多</li>
-<li>另一方面，由于sql thread也是单线程的，当主库的并发较高时，产生的DML数量超过slave的SQL thread所能处理的速度，或者当slave中有大型query语句产生了锁等待，那么延时就产生了。</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/02/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
-  </nav>
 
 
 
@@ -1075,6 +364,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#prefix-前缀"><span class="nav-text">prefix-前缀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#wildcard-通配符"><span class="nav-text">wildcard-通配符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#regexp-正则"><span class="nav-text">regexp-正则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fuzzy-混淆模糊查询"><span class="nav-text">fuzzy-混淆模糊查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#match-phrase-prefix-短语前缀"><span class="nav-text">match_phrase_prefix-短语前缀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#N-gram：token-filter"><span class="nav-text">N-gram：token filter</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
