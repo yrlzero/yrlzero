@@ -23,23 +23,24 @@
 
   <meta name="description" content="底层原理 正排索引（doc values ）VS 倒排索引  概念：从广义来说，正排索引（doc values ） 本质上是一个序列化的列式存储。列式存储 适用于聚合、排序、脚本等操作，所有的数字、地理坐标、日期、IP 和不分析（ not_analyzed ）字符类型都会默认开启。 而倒排索引的优势在于查找包含某个项的文档，相反，也可以用它确定哪些项是否存在单个文档里。 优化：es官方是建议，es">
 <meta property="og:type" content="article">
-<meta property="og:title" content="elasticsearch(三)倒排索引">
-<meta property="og:url" content="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/index.html">
+<meta property="og:title" content="elasticsearch(三)-倒排索引和写入原理">
+<meta property="og:url" content="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/index.html">
 <meta property="og:site_name" content="yrl&#39;s blog">
 <meta property="og:description" content="底层原理 正排索引（doc values ）VS 倒排索引  概念：从广义来说，正排索引（doc values ） 本质上是一个序列化的列式存储。列式存储 适用于聚合、排序、脚本等操作，所有的数字、地理坐标、日期、IP 和不分析（ not_analyzed ）字符类型都会默认开启。 而倒排索引的优势在于查找包含某个项的文档，相反，也可以用它确定哪些项是否存在单个文档里。 优化：es官方是建议，es">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/elk/elasticsearch-index/es-01.png">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/elk/elasticsearch-index/es-02.png">
 <meta property="og:image" content="http://yrlzero.gitee.io/images/elk/elasticsearch-index/es-03.png">
+<meta property="og:image" content="http://yrlzero.gitee.io/images/elk/elasticsearch-painless/es-01.jpg">
 <meta property="article:published_time" content="2021-05-25T13:01:29.016Z">
-<meta property="article:modified_time" content="2021-05-25T13:39:19.406Z">
+<meta property="article:modified_time" content="2021-05-25T13:47:30.164Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="elasticsearch">
 <meta property="article:tag" content="elk">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://yrlzero.gitee.io/images/elk/elasticsearch-index/es-01.png">
 
-<link rel="canonical" href="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/">
+<link rel="canonical" href="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/">
 
 
 <script id="page-configurations">
@@ -52,7 +53,7 @@
   };
 </script>
 
-  <title>elasticsearch(三)倒排索引 | yrl's blog</title>
+  <title>elasticsearch(三)-倒排索引和写入原理 | yrl's blog</title>
   
 
 
@@ -190,7 +191,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -203,7 +204,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          elasticsearch(三)倒排索引
+          elasticsearch(三)-倒排索引和写入原理
         </h1>
 
         <div class="post-meta">
@@ -214,7 +215,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-05-25 21:01:29 / 修改时间：21:39:19" itemprop="dateCreated datePublished" datetime="2021-05-25T21:01:29+08:00">2021-05-25</time>
+              <time title="创建时间：2021-05-25 21:01:29 / 修改时间：21:47:30" itemprop="dateCreated datePublished" datetime="2021-05-25T21:01:29+08:00">2021-05-25</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -314,37 +315,19 @@
 <p><strong>因此通过正排索引来解决聚合问题</strong>。</p>
 </blockquote>
 <p><img src="http://yrlzero.gitee.io/images/elk/elasticsearch-index/es-03.png" alt="es"></p>
-<h2 id="批量查询"><a href="#批量查询" class="headerlink" title="批量查询"></a>批量查询</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">语法：</span></span><br><span class="line"><span class="attr">GET</span> <span class="string">/_mget</span></span><br><span class="line"><span class="attr">GET</span> <span class="string">/&lt;index&gt;/_mget</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//批量查询 查询id =2 和id = 3 的数据</span></span><br><span class="line">GET /_mget</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"docs"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_index"</span>: <span class="string">"product"</span>,</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">2</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_index"</span>: <span class="string">"product"</span>,</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//封装,把索引名(product提取出来)</span></span><br><span class="line">GET /product/_mget</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"docs"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">2</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//再封装</span></span><br><span class="line">GET /product/_mget</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"ids"</span>:[<span class="number">2</span>,<span class="number">3</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//include包含哪些字段  exclude排除哪些字段</span></span><br><span class="line">GET /product/_mget</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"docs"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">2</span>,</span><br><span class="line">            <span class="attr">"_source"</span>: <span class="literal">false</span> <span class="comment">//不显示字段数据</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">3</span>,</span><br><span class="line">            <span class="attr">"_source"</span>: [  <span class="comment">//指定字段数据</span></span><br><span class="line">                <span class="string">"name"</span>,</span><br><span class="line">                <span class="string">"price"</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">4</span>,</span><br><span class="line">            <span class="attr">"_source"</span>: &#123;</span><br><span class="line">                <span class="attr">"include"</span>: [</span><br><span class="line">                    <span class="string">"name"</span></span><br><span class="line">                ],</span><br><span class="line">                <span class="attr">"exclude"</span>:[</span><br><span class="line">                    <span class="string">"price"</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Operate：</span><br><span class="line">  create：PUT &#x2F;index&#x2F;_create&#x2F;id&#x2F;，强制创建（是否制定id）</span><br><span class="line">  delete：删除（lazy delete原理）</span><br><span class="line">  index：可以是创建，也可以是全量替换</span><br><span class="line">  update：执行partial update（全量替换，部分替换）</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//手动指定id和自动生成</span></span><br><span class="line">PUT /test_index/_doc/1/</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"test"</span>:<span class="string">"123"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//强制执行创建 如果数据存在则报错</span></span><br><span class="line">PUT /test_index/_doc/1/_create</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"test"</span>:<span class="string">"123"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//同上</span></span><br><span class="line">PUT /test_index/_create/1/</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"test"</span>:<span class="string">"123"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//自动生产id(guid)</span></span><br><span class="line">POST /test_index/_doc</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"test"</span>:<span class="string">"123"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当使用PUT进行数据覆盖的时候，Version版本号会上升，旧的Version数据会被删除，不会马上删除，会有一个懒删除的机制。</p>
-<h2 id="批量操作"><a href="#批量操作" class="headerlink" title="批量操作"></a>批量操作</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bulk：批量增删改  no-query</span><br><span class="line">语法格式：</span><br><span class="line">POST /_bulk</span><br><span class="line">POST /&lt;index&gt;/_bulk</span><br><span class="line">&#123;<span class="attr">"action"</span>: &#123;<span class="attr">"metadata"</span>&#125;&#125;   <span class="comment">//操作和索引</span></span><br><span class="line">&#123;<span class="attr">"data"</span>&#125;   <span class="comment">//数据</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">POST /_bulk</span><br><span class="line">&#123; <span class="attr">"delete"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"1"</span> &#125;&#125;</span><br><span class="line"></span><br><span class="line">&#123; <span class="attr">"create"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"2"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"name"</span>:    <span class="string">"_bulk create 2"</span> &#125;</span><br><span class="line"></span><br><span class="line">&#123; <span class="attr">"create"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"12"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"name"</span>:    <span class="string">"_bulk create 12"</span> &#125;</span><br><span class="line"></span><br><span class="line">&#123; <span class="attr">"index"</span>:  &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"3"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"name"</span>:    <span class="string">"index product2 "</span> &#125;</span><br><span class="line"></span><br><span class="line">&#123; <span class="attr">"index"</span>:  &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"13"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"name"</span>:    <span class="string">"index product2"</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//当出现冲突时尝试三次，三次失败后就放弃</span></span><br><span class="line">&#123; <span class="attr">"update"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"4"</span>,<span class="attr">"retry_on_conflict"</span> : <span class="string">"3"</span>&#125; &#125;</span><br><span class="line">&#123; <span class="attr">"doc"</span> : &#123;<span class="attr">"test_field2"</span> : <span class="string">"bulk test1"</span>&#125; &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>bulk</code>批处理操作要求数据分两行编写，不可以将<code>{}</code>进行换行操作。</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//加?filter_path=items.*.error  只显示失败的，返回从操作失败的数据信息</span></span><br><span class="line">POST /_bulk?filter_path=items.*.error</span><br><span class="line">&#123; <span class="attr">"delete"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"1"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"create"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"2"</span> &#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//version=2&amp;&amp;version_type=external 通过版本更新数据，避免并发覆盖---CAS</span></span><br><span class="line">PUT /version_index/_doc/1?version=2&amp;&amp;version_type=external</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"title"</span>: <span class="string">"窈窕淑女,君子好逑"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//新版本使用者两个</span></span><br><span class="line"><span class="comment">//if_seq_no` and `if_primary_term`</span></span><br></pre></td></tr></table></figure>
-
+<h2 id="写入原理"><a href="#写入原理" class="headerlink" title="写入原理"></a>写入原理</h2><p><img src="http://yrlzero.gitee.io/images/elk/elasticsearch-painless/es-01.jpg" alt="es"></p>
+<p>当有写入请求时，数据会先写到内存的Buffer中（Buffer专门用于写入操作），每间隔1S会创建一个<code>index segment</code>的<code>file</code>，然后<code>segment</code>会同步到<code>OS cache</code>中，<code>OS cache</code>会返回一个<code>status = Open</code>，<strong>这时候的<code>segment</code>就能对外提供搜索操作。</strong></p>
+<p><strong>读写操作进行了异步分离操作，segment对外提供读搜索操作，OS cache后台异步写入数据。</strong></p>
 <blockquote>
-<p><strong>ES是通过CAS+Version解决并发的问题！！！</strong></p>
+<p>在这种方式下，如果宕机会造成少部分数据的丢失，ES是怎么避免的？</p>
 </blockquote>
+<p>ES在写入索引时，并没有实时落盘到索引文件，而是先双写到内存和translog文件，假如节点挂了，重启节点时就会重放日志，这样相当于把用户的操作模拟了一遍。保证了数据的不丢失。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">当OS cache中的数据达到一定大小之后或者一定时间后，触发Flush：</span><br><span class="line">1.执行 commit操作，把内存中的Buffer、Segment数据同步到OS cache</span><br><span class="line">2.把OS cache的数据fsync到 磁盘中</span><br><span class="line">3.清空translog</span><br></pre></td></tr></table></figure>
+
+<p><code>Commit Point</code>用于存储可用的segment，每当创建一个segment时，都会往<code>Commit point</code>中做登记，<code>segment</code>文件并不是无限制地创建的，当达到一定的操作/大小时，会执行segment合并操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.选择一些体积小的segment，然后将其合并成一个更大的segment</span><br><span class="line">2.执行flush操作，讲OS cache的数据落地到磁盘中</span><br><span class="line">3.创建新的commit point，并且登记新的segment，然后将旧的segment标记成删除状态</span><br><span class="line">4.将新的segment搜索状态&#96;status&#x3D;open&#96;打开</span><br><span class="line">5.将删除状态的segment文件删除</span><br></pre></td></tr></table></figure>
+
+<p><code>segment</code>维护了一个<code>.del</code>的文件，当有数据执行删除/更新操作时，它会先将数据在segment中标记成删除的状态，这时候没有物理删除，然后在查询的时候，会将删除状态的数据进行过滤。</p>
 
     </div>
 
@@ -367,7 +350,10 @@
     <a href="/2021/05/24/elasticsearch%EF%BC%88%E4%BA%8C%EF%BC%89%E6%9F%A5%E8%AF%A2%E8%AF%AD%E6%B3%95/" rel="prev" title="elasticsearch(二)查询语法">
       <i class="fa fa-chevron-left"></i> elasticsearch(二)查询语法
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/25/elasticsearch%EF%BC%88%E5%9B%9B%EF%BC%89painless/" rel="next" title="elasticsearch(四)-painless">
+      elasticsearch(四)-painless <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -426,7 +412,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#底层原理"><span class="nav-text">底层原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#批量查询"><span class="nav-text">批量查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#批量操作"><span class="nav-text">批量操作</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#底层原理"><span class="nav-text">底层原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写入原理"><span class="nav-text">写入原理</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -442,7 +428,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-count">51</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
