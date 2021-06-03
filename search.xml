@@ -5024,6 +5024,9 @@
 
 
 
+<h2 id="IK分词器"><a href="#IK分词器" class="headerlink" title="IK分词器"></a><a href="https://github.com/medcl/elasticsearch-analysis-ik/releases" target="_blank" rel="noopener">IK分词器</a></h2><p>下载编译后的安装包</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建插件文件夹</span></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/elasticsearch/plugins/ &amp;&amp; mkdir ik</span><br><span class="line"><span class="comment"># 将编译后的zip上传进ik文件夹中解压</span></span><br><span class="line">unzip elasticsearch-analysis-ik-7.12.1.zip </span><br><span class="line"><span class="comment">#授权</span></span><br><span class="line">chown -R elasticsearch ik</span><br><span class="line"><span class="comment">#重启启动切换其账户启动es</span></span><br></pre></td></tr></table></figure>
+
 ]]></content>
       <categories>
         <category>elasticsearch</category>
