@@ -5027,7 +5027,13 @@
 <h2 id="IK分词器"><a href="#IK分词器" class="headerlink" title="IK分词器"></a><a href="https://github.com/medcl/elasticsearch-analysis-ik/releases" target="_blank" rel="noopener">IK分词器</a></h2><p>下载编译后的安装包</p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建插件文件夹</span></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/elasticsearch/plugins/ &amp;&amp; mkdir ik</span><br><span class="line"><span class="comment"># 将编译后的zip上传进ik文件夹中解压</span></span><br><span class="line">unzip elasticsearch-analysis-ik-7.12.1.zip </span><br><span class="line"><span class="comment">#授权</span></span><br><span class="line">chown -R elasticsearch ik</span><br><span class="line"><span class="comment">#重启启动切换其账户启动es</span></span><br></pre></td></tr></table></figure>
 
-]]></content>
+<p>两种分词器analyzer</p>
+<ul>
+<li>ik_max_word：细粒度</li>
+<li>ik_smart：粗粒度</li>
+</ul>
+<p>配置文件说明</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1) IKAnalyzer.cfg.xml：IK分词配置文件</span><br><span class="line">2) 主词库：main.dic</span><br><span class="line">3) 英文停用词：stopword.dic，不会建立在倒排索引中</span><br><span class="line">4) 特殊词库：</span><br><span class="line">    a. quantifier.dic：特殊词库：计量单位等</span><br><span class="line">    b. suffix.dic：特殊词库：后缀名</span><br><span class="line">    c. surname.dic：特殊词库：百家姓</span><br><span class="line">    d. preposition：特殊词库：语气词</span><br><span class="line">5) 自定义词库：比如当下流行词：857、emmm...、渣女、舔屏、996</span><br><span class="line">6) 热更新：</span><br><span class="line">	a. 修改ik分词器源码</span><br><span class="line">	b. 基于ik分词器原生支持的热更新方案，部署一个web服务器，提供一个http接口，通过modified和tag两个http响应头，来提供词语的热更新</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>elasticsearch</category>
       </categories>
