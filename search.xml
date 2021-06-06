@@ -5235,6 +5235,8 @@
 <td>查询所有数据</td>
 </tr>
 </tbody></table>
+<a id="more"></a>
+
 <h2 id="二、索引"><a href="#二、索引" class="headerlink" title="二、索引"></a>二、索引</h2><h3 id="2-1、添加索引"><a href="#2-1、添加索引" class="headerlink" title="2.1、添加索引"></a>2.1、添加索引</h3><h4 id="添加文档方式-gt-自动创建索引"><a href="#添加文档方式-gt-自动创建索引" class="headerlink" title="添加文档方式 =&gt; 自动创建索引"></a>添加文档方式 =&gt; 自动创建索引</h4><figure class="highlight json"><table><tr><td class="code"><pre><span class="line">PUT /person/_doc/1</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span>:<span class="string">"测试名称"</span>,</span><br><span class="line">  <span class="attr">"age"</span>:<span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <img src="http://yrlzero.gitee.io/images/elk/crud/create_index01.jpg" style="zoom:67%;" />
