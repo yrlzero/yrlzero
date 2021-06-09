@@ -18,13 +18,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"yrlzero.gitee.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="HashMap区别JDK7和JDK8中的HashMap底层数据结构有什么区别? 123JDK7:数组 + 链表JDK8:数组 + 链表 + 红黑树     链表包括单向链表和双向链表，双线链表主要是为了链表操作方便，在插入、扩容链表转红黑树的过程中使用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="不同版本HashMap和ConcurrentHashMap区分">
-<meta property="og:url" content="http://yrlzero.gitee.io/2021/03/31/%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%ACHashMap-ConcurrentHashMap%E5%8C%BA%E5%88%AB/index.html">
+<meta property="og:url" content="http://yrlzero.github.io/2021/03/31/%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%ACHashMap-ConcurrentHashMap%E5%8C%BA%E5%88%AB/index.html">
 <meta property="og:site_name" content="yrl&#39;s blog">
 <meta property="og:description" content="HashMap区别JDK7和JDK8中的HashMap底层数据结构有什么区别? 123JDK7:数组 + 链表JDK8:数组 + 链表 + 红黑树     链表包括单向链表和双向链表，双线链表主要是为了链表操作方便，在插入、扩容链表转红黑树的过程中使用">
 <meta property="og:locale" content="zh_CN">
@@ -35,7 +35,7 @@
 <meta property="article:tag" content="HashMap">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yrlzero.gitee.io/2021/03/31/%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%ACHashMap-ConcurrentHashMap%E5%8C%BA%E5%88%AB/">
+<link rel="canonical" href="http://yrlzero.github.io/2021/03/31/%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%ACHashMap-ConcurrentHashMap%E5%8C%BA%E5%88%AB/">
 
 
 <script id="page-configurations">
@@ -186,7 +186,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.gitee.io/2021/03/31/%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%ACHashMap-ConcurrentHashMap%E5%8C%BA%E5%88%AB/">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/03/31/%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%ACHashMap-ConcurrentHashMap%E5%8C%BA%E5%88%AB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -371,7 +371,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">57</span>
+          <span class="site-state-item-count">58</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

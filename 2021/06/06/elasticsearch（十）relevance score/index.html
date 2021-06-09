@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="relevance score（相关性得分）TF&#x2F;IDF TF(term frequency): 关键词在每个doc中出现的次数 IDF(inverse doc frequency): 关键词在整个索引中出现的次数  计算规则​        TF数值大的得分较高，因为关键词在一个文档出现的次数多，证明该文档的相关性更大 ​        IDF数值大的得分较低，关键词在整个倒排索引中出现的次数越">
+<meta property="og:type" content="article">
+<meta property="og:title" content="elasticsearch（十）相关性得分及分值排序优化">
+<meta property="og:url" content="http://yrlzero.github.io/2021/06/06/elasticsearch%EF%BC%88%E5%8D%81%EF%BC%89relevance%20score/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="relevance score（相关性得分）TF&#x2F;IDF TF(term frequency): 关键词在每个doc中出现的次数 IDF(inverse doc frequency): 关键词在整个索引中出现的次数  计算规则​        TF数值大的得分较高，因为关键词在一个文档出现的次数多，证明该文档的相关性更大 ​        IDF数值大的得分较低，关键词在整个倒排索引中出现的次数越">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-06-06T14:34:26.629Z">
+<meta property="article:modified_time" content="2021-06-09T14:55:38.155Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="elasticsearch">
+<meta property="article:tag" content="elk">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yrlzero.github.io/2021/06/06/elasticsearch%EF%BC%88%E5%8D%81%EF%BC%89relevance%20score/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>elasticsearch（十）相关性得分及分值排序优化 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/06/06/elasticsearch%EF%BC%88%E5%8D%81%EF%BC%89relevance%20score/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          elasticsearch（十）相关性得分及分值排序优化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-06 22:34:26" itemprop="dateCreated datePublished" datetime="2021-06-06T22:34:26+08:00">2021-06-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-09 22:55:38" itemprop="dateModified" datetime="2021-06-09T22:55:38+08:00">2021-06-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="relevance-score（相关性得分）"><a href="#relevance-score（相关性得分）" class="headerlink" title="relevance score（相关性得分）"></a>relevance score（相关性得分）</h2><h3 id="TF-IDF"><a href="#TF-IDF" class="headerlink" title="TF/IDF"></a>TF/IDF</h3><ul>
+<li>TF(term frequency): 关键词在每个doc中出现的次数</li>
+<li>IDF(inverse doc frequency): 关键词在整个索引中出现的次数</li>
+</ul>
+<h3 id="计算规则"><a href="#计算规则" class="headerlink" title="计算规则"></a>计算规则</h3><p>​        TF数值大的得分较高，因为关键词在一个文档出现的次数多，证明该文档的相关性更大</p>
+<p>​        IDF数值大的得分较低，关键词在整个倒排索引中出现的次数越多，关联的文档越多，证明其相关越低</p>
+<p>​        relevance score（相关性得分）：每个query的分数，乘以matched query数量，除以总query数量</p>
+<ol>
+<li>它会执行 should 语句中的两个查询。</li>
+<li>两个查询的评分相加。</li>
+<li>乘以匹配语句的总数。</li>
+<li>除以所有语句总数</li>
+</ol>
+<a id="more"></a>
+
+<p>例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;match&quot;: &#123;&quot;name&quot;: &quot;吃鸡手机&quot;&#125;&#125;,</span><br><span class="line">	doc1:	吃鸡1次，手机1次，计2分	</span><br><span class="line">	doc2:	吃鸡0次，手机1次，计1分</span><br><span class="line">	doc3:	吃鸡0次，手机1次，计1分</span><br><span class="line">&#123;&quot;match&quot;: &#123;&quot;desc&quot;: &quot;吃鸡手机&quot;&#125;&#125;</span><br><span class="line">doc1:	吃鸡0次，手机0次，计0分	</span><br><span class="line">	doc2:	吃鸡0次，手机1次，计1分</span><br><span class="line">	doc3:	吃鸡0次，手机1次，计1分</span><br><span class="line">	</span><br><span class="line">总分：（query1分数+query2分数）*matched query &#x2F; total query</span><br><span class="line"></span><br><span class="line">doc1:	query1+query2：2		matched：1	total query：2		result：2*1&#x2F;2&#x3D;1</span><br><span class="line">doc2:	query1+query2：2		matched：2	total query：2		result：2*2&#x2F;2&#x3D;2</span><br><span class="line">doc3:	query1+query2：2		matched：2	total query：2		result：2*2&#x2F;2&#x3D;2</span><br><span class="line">	</span><br><span class="line">matched query数量 &#x3D; 2</span><br><span class="line">总query数量 &#x3D; 2</span><br></pre></td></tr></table></figure>
+
+<p>总结：<code>总分 =（query1分数+query2分数）*matched query / total query</code></p>
+<h3 id="shard-local-idf和global-idf"><a href="#shard-local-idf和global-idf" class="headerlink" title="shard local idf和global idf"></a>shard local idf和global idf</h3><p>es的每个shard只保存一部分的doc数据，当我们的查询路由到某个shard上进行查询时，只在该shard上计算idf，即<code>shard local idf</code>；如果不同的shard存在的文档数量不同，出现不同的shard local idf，在差距较大的情况下会影响分值的计算，影响排序结果。</p>
+<p>解决：</p>
+<ol>
+<li>一般来说，生产环境下，数据量大时尽可能实现均匀分配，一定程度是哪个避免多个shard之间出现shard local idf差距过大的情况</li>
+<li>搜索附带<code>search_type=dfs_query_then_fetch</code>参数，当计算一个doc的相关度分数的时候，就会将所有shard对应的local IDF获取出来，在本地进行global IDF分数的计算，所有shard的doc作为上下文来进行计算确保准确性，生产环境下，不推荐这个参数，因为性能很差。</li>
+</ol>
+<h2 id="排序规则优化"><a href="#排序规则优化" class="headerlink" title="排序规则优化"></a>排序规则优化</h2><h3 id="dix-max"><a href="#dix-max" class="headerlink" title="dix_max"></a>dix_max</h3><p>Disjunction Max Query,将任何与任一查询匹配的文档作为结果返回，但只将最佳匹配的评分作为查询的评分结果返回 。</p>
+<p>tie_breaker：取值范围 [0,1]，其中 0 代表使用 dis_max 最佳匹配语句的普通逻辑，1表示所有匹配语句同等重要。最佳的精确值需要根据数据与查询调试得出，但是合理值应该与零接近（处于 0.1 - 0.4 之间），这样就不会颠覆 dis_max 最佳匹配性质的根本。</p>
+<p>boost：设置分值比例</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">#查询匹配的文档，被更多term命中的feild查询语句作为查询评分结果（默认使用best_fields）</span><br><span class="line">GET product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"dis_max"</span>: &#123;</span><br><span class="line">            <span class="attr">"queries"</span>: [</span><br><span class="line">                &#123;<span class="attr">"match"</span>: &#123;<span class="attr">"name"</span>: <span class="string">"超级快充"</span>&#125;&#125;,</span><br><span class="line">                &#123;<span class="attr">"match"</span>: &#123;<span class="attr">"desc"</span>: <span class="string">"超级快充"</span>&#125;&#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">GET product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"dis_max"</span>: &#123;</span><br><span class="line">            <span class="attr">"queries"</span>: [</span><br><span class="line">                &#123;<span class="attr">"match"</span>: &#123;<span class="attr">"name"</span>: <span class="string">"超级快充"</span>&#125;&#125;,</span><br><span class="line">                &#123;<span class="attr">"match"</span>: &#123;<span class="attr">"desc"</span>: <span class="string">"超级快充"</span>&#125;&#125;</span><br><span class="line">            ],</span><br><span class="line">           	<span class="attr">"boost"</span>: <span class="number">2.0</span>,</span><br><span class="line">            <span class="attr">"tie_breaker"</span>: <span class="number">0.7</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="multi-match"><a href="#multi-match" class="headerlink" title="multi_match"></a>multi_match</h3><h4 id="type属性"><a href="#type属性" class="headerlink" title="type属性"></a>type属性</h4><h5 id="best-fields（默认）"><a href="#best-fields（默认）" class="headerlink" title="best_fields（默认）"></a>best_fields（默认）</h5><p>​            多个字段进行查询匹配时，返回评分最高的字段评分作为查询结果。类似：dis_max query。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">POST product/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"multi_match"</span>: &#123;</span><br><span class="line">      <span class="attr">"type"</span>: <span class="string">"best_fields"</span>,</span><br><span class="line">      <span class="attr">"query"</span>: <span class="string">"超级快充"</span>,</span><br><span class="line">      <span class="attr">"fields"</span>: [</span><br><span class="line">        <span class="string">"name"</span>,</span><br><span class="line">        <span class="string">"desc"</span></span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"tie_breaker"</span>: <span class="number">0.2</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">#dis_max query查询与上述best_fields等价   </span><br><span class="line">POST product/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"dis_max"</span>: &#123;</span><br><span class="line">      <span class="attr">"queries"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"match"</span>: &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"超级快充"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"match"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: <span class="string">"超级快充"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"tie_breaker"</span>: <span class="number">0.2</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="most-fields"><a href="#most-fields" class="headerlink" title="most_fields"></a>most_fields</h5><p>​            多个字段进行查询匹配时，多个字段的评分一起参与计算，返回的综合评分（非最高分）</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">GET /product/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"multi_match"</span>: &#123;</span><br><span class="line">      <span class="attr">"query"</span>: <span class="string">"超级快充"</span>,</span><br><span class="line">      <span class="attr">"type"</span>: <span class="string">"most_fields"</span>,</span><br><span class="line">      <span class="attr">"fields"</span>: [</span><br><span class="line">        <span class="string">"name^10"</span>,</span><br><span class="line">        <span class="string">"desc"</span></span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#与上面的most_fields等价</span><br><span class="line">GET product/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"bool"</span>: &#123;</span><br><span class="line">      <span class="attr">"should"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"match"</span>: &#123;</span><br><span class="line">            <span class="attr">"name"</span>: &#123;</span><br><span class="line">              <span class="attr">"query"</span>: <span class="string">"超级快充"</span>,</span><br><span class="line">              <span class="attr">"boost"</span>: <span class="number">10</span></span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"match"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: <span class="string">"超级快充"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="cross-fields"><a href="#cross-fields" class="headerlink" title="cross_fields"></a>cross_fields</h5><p>​                跨字段匹配与operator指令结合操作。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#查询的关键词的term必须在name and desc中出现</span><br><span class="line">#例如，超级必须在name或desc中出现 and  快充必须在name或desc中出现</span><br><span class="line">GET product/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"multi_match"</span> : &#123;</span><br><span class="line">      <span class="attr">"query"</span>:      <span class="string">"超级 快充"</span>,</span><br><span class="line">      <span class="attr">"type"</span>:       <span class="string">"cross_fields"</span>,</span><br><span class="line">      <span class="attr">"fields"</span>:     [ <span class="string">"name"</span>, <span class="string">"desc"</span> ],</span><br><span class="line">      <span class="attr">"operator"</span>:   <span class="string">"and"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="function-score"><a href="#function-score" class="headerlink" title="function_score"></a>function_score</h3><p>必须定义一个查询和一个或多个函数，自定义函数会为查询返回的每个文档计算一个新分数</p>
+<p>​    field：要计算的字段</p>
+<p>​    factor：当前分数计算，对整个结果产生的权重比</p>
+<p>​    modifier：以何种运算方式计算，接受以下枚举</p>
+<ul>
+<li>none：不处理</li>
+<li>log：计算对数</li>
+<li>log1p：先将字段值 +1，再计算对数</li>
+<li>log2p：先将字段值 +2，再计算对数</li>
+<li>ln：计算自然对数</li>
+<li>ln1p：先将字段值 +1，再计算自然对数</li>
+<li>ln2p：先将字段值 +2，再计算自然对数</li>
+<li>square：计算平方</li>
+<li>sqrt：计算平方根</li>
+<li>reciprocal：计算倒数</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#默认分值与指定field字段数值相乘得出分数、根据modifier指定的运算方式处理、factor权重比、max_boost表示最大的分值、boost_mode指定计算后的分数与原始的_score如何合并</span><br><span class="line">GET /person/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"function_score"</span>: &#123;</span><br><span class="line">      <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"match_all"</span>: &#123;&#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">"field_value_factor"</span>: &#123;</span><br><span class="line">        <span class="attr">"field"</span>: <span class="string">"age"</span>,</span><br><span class="line">        <span class="attr">"modifier"</span>: <span class="string">"none"</span>,</span><br><span class="line">        <span class="attr">"factor"</span>: <span class="number">1.2</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">"max_boost"</span>: <span class="number">10</span>,</span><br><span class="line">      <span class="attr">"boost_mode"</span>: <span class="string">"multiply"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>boost_mode：指定计算后的分数与原始的_score如何合并，有以下选</p>
+<ul>
+<li><p>multiply：查询分数和函数分数相乘</p>
+</li>
+<li><p>sum：查询分数和函数分数相加</p>
+</li>
+<li><p>avg：取平均值</p>
+</li>
+<li><p>replace：替换原始分数</p>
+</li>
+<li><p>min：取查询分数和函数分数的最小值</p>
+</li>
+<li><p>max：取查询分数和函数分数的最大值</p>
+<p>script_score：通过自定义脚本计算分值</p>
+</li>
+</ul>
+<p>max_boost：分数上限</p>
+<p>random_score：随机得到 0 到 1 分数</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/elasticsearch/" rel="tag"># elasticsearch</a>
+              <a href="/tags/elk/" rel="tag"># elk</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/06/elasticsearch%EF%BC%88%E4%B9%9D%EF%BC%89%E5%B8%B8%E7%94%A8CRUD%E6%93%8D%E4%BD%9C%E6%B1%87%E6%80%BB/" rel="prev" title="elasticsearch（九）常用CRUD操作汇总">
+      <i class="fa fa-chevron-left"></i> elasticsearch（九）常用CRUD操作汇总
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#relevance-score（相关性得分）"><span class="nav-text">relevance score（相关性得分）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TF-IDF"><span class="nav-text">TF&#x2F;IDF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计算规则"><span class="nav-text">计算规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shard-local-idf和global-idf"><span class="nav-text">shard local idf和global idf</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排序规则优化"><span class="nav-text">排序规则优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dix-max"><span class="nav-text">dix_max</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#multi-match"><span class="nav-text">multi_match</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#type属性"><span class="nav-text">type属性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#best-fields（默认）"><span class="nav-text">best_fields（默认）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#most-fields"><span class="nav-text">most_fields</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#cross-fields"><span class="nav-text">cross_fields</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#function-score"><span class="nav-text">function_score</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
