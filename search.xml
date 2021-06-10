@@ -85,7 +85,7 @@
 
 <h2 id="四、Logstash"><a href="#四、Logstash" class="headerlink" title="四、Logstash"></a>四、<a href="https://www.elastic.co/cn/downloads/past-releases#logstash" target="_blank" rel="noopener">Logstash</a></h2><h3 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h3><p>Logstash是开源的流数据处理、转换（解析）和发送引擎，可以采集来自不同数据源的数据，并对数据进行处理后输出到多种输出源。</p>
 <p>Logstash的数据处理过程主要包括：<strong>Inputs</strong>, <strong>Filters</strong>, <strong>Outputs</strong> 三部分</p>
-<p><img src="/images/elk/elk-logstash/elk-01.png" alt=""></p>
+<p><img src="images/elk/elk-logstash/elk-01.png" alt=""></p>
 <h4 id="Inputs"><a href="#Inputs" class="headerlink" title="Inputs"></a><strong>Inputs</strong></h4><p>用于从数据源获取数据，常见的插件如beats、file、kafka、rabbitmq、log4j、redis等。</p>
 <h4 id="Filters"><a href="#Filters" class="headerlink" title="Filters"></a><strong>Filters</strong></h4><p>筛选器是Logstash管道中的数据处理器，input时会触发事件，触发filter对数据进行transport，即转换解析各种格式的数据，常见的过滤器插件如下：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">grok：解析和构造任意文本。是Logstash过滤器的基础，广泛用于从非结构化数据中导出结构，当前，Grok是Logstash中将非结构化日志数据解析为结构化和可查询内容的最佳方法。</span><br><span class="line">mutate：对事件字段执行常规转换。支持对事件中字段进行重命名，删除，替换和修改。</span><br><span class="line">date：把字符串类型的时间字段转换成时间戳类型</span><br><span class="line">drop：完全删除事件，例如调试事件。</span><br><span class="line">clone：复制事件，可能会添加或删除字段。</span><br><span class="line">geoip：添加有关IP地址地理位置的信息。</span><br></pre></td></tr></table></figure>
