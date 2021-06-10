@@ -28,19 +28,19 @@
 <meta property="og:site_name" content="yrl&#39;s blog">
 <meta property="og:description" content="主从同步延迟  mysql的主从复制都是单线程的操作，主库对所有DDL和DML产生的日志写进bin log，由于bin log是顺序写，所以效率很高。 master和slave之间的数据传输依靠了内部网络或专线，一般来说也是比较快的 slave读取master的数据写入relay log是追加日志，属于顺序io效率并不低 slave的sql thread线程将主库的DDL和DML操作事件在slav">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png">
-<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mysql/sync_binlog.png">
-<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mysql/%E5%B9%B6%E8%A1%8C%E5%A4%8D%E5%88%B6.png">
-<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mysql/mariaDB1.png">
-<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mysql/mariaDB2.png">
-<meta property="og:image" content="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/linux/mysql/sync_binlog.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/linux/mysql/%E5%B9%B6%E8%A1%8C%E5%A4%8D%E5%88%B6.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/linux/mysql/mariaDB1.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/linux/mysql/mariaDB2.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/linux/mysql/%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4.png">
 <meta property="article:published_time" content="2021-05-02T10:08:24.824Z">
-<meta property="article:modified_time" content="2021-05-02T14:47:17.974Z">
+<meta property="article:modified_time" content="2021-06-10T13:54:15.313Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="mysql">
 <meta property="article:tag" content="db">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png">
+<meta name="twitter:image" content="http://yrlzero.github.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png">
 
 <link rel="canonical" href="http://yrlzero.github.io/2021/05/02/mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98/">
 
@@ -215,10 +215,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-05-02 18:08:24 / 修改时间：22:47:17" itemprop="dateCreated datePublished" datetime="2021-05-02T18:08:24+08:00">2021-05-02</time>
+              <time title="创建时间：2021-05-02 18:08:24" itemprop="dateCreated datePublished" datetime="2021-05-02T18:08:24+08:00">2021-05-02</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-10 21:54:15" itemprop="dateModified" datetime="2021-06-10T21:54:15+08:00">2021-06-10</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -244,7 +250,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="主从同步延迟"><a href="#主从同步延迟" class="headerlink" title="主从同步延迟"></a>主从同步延迟</h2><p><img src="http://yrlzero.gitee.io/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png" alt=""></p>
+        <h2 id="主从同步延迟"><a href="#主从同步延迟" class="headerlink" title="主从同步延迟"></a>主从同步延迟</h2><p><img src="/images/linux/mysql/%E4%B8%BB%E4%BB%8E%E5%8E%9F%E7%90%86.png" alt=""></p>
 <ul>
 <li>mysql的主从复制都是单线程的操作，主库对所有DDL和DML产生的日志写进bin log，由于bin log是顺序写，所以效率很高。</li>
 <li>master和slave之间的数据传输依靠了内部网络或专线，一般来说也是比较快的</li>
@@ -286,7 +292,7 @@
 <p>​            3.1.3、使用更好的硬件设备，比如cpu，ssd等，但是这种方案一般对于公司而言不太能接受，原因也很简单，会增加公司的成本，而一般公司其实都很抠门，所以意义也不大，但是你要知道这也是解决问题的一个方法，只不过你需要评估的是投入产出比而已。</p>
 <h4 id="3-2、从库配置方面"><a href="#3-2、从库配置方面" class="headerlink" title="3.2、从库配置方面"></a>3.2、从库配置方面</h4><p>​        <strong>3.2.1、修改sync_binlog的参数的值</strong></p>
 <p>​        想要合理设置此参数的值必须要清楚的知道binlog的写盘的流程：</p>
-<img src="http://yrlzero.gitee.io/images/linux/mysql/sync_binlog.png" style="zoom:80%;" />
+<img src="/images/linux/mysql/sync_binlog.png" style="zoom:80%;" />
 
 <p>可以看到，每个线程有自己的bin log cache，但是共用同一份bin log。</p>
 <p>​        图中的write，指的就是把日志写入到文件系统的page cache，并没有把数据持久化到磁盘，所以速度快</p>
@@ -300,7 +306,7 @@
 <p>​        3、设置innodb_flush_log_at_trx_commit 属性，这个属性用来表示每一次的事务提交是否需要把日志都写入磁盘，这是很浪费时间的，一共有三个属性值，分别是0（每次写到服务缓存，一秒钟刷写一次），1（每次事务提交都刷写一次磁盘），2（每次写到os缓存，一秒钟刷写一次），一般情况下我们推荐设置成2，这样就算mysql的服务宕机了，卸载os缓存中的数据也会进行持久化。</p>
 <h3 id="4、从根本上解决主从复制的延迟问题"><a href="#4、从根本上解决主从复制的延迟问题" class="headerlink" title="4、从根本上解决主从复制的延迟问题"></a>4、从根本上解决主从复制的延迟问题</h3><p>​        大多数时候我们在线上的业务系统中都使用了mysql的主从复制，但是需要注意的是，并不是所有的场景都适合主从复制，一般情况下是读要远远多于写的应用，同时读的时效性要求不那么高的场景。如果真实场景中真的要求立马读取到更新之后的数据，那么就只能强制读取主库的数据，所以在进行实现的时候要考虑实际的应用场景，不要为了技术而技术，这是很严重的事情。</p>
 <p>​        在mysql5.6版本之后引入了一个概念，就是我们通常说的<code>MTS</code>-Multi Thread Slave（并行复制），如下图：</p>
-<img src="http://yrlzero.gitee.io/images/linux/mysql/并行复制.png" style="zoom:80%;" />
+<img src="/images/linux/mysql/并行复制.png" style="zoom:80%;" />
 
 <p>通过上图我们可以发现其实所谓的<code>MTS-并行复制</code>，就是在中间添加了一个分发的环节，也就是说原来的<code>sql thread</code>变成了现在的coordinator组件，当日志来了之后，coordinator负责读取日志信息以及分发事务，真正的日志执行的过程是放在了worker线程上，由多个线程并行的去执行。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看并行的slave的线程的个数，默认是0.表示单线程</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">global</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'slave_parallel_workers'</span>;</span><br><span class="line"><span class="comment">-- 根据实际情况保证开启多少线程</span></span><br><span class="line"><span class="keyword">set</span> <span class="keyword">global</span> slave_parallel_workers = <span class="number">4</span>;</span><br><span class="line"><span class="comment">-- 设置并发复制的方式，默认是一个线程处理一个库，值为database</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">global</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%slave_parallel_type%'</span>;</span><br><span class="line"><span class="comment">-- 停止slave</span></span><br><span class="line"><span class="keyword">stop</span> <span class="keyword">slave</span>;</span><br><span class="line"><span class="comment">-- 设置属性值</span></span><br><span class="line"><span class="keyword">set</span> <span class="keyword">global</span> slave_parallel_type=<span class="string">'logical_check'</span>;</span><br><span class="line"><span class="comment">-- 开启slave</span></span><br><span class="line"><span class="keyword">start</span> <span class="keyword">slave</span></span><br><span class="line"><span class="comment">-- 查看线程数</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">full</span> <span class="keyword">processlist</span>;</span><br></pre></td></tr></table></figure>
@@ -336,9 +342,9 @@
 <p>​        4、这一组全部执行完成后，coordinator再去取下一批。</p>
 <p>​        这是mariaDB的并行复制策略，大体上看起来是没有问题的，但是你仔细观察的话会发现他并没有实现“真正的模拟主库并发度”这个目标，在主库上，一组事务在commit的时候，下一组事务是同时处于“执行中”状态的。</p>
 <p>​        我们真正想要达到的并行复制应该是如下的状态，也就是说当第一组事务提交的是，下一组事务是运行的状态，当第一组事务提交完成之后，下一组事务会立刻变成commit状态。</p>
-<p><img src="http://yrlzero.gitee.io/images/linux/mysql/mariaDB1.png" alt=""></p>
+<p><img src="/images/linux/mysql/mariaDB1.png" alt=""></p>
 <p>​        但是按照mariaDB的并行复制策略，那么备库上的执行状态会变成如下所示：</p>
-<p><img src="http://yrlzero.gitee.io/images/linux/mysql/mariaDB2.png" alt=""></p>
+<p><img src="/images/linux/mysql/mariaDB2.png" alt=""></p>
 <p>可以看到，这张图跟上面这张图的最大区别在于，slave上执行的时候必须要等第一组事务执行完成之后，第二组事务才能开始执行，这样系统的吞吐量就不够了。而且这个方案很容易被大事务拖后腿，如果trx2是一个大事务，那么在备库应用的时候，trx1和trx3执行完成之后，就只能等trx2完全执行完成，下一组才能开始执行，这段时间，只有一个worker线程在工作，是对资源的浪费。</p>
 <h4 id="4-3、mysql5-7的并行复制策略"><a href="#4-3、mysql5-7的并行复制策略" class="headerlink" title="4.3、mysql5.7的并行复制策略"></a>4.3、mysql5.7的并行复制策略</h4><p>​        mysql5.7版本的时候，根据mariaDB的并行复制策略，做了相应的优化调整后，提供了自己的并行复制策略，并且可以通过参数slave-parallel-type来控制并行复制的策略：</p>
 <p>​        1、当配置的值为DATABASE的时候，表示使用5.6版本的按库并行策略；</p>
@@ -346,7 +352,7 @@
 <p>​        此时，大家需要思考一个问题：<strong>同时处于执行状态的所有事务，是否可以并行？</strong></p>
 <p>​        答案：不行，因为多个执行中的事务是有可能出现锁冲突的，锁冲突之后就会产生锁等待问题。</p>
 <p>​        在mariaDB中，所有处于commit状态的事务是可以并行，因为如果能commit的话就说明已经没有锁的问题，但是大家回想下，我们mysql的日志提交是两阶段提交，如下图，其实只要处于prepare状态就已经表示没有锁的问题了。</p>
-<img src="http://yrlzero.gitee.io/images/linux/mysql/两阶段提交.png" style="zoom: 45%;" />
+<img src="/images/linux/mysql/两阶段提交.png" style="zoom: 45%;" />
 
 <p>因此，mysql5.7的并行复制策略的思想是：</p>
 <p>​        1、同时处于prepare状态的事务，在slave执行是可以并行的。</p>
