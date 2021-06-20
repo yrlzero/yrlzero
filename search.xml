@@ -71,7 +71,7 @@
 <p>Filebeat是读取日志是会记录到读取日志的行号，当重启或者删除es的索引，他依旧会从记录的那一行之后开始读，曾经读取过的数据不会再次读取，若想要重新全量读取，则需要去把<code>data</code>文件夹的数据删除。</p>
 <h4 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h4><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#前台启动</span></span><br><span class="line">./filebeat -e -c ./filebeat.yml</span><br><span class="line"><span class="comment">#后台启动</span></span><br><span class="line">nohup ./filebeat -e -c filebeat.yml &gt;/dev/null 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure>
 
-<h4 id="问题："><a href="#问题：" class="headerlink" title="问题："></a>问题：</h4><p>通过后台启动命令来启动filebeat,第二天早上发现filebeat自动关闭</p>
+<h4 id="问题-自动关闭"><a href="#问题-自动关闭" class="headerlink" title="问题-自动关闭"></a>问题-自动关闭</h4><p>通过后台启动命令来启动filebeat,第二天早上发现filebeat自动关闭</p>
 <blockquote>
 <p>在当shell中执行<code>后台启动命令</code>成功后，还需要按终端上键盘任意键退回到shell输入命令窗口，然后通过在shell中输入exit来退出终端；如果在<code>后台启动命令</code>执行成功后直接点关闭程序按钮关闭终端的话，这时候会断掉该命令所对应的session，导致nohup对应的进程被通知需要一起shutdown，起不到关掉终端后调用程序继续后台运行的作用。</p>
 <p>解决方案：通过exit命令退出shell客户端。在启动完filebeat之后，在crt输入exit退出，此时filebeat不会随着客户端的关闭而退出</p>
