@@ -394,6 +394,7 @@
 
 <h3 id="写操作"><a href="#写操作" class="headerlink" title="写操作"></a>写操作</h3><p><img src="/images/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/%E5%86%99%E6%93%8D%E4%BD%9C.jpg" alt=""></p>
 <p><img src="/images/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/es%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86-03-1625060936206.jpg" alt=""></p>
+<p><img src="images/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/es-01.jpg" alt=""></p>
 <p>当有写入请求时，数据会先写到内存的Buffer中（Buffer专门用于写入操作），每间隔1S会创建一个<code>index segment</code>的<code>file</code>，然后<code>segment</code>会同步到<code>OS cache</code>中，<code>OS cache</code>会返回一个<code>status = Open</code>，<strong>这时候的<code>segment</code>就能对外提供搜索操作。</strong></p>
 <p><strong>读写操作进行了异步分离操作，segment对外提供读搜索操作，OS cache后台异步写入数据。</strong></p>
 <blockquote>
