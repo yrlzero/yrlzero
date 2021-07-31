@@ -6515,4 +6515,94 @@
         <category>rocketmq</category>
       </categories>
   </entry>
+  <entry>
+    <title>TCP HTTP HTTPS</title>
+    <url>/2021/07/31/tcp%20http%20https/</url>
+    <content><![CDATA[<h2 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h2><img src="/images/https/TCP三次握手四次挥手.jpg" style="zoom:80%;" />
+
+<a id="more"></a>
+
+<h3 id="TCP-建立连接（三次握手）"><a href="#TCP-建立连接（三次握手）" class="headerlink" title="TCP-建立连接（三次握手）"></a>TCP-建立连接（三次握手）</h3><img src="/images/https/三次握手.gif" style="zoom:80%;" />
+
+<ul>
+<li><p>client端发送一个SYN包告诉server端自己的初始序列号是X，进入SYN_SENT状态</p>
+</li>
+<li><p>server端收到SYN，返回客户端ACK（X+1）和自己的SYN seq=Y，进入SYN_RCVD状态</p>
+</li>
+<li><p>client端收到后回复server端ACK（Y+1），此时双方进入ESTABLISHED（TCP连接成功）状态，完成三次握手</p>
+<blockquote>
+<p>请求-确认-建立连接</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><h4 id="为什么需要三次握手才能建立连接呢？"><a href="#为什么需要三次握手才能建立连接呢？" class="headerlink" title="为什么需要三次握手才能建立连接呢？"></a>为什么需要三次握手才能建立连接呢？</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">第一次握手：Client 什么都不能确认；Server 确认了对方发送正常，自己接收正常</span><br><span class="line">第二次握手：Client 确认了：自己发送、接收正常，对方发送、接收正常；Server 确认了：对方发送正常，自己接收正常</span><br><span class="line">第三次握手：Client 确认了：自己发送、接收正常，对方发送、接收正常；Server 确认了：自己发送、接收正常，对方发送、接收正常</span><br><span class="line"></span><br><span class="line">所以三次握手就能确认双发收发功能都正常，缺一不可。</span><br></pre></td></tr></table></figure>
+
+<h4 id="为什么要传送ACK呢？"><a href="#为什么要传送ACK呢？" class="headerlink" title="为什么要传送ACK呢？"></a>为什么要传送ACK呢？</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">为确保是同一个客户端的请求，建立可靠的TCP连接</span><br></pre></td></tr></table></figure>
+
+<h4 id="为什么TCP客户端最后还要发送一次确认呢？"><a href="#为什么TCP客户端最后还要发送一次确认呢？" class="headerlink" title="为什么TCP客户端最后还要发送一次确认呢？"></a>为什么TCP客户端最后还要发送一次确认呢？</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果使用的是两次握手建立连接，假设有这样一种场景，客户端发送了第一个请求连接并且没有丢失，只是因为在网络结点中滞留的时间太长了，由于TCP的客户端迟迟没有收到确认报文，以为服务器没有收到，此时重新向服务器发送这条报文，此后客户端和服务器经过两次握手完成连接，传输数据，然后关闭连接。此时此前滞留的那一次请求连接，网络通畅了到达了服务器，这个报文本该是失效的，但是，两次握手的机制将会让客户端和服务器再次建立连接，这将导致不必要的错误和资源的浪费。</span><br><span class="line"></span><br><span class="line">如果采用的是三次握手，就算是那一次失效的报文传送过来了，服务端接受到了那条失效报文并且回复了确认报文，但是客户端不会再次发出确认。由于服务器收不到确认，就知道客户端并没有请求连接</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="TCP-释放连接（四次挥手）"><a href="#TCP-释放连接（四次挥手）" class="headerlink" title="TCP-释放连接（四次挥手）"></a>TCP-释放连接（四次挥手）</h3><img src="/images/https/四次挥手.gif" style="zoom:80%;" />
+
+<ul>
+<li>client端发送FIN包告诉server端即将断开连接，<code>client端</code>进入<code>FIN-WAIT-1（终止等待1）</code>状态</li>
+<li>server端收到后回复client端ACK，此时<code>server端</code>进入<code>CLOSE-WAIT（关闭等待）</code>状态，客户端收到服务器的确认请求后，此时<code>client端</code>就进入<code>FIN-WAIT-2（终止等待2）</code>状态</li>
+<li>server端没有数据需要发送时，发送FIN包给client端，<code>server端</code>进入了<code>LAST-ACK（最后确认）</code>状态</li>
+<li>client端收到后回复server端ACK，此时<code>client端</code>进入了<code>TIME-WAIT（时间等待）</code>状态，<code>server端</code>收到ACK进入<code>CLOSED</code>状态，注意此时<code>client端</code>的TCP连接还没有释放，必须经过2*MSL（最长报文段寿命）的时间后，当客户端撤销相应的TCB后，才进入CLOSED状态</li>
+</ul>
+<blockquote>
+<p>客户端请求断开-服务端确认</p>
+<p>服务端请求断开-客户端确认</p>
+</blockquote>
+<h3 id="问题-1"><a href="#问题-1" class="headerlink" title="问题"></a>问题</h3><h4 id="为什么客户端最后还要等待2MSL？"><a href="#为什么客户端最后还要等待2MSL？" class="headerlink" title="为什么客户端最后还要等待2MSL？"></a>为什么客户端最后还要等待2MSL？</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MSL（Maximum Segment Lifetime），TCP允许不同的实现可以设置不同的MSL值。</span><br><span class="line"></span><br><span class="line">第一，保证客户端发送的最后一个ACK报文能够到达服务器，因为这个ACK报文可能丢失，站在服务器的角度看来，我已经发送了FIN+ACK报文请求断开了，客户端还没有给我回应，应该是我发送的请求断开报文它没有收到，于是服务器又会重新发送一次，而客户端就能在这个2MSL时间段内收到这个重传的报文，接着给出回应报文，并且会重启2MSL计时器。</span><br><span class="line"></span><br><span class="line">第二，防止类似与“三次握手”中提到了的“已经失效的连接请求报文段”出现在本连接中。客户端发送完最后一个确认报文后，在这个2MSL时间中，就可以使本连接持续的时间内所产生的所有报文段都从网络中消失。这样新的连接中不会出现旧连接的请求报文。</span><br></pre></td></tr></table></figure>
+
+<h3 id="为什么建立连接是三次握手，关闭连接确是四次挥手呢？"><a href="#为什么建立连接是三次握手，关闭连接确是四次挥手呢？" class="headerlink" title="为什么建立连接是三次握手，关闭连接确是四次挥手呢？"></a>为什么建立连接是三次握手，关闭连接确是四次挥手呢？</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">建立连接的时候， 服务器在LISTEN状态下，收到建立连接请求的SYN报文后，把ACK和SYN放在一个报文里发送给客户端。</span><br><span class="line">而关闭连接时，服务器收到对方的FIN报文时，仅仅表示对方不再发送数据了但是还能接收数据，而自己也未必全部数据都发送给对方了，所以己方可以立即关闭，也可以发送一些数据给对方后，再发送FIN报文给对方来表示同意现在关闭连接，因此，己方ACK和FIN一般都会分开发送，从而导致多了一次。</span><br></pre></td></tr></table></figure>
+
+<h4 id="如果已经建立了连接，但是客户端突然出现故障了怎么办？"><a href="#如果已经建立了连接，但是客户端突然出现故障了怎么办？" class="headerlink" title="如果已经建立了连接，但是客户端突然出现故障了怎么办？"></a>如果已经建立了连接，但是客户端突然出现故障了怎么办？</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">TCP还设有一个保活计时器，显然，客户端如果出现故障，服务器不能一直等下去，白白浪费资源。服务器每收到一次客户端的请求后都会重新复位这个计时器，时间通常是设置为2小时，若两小时还没有收到客户端的任何数据，服务器就会发送一个探测报文段，以后每隔75秒发送一次。若一连发送10个探测报文仍然没反应，服务器就认为客户端出了故障，接着就关闭连接。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><a href="https://blog.csdn.net/qzcsu/article/details/72861891" target="_blank" rel="noopener">参考</a></p>
+</blockquote>
+<hr>
+<h2 id="HTTP"><a href="#HTTP" class="headerlink" title="HTTP"></a>HTTP</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">HTTP是建立TCP协议的。</span><br><span class="line">TCP是OSI七层协议中的第四层传输层协议，定义的是数据传输和连接方式的规范。</span><br><span class="line">HTTP是第七层的应用层协议，定义的是传输数据的内容的规范。</span><br><span class="line">HTTP协议中的数据是利用TCP协议传输的。</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h2><p>HTTP协议运行在TCP之上，所有传输的内容都是明文，客户端和服务器端都无法验证对方的身份。HTTPS是运行在SSL/TLS之上的HTTP协议，SSL/TLS 运行在TCP之上。所有传输的<code>内容</code>都经过<code>对称加密</code>，但对称加密的<code>密钥</code>用服务器方的<code>证书</code>进行了<code>非对称加密</code>。</p>
+<p><img src="/images/https/https.png" alt=""></p>
+<ul>
+<li><p>第一步：客户端告诉服务端其所能支持的<code>加密算法</code> + 客户端生成的随机数<code>client-random</code></p>
+</li>
+<li><p>第二步</p>
+<ul>
+<li>服务端从客户端传送的<code>加密算法</code>中选取一种，并返回告诉客户端 </li>
+<li>服务端随机数<code>server-random</code></li>
+<li><code>证书</code>（密文 + 签名 + 签名算法 ） =&gt;  CA的私钥（server.公钥） = 密文；算法hash（server.公钥） = 签名</li>
+</ul>
+</li>
+<li><p>第三步</p>
+<ul>
+<li>客户端使用CA的公钥解密得到<code>server.公钥</code>，并根据协商好的算法对该公钥计算后与<code>签名比对</code>，成功则证明请求没有被伪造；</li>
+<li>使用<code>server.公钥</code>对新生成的随机数<code>premaster-random</code>进行<code>加密</code></li>
+</ul>
+</li>
+<li><p>第四步</p>
+<ul>
+<li>服务端使用<code>server.私钥</code>对客户端传送的密文进行解密，得到<code>permaster-random</code>，将三个随机数通过一定算法生成<code>对称加密的key</code>；</li>
+<li>之后的http传输协议中，双方使用此key进行对称加密</li>
+</ul>
+</li>
+</ul>
+<p>为什么使用CA机构签发的证书？</p>
+<p>如果不使用CA机构签发的证书，单纯由服务端使用私钥签发公钥；那么中间代理商可能获取服务端发出的公钥，再自己伪造私钥签发假公钥转发给客户端；客户端获取代理商分发的假公钥进行加密，被代理商截取之后使用自己的私钥解密，窥探到数据；代理商再替代客户端向服务端发送虚假数据。</p>
+<img src="/images/https/没有CA的交互.png" style="zoom:80%;" />
+
+<p>如果使用CA进行加签，当客户端使用公有的CA公钥对证书进行解密时，因为代理商无法拿到CA的私钥，只能使用CA公钥加密的数据，而CA公钥加密的数据在客户端无法使用CA公钥正确解密；所以当客户端使用得到的server.公钥，根据约定的加密算法计算的值与签名不对应，则证明请求被伪造。</p>
+<p>合法的CA机构会和操作系统打交道，将CA公钥内置在操作系统中，浏览器获得证书后通过CA.公钥进行解密证书获得Server.公钥，这个步骤代理服务器没有CA.私钥，它没办法伪造一个不合格的证书。</p>
+]]></content>
+      <categories>
+        <category>网络</category>
+      </categories>
+  </entry>
 </search>

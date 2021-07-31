@@ -179,6 +179,91 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/06/12/elasticsearch%EF%BC%88%E5%8D%81%E4%BA%8C%EF%BC%89geo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/12/elasticsearch%EF%BC%88%E5%8D%81%E4%BA%8C%EF%BC%89geo/" class="post-title-link" itemprop="url">elasticsearch（十二）geo</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-12 18:40:03" itemprop="dateCreated datePublished" datetime="2021-06-12T18:40:03+08:00">2021-06-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-14 16:10:04" itemprop="dateModified" datetime="2021-06-14T16:10:04+08:00">2021-06-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="地理位置搜索"><a href="#地理位置搜索" class="headerlink" title="地理位置搜索"></a>地理位置搜索</h2><ul>
+<li>latitude：维度  缩写：lat</li>
+<li>longitude：经度  缩写：lon</li>
+</ul>
+<p>经纬度坐标，只支持WGS84坐标系，坐标范围Lat值为[-90,90]，Lon为[-180,180]，超出这个访问的点在创建时会报错，通过创建mapping时指定ignore_malformed来忽略格式错误的地理位置</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/12/elasticsearch%EF%BC%88%E5%8D%81%E4%BA%8C%EF%BC%89geo/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/06/12/elasticsearch%EF%BC%88%E5%8D%81%E4%B8%80%EF%BC%89Highlight%E3%80%81Suggest/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -949,93 +1034,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">elasticsearch(三)-倒排索引和写入原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-05-25 21:01:29" itemprop="dateCreated datePublished" datetime="2021-05-25T21:01:29+08:00">2021-05-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-07-03 11:57:17" itemprop="dateModified" datetime="2021-07-03T11:57:17+08:00">2021-07-03</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="底层原理"><a href="#底层原理" class="headerlink" title="底层原理"></a>底层原理</h2><blockquote>
-<p>正排索引（doc values ）VS 倒排索引</p>
-</blockquote>
-<p><strong>概念</strong>：从广义来说，<code>正排索引（doc values ）</code> 本质上是一个序列化的列式存储。列式存储 适用于聚合、排序、脚本等操作，所有的数字、地理坐标、日期、IP 和不分析（ not_analyzed ）字符类型都会默认开启。</p>
-<p>而<code>倒排索引</code>的优势在于查找包含某个项的文档，相反，也可以用它确定哪些项是否存在单个文档里。</p>
-<p><strong>优化</strong>：es官方是建议，es大量是基于os cache来进行缓存和提升性能的，不建议用jvm内存来进行缓存，那样会导致一定的gc开销和oom问题，给jvm更少的内存，给os cache更大的内存。比如64g服务器，给jvm最多4 ~ 16g（1/16 ~ 1/4），os cache可以提升doc value和倒排索引的缓存和查询效率。</p>
-<p><strong>总结：全文搜索需要用倒排索引，而排序和聚合则需要使用 正排索引。</strong></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/25/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1107,14 +1105,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-count">70</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
