@@ -5982,47 +5982,47 @@
 <p>解压：<code>tar -zxf rocketmq-rocketmq-all-4.8.0.tar.gz</code></p>
 <h3 id="1-3、编译"><a href="#1-3、编译" class="headerlink" title="1.3、编译"></a>1.3、编译</h3><p>进入解压后的主目录，使用maven编译项目：<code>mvn -Prelease-all -DskipTests clean install -U</code></p>
 <p>进入分布式目录：<code>cd distribution</code>可以看到编译后的target目录</p>
-<p><img src="images/roketmq/rocketmq01.png" alt=""></p>
+<p><img src="/images/roketmq/rocketmq01.png" alt=""></p>
 <p>进入target目录下：<code>cd target/rocketmq-4.8.0/rocketmq-4.8.0/bin</code> 可以看到可执行文件</p>
-<p><img src="images/roketmq/rocketmq02.png" alt=""></p>
+<p><img src="/images/roketmq/rocketmq02.png" alt=""></p>
 <h3 id="1-4、启动"><a href="#1-4、启动" class="headerlink" title="1.4、启动"></a>1.4、启动</h3><h4 id="1-4-1、启动nameServer"><a href="#1-4-1、启动nameServer" class="headerlink" title="1.4.1、启动nameServer"></a>1.4.1、启动nameServer</h4><p>​    前台启动：<code>./mqnamesrv</code></p>
-<p><img src="images/roketmq/nameServer.png" alt=""></p>
+<p><img src="/images/roketmq/nameServer.png" alt=""></p>
 <p>​    后台启动：<code>nohup sh mqnamesrv &amp;</code></p>
 <p>​    通过日志查看执行结果：<code>tail -f ~/logs/rocketmqlogs/namesrv.log</code></p>
 <p>​    端口：9876</p>
 <h4 id="1-4-2启动Broker"><a href="#1-4-2启动Broker" class="headerlink" title="1.4.2启动Broker"></a>1.4.2启动Broker</h4><p>启动的同时指定连接的nameServer地址</p>
 <p>​    前台启动：<code>./mqbroker -n localhost:9876</code></p>
 <p>​    出现错误提示</p>
-<p><img src="images/roketmq/broker-error.png" alt=""></p>
+<p><img src="/images/roketmq/broker-error.png" alt=""></p>
 <p><code>vim mqbroker</code>可以看到其执行的sh脚本</p>
-<p><img src="images/roketmq/vimbroker.png" alt=""></p>
+<p><img src="/images/roketmq/vimbroker.png" alt=""></p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#修改脚本</span></span><br><span class="line">vim runbroker.sh</span><br><span class="line"><span class="comment">#将原堆大小-Xms8g -Xmx8g -Xmn4g进行修改</span></span><br><span class="line">JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -server -Xms512m -Xmx512m -Xmn256m"</span></span><br></pre></td></tr></table></figure>
 
 <p>再次启动</p>
-<p><img src="images/roketmq/brokersuccess.png" alt=""></p>
+<p><img src="/images/roketmq/brokersuccess.png" alt=""></p>
 <p>​    后台启动：<code>nohup sh mqbroker -n localhost:9876 &amp;</code></p>
 <p>​    通过日志查看执行结果：<code>tail -f ~/logs/rocketmqlogs/broker.log</code></p>
 <p>​    端口：10911</p>
 <h3 id="1-5、测试"><a href="#1-5、测试" class="headerlink" title="1.5、测试"></a>1.5、测试</h3><p>使用<code>tool.sh</code>脚本执行测试程序</p>
 <h4 id="1-5-1、测试发送"><a href="#1-5-1、测试发送" class="headerlink" title="1.5.1、测试发送"></a>1.5.1、测试发送</h4><p><code>./tools.sh org.apache.rocketmq.example.quickstart.Producer</code></p>
 <p>失败-connect to null failed</p>
-<p><img src="images/roketmq/test-fail.png" alt=""></p>
+<p><img src="/images/roketmq/test-fail.png" alt=""></p>
 <p><strong>原因：</strong>不知道<code>nameserver</code>在哪儿</p>
 <p>在<code>tools</code>脚本中添加<code>export NAMESRV_ADDR=localhost:9876</code></p>
 <p>再次执行</p>
-<p><img src="images/roketmq/test-result.png" alt=""></p>
+<p><img src="/images/roketmq/test-result.png" alt=""></p>
 <h4 id="1-5-2、测试接收"><a href="#1-5-2、测试接收" class="headerlink" title="1.5.2、测试接收"></a>1.5.2、测试接收</h4><p><code>./tools.sh org.apache.rocketmq.example.quickstart.Consumer</code></p>
-<p><img src="images/roketmq/test-result-consume.png" alt=""></p>
+<p><img src="/images/roketmq/test-result-consume.png" alt=""></p>
 <h2 id="二、rocketmq-console（控制台）"><a href="#二、rocketmq-console（控制台）" class="headerlink" title="二、rocketmq-console（控制台）"></a>二、rocketmq-console（控制台）</h2><h3 id="2-1、下载"><a href="#2-1、下载" class="headerlink" title="2.1、下载"></a>2.1、<a href="https://github.com/apache/rocketmq-externals" target="_blank" rel="noopener">下载</a></h3><h3 id="2-2、中文文档"><a href="#2-2、中文文档" class="headerlink" title="2.2、中文文档"></a>2.2、<a href="https://github.com/apache/rocketmq-externals/blob/master/rocketmq-console/doc/1_0_0/UserGuide_CN.md" target="_blank" rel="noopener">中文文档</a></h3><h3 id="2-3、编译"><a href="#2-3、编译" class="headerlink" title="2.3、编译"></a>2.3、编译</h3><p>解压<code>unzip rocketmq-externals-master.zip</code></p>
 <p>进入主目录<code>cd /usr/local/rocketmq-externals-master/rocketmq-console</code></p>
-<p><img src="images/roketmq/console01.png" alt=""></p>
+<p><img src="/images/roketmq/console01.png" alt=""></p>
 <p>使用maven进行编译：<code>mvn clean package -Dmaven.test.skip=true</code></p>
 <h3 id="2-4、启动"><a href="#2-4、启动" class="headerlink" title="2.4、启动"></a>2.4、启动</h3><p>编译成功后在<code>rocketmq-console/target</code>目录下执行<code>rocketmq-console-ng-2.0.0.jar</code></p>
 <p>启动时，直接动态添加<code>nameserver</code>地址或编辑<code>application.properties</code>添加属性</p>
 <p><code>java -jar rocketmq-console-ng-2.0.0.jar --rocketmq.config.namesrvAddr=127.0.0.1:9876</code></p>
-<p><img src="images/roketmq/console02.png" alt=""></p>
+<p><img src="/images/roketmq/console02.png" alt=""></p>
 <p>启动成功后访问服务器8080端口即可</p>
-<p><img src="images/roketmq/console03.png" alt=""></p>
+<p><img src="/images/roketmq/console03.png" alt=""></p>
 ]]></content>
       <categories>
         <category>中间件</category>
@@ -6033,7 +6033,7 @@
   <entry>
     <title>rocketmq 存储设计</title>
     <url>/2021/07/31/rocketmq%20%E5%AD%98%E5%82%A8%E8%AE%BE%E8%AE%A1/</url>
-    <content><![CDATA[<h2 id="设计"><a href="#设计" class="headerlink" title="设计"></a><a href="https://github.com/apache/rocketmq/blob/master/docs/cn/design.md" target="_blank" rel="noopener">设计</a></h2><h3 id="消息存储整体架构"><a href="#消息存储整体架构" class="headerlink" title="消息存储整体架构"></a>消息存储整体架构</h3><img src="images/roketmq/rocketmq_design_11.png" style="zoom:80%;" />
+    <content><![CDATA[<h2 id="设计"><a href="#设计" class="headerlink" title="设计"></a><a href="https://github.com/apache/rocketmq/blob/master/docs/cn/design.md" target="_blank" rel="noopener">设计</a></h2><h3 id="消息存储整体架构"><a href="#消息存储整体架构" class="headerlink" title="消息存储整体架构"></a>消息存储整体架构</h3><img src="/images/roketmq/rocketmq_design_11.png" style="zoom:80%;" />
 
 <a id="more"></a>
 
@@ -6043,7 +6043,7 @@
 </li>
 <li><p>ConsumeQueue：消息消费队列，引入的目的主要是提高消息消费的性能，由于RocketMQ是基于主题topic的订阅模式，消息消费是针对主题进行的，如果要遍历commitlog文件中根据topic检索消息是非常低效的。Consumer即可根据ConsumeQueue来查找待消费的消息。其中，ConsumeQueue（逻辑消费队列）作为消费消息的索引，保存了指定Topic下的队列消息在CommitLog中的起始物理偏移量offset，消息大小size和消息Tag的HashCode值。consumequeue文件可以看成是基于topic的commitlog索引文件，故consumequeue文件夹的组织方式如下：topic/queue/file三层组织结构，具体存储路径为：$HOME/store/consumequeue/{topic}/{queueId}/{fileName}。同样consumequeue文件采取定长设计，每一个条目共20个字节，分别为8字节的commitlog物理偏移量、4字节的消息长度、8字节tag hashcode，单个文件由30W个条目组成，可以像数组一样随机访问每一个条目，每个ConsumeQueue文件大小约5.72M；</p>
 <p>默认情况下每个topic在broker上有一个consumerqueue的文件，里面包含了4个message queue文件。</p>
-<img src="images/roketmq/rocketmq_design_1.png" style="zoom: 80%;" />
+<img src="/images/roketmq/rocketmq_design_1.png" style="zoom: 80%;" />
 </li>
 <li><p>IndexFile：IndexFile（索引文件）提供了一种可以通过key或时间区间来查询消息的方法。Index文件的存储位置是：$HOME \store\index${fileName}，文件名fileName是以创建时的时间戳命名的，固定的单个IndexFile文件大小约为400M，一个IndexFile可以保存 2000W个索引，IndexFile的底层存储设计为在文件系统中实现HashMap结构，故rocketmq的索引文件其底层实现为hash索引。</p>
 </li>
@@ -6053,11 +6053,11 @@
 <p>​        在RocketMQ中，ConsumeQueue逻辑消费队列存储的数据较少，并且是顺序读取，在page cache机制的预读取作用下，Consume Queue文件的读性能几乎接近读内存，即使在有消息堆积情况下也不会影响性能。而对于CommitLog消息存储的日志数据文件来说，读取消息内容时候会产生较多的随机访问读取，严重影响性能。如果选择合适的系统IO调度算法，比如设置调度算法为“Deadline”（此时块存储采用SSD的话），随机读的性能也会有所提升。</p>
 <p>​        另外，RocketMQ主要通过MappedByteBuffer对文件进行读写操作。其中，利用了NIO中的FileChannel模型将磁盘上的物理文件直接映射到用户态的内存地址中（这种Mmap的方式减少了传统IO将磁盘文件数据在操作系统内核地址空间的缓冲区和用户应用程序地址空间的缓冲区之间来回进行拷贝的性能开销），将对文件的操作转化为直接对内存地址进行操作，从而极大地提高了文件的读写效率（正因为需要使用内存映射机制，故RocketMQ的文件存储都使用定长结构来存储，方便一次将整个文件映射至内存）。</p>
 <p>​        <code>所以为了使用零拷贝技术，RocketMQ的文件存储大小默认每个1G，超过1G会重新建立一个新文件、</code></p>
-<h3 id="消息刷盘"><a href="#消息刷盘" class="headerlink" title="消息刷盘"></a>消息刷盘</h3><img src="images/roketmq/rocketmq_design_2.png" style="zoom:80%;" />
+<h3 id="消息刷盘"><a href="#消息刷盘" class="headerlink" title="消息刷盘"></a>消息刷盘</h3><img src="/images/roketmq/rocketmq_design_2.png" style="zoom:80%;" />
 
 <p>(1) 同步刷盘：如上图所示，只有在消息真正持久化至磁盘后RocketMQ的Broker端才会真正返回给Producer端一个成功的ACK响应。同步刷盘对MQ消息可靠性来说是一种不错的保障，但是性能上会有较大影响，一般适用于金融业务应用该模式较多。</p>
 <p>(2) 异步刷盘：能够充分利用OS的PageCache的优势，只要消息写入PageCache即可将成功的ACK返回给Producer端。消息刷盘采用后台异步线程提交的方式进行，降低了读写延迟，提高了MQ的性能和吞吐量。</p>
-<h3 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h3><img src="images/roketmq/rocketmq_architecture_1.png" style="zoom: 67%;" />
+<h3 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h3><img src="/images/roketmq/rocketmq_architecture_1.png" style="zoom: 67%;" />
 
 <p>RocketMQ消息队列集群主要包括NameServer、Broker(Master/Slave)、Producer、Consumer4个角色，基本通讯流程如下：</p>
 <ol>
@@ -6079,9 +6079,9 @@
 <p>(1) 从rebalanceImpl实例的本地缓存变量—topicSubscribeInfoTable中，获取该Topic主题下的消息消费队列集合（mqSet）；</p>
 <p>(2) 根据topic和consumerGroup为参数调用mQClientFactory.findConsumerIdList()方法向Broker端发送获取该消费组下消费者Id列表的RPC通信请求（Broker端基于前面Consumer端上报的心跳包数据而构建的consumerTable做出响应返回，业务请求码：GET_CONSUMER_LIST_BY_GROUP）；</p>
 <p>(3) 先对Topic下的消息消费队列、消费者Id排序，然后用消息队列分配策略算法（默认为：消息队列的平均分配算法），计算出待拉取的消息队列。这里的平均分配算法，类似于分页的算法，将所有MessageQueue排好序类似于记录，将所有消费端Consumer排好序类似页数，并求出每一页需要包含的平均size和每个页面记录的范围range，最后遍历整个range而计算出当前Consumer端应该分配到的记录（这里即为：MessageQueue）。</p>
-<p><img src="images/roketmq/rocketmq_design_8.png" alt=""></p>
+<p><img src="/images/roketmq/rocketmq_design_8.png" alt=""></p>
 <p>(4) 然后，调用updateProcessQueueTableInRebalance()方法，具体的做法是，先将分配到的消息队列集合（mqSet）与processQueueTable做一个过滤比对。</p>
-<p><img src="images/roketmq/rocketmq_design_9.png" alt=""></p>
+<p><img src="/images/roketmq/rocketmq_design_9.png" alt=""></p>
 <ul>
 <li>上图中processQueueTable标注的红色部分，表示与分配到的消息队列集合mqSet互不包含。将这些队列设置Dropped属性为true，然后查看这些队列是否可以移除出processQueueTable缓存变量，这里具体执行removeUnnecessaryMessageQueue()方法，即每隔1s 查看是否可以获取当前消费处理队列的锁，拿到的话返回true。如果等待1s后，仍然拿不到当前消费处理队列的锁则返回false。如果返回true，则从processQueueTable缓存变量中移除对应的Entry；</li>
 <li>上图中processQueueTable的绿色部分，表示与分配到的消息队列集合mqSet的交集。判断该ProcessQueue是否已经过期了，在Pull模式的不用管，如果是Push模式的，设置Dropped属性为true，并且调用removeUnnecessaryMessageQueue()方法，像上面一样尝试移除Entry；</li>
@@ -6253,7 +6253,7 @@
 <p>跨语言</p>
 </li>
 </ul>
-<h2 id="二、消息收发模型"><a href="#二、消息收发模型" class="headerlink" title="二、消息收发模型"></a>二、消息收发模型</h2><img src="images/roketmq/消息收发模型.png" alt="参考阿里云官方文档图片" style="zoom:80%;" />
+<h2 id="二、消息收发模型"><a href="#二、消息收发模型" class="headerlink" title="二、消息收发模型"></a>二、消息收发模型</h2><img src="/images/roketmq/消息收发模型.png" alt="参考阿里云官方文档图片" style="zoom:80%;" />
 
 <a id="more"></a>
 
@@ -6290,21 +6290,21 @@
 <li><p>消费失败的消息不会重投</p>
 </li>
 </ul>
-<h3 id="发送方式"><a href="#发送方式" class="headerlink" title="发送方式"></a>发送方式</h3><h4 id="同步消息-单条、批量"><a href="#同步消息-单条、批量" class="headerlink" title="同步消息(单条、批量)"></a>同步消息(单条、批量)</h4><img src="images/roketmq/同步发送.png" style="zoom: 67%;" />
+<h3 id="发送方式"><a href="#发送方式" class="headerlink" title="发送方式"></a>发送方式</h3><h4 id="同步消息-单条、批量"><a href="#同步消息-单条、批量" class="headerlink" title="同步消息(单条、批量)"></a>同步消息(单条、批量)</h4><img src="/images/roketmq/同步发送.png" style="zoom: 67%;" />
 
 <p>​            同步发送是指消息发送方发出一条消息后，会在收到服务端返回响应之后才发下一条消息的通讯方式。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DefaultMQProducer producer = <span class="keyword">new</span> DefaultMQProducer(<span class="string">"group01"</span>);</span><br><span class="line"><span class="comment">//nameServer地址</span></span><br><span class="line">producer.setNamesrvAddr(<span class="string">"192.168.1.18:9876"</span>);</span><br><span class="line">producer.start();</span><br><span class="line"></span><br><span class="line"><span class="comment">//同步单条普通消息</span></span><br><span class="line">Message message = <span class="keyword">new</span> Message(<span class="string">"topic01"</span>,<span class="string">"msg_body"</span>.getBytes());</span><br><span class="line">SendResult send = producer.send(message);</span><br><span class="line"></span><br><span class="line"><span class="comment">//同步多条普通消息发送</span></span><br><span class="line">List&lt;Message&gt; msgList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">msgList.add(<span class="keyword">new</span> Message(<span class="string">"topic01"</span>,<span class="string">"同步普通多条01"</span>.getBytes()));</span><br><span class="line">msgList.add(<span class="keyword">new</span> Message(<span class="string">"topic01"</span>,<span class="string">"同步普通多条02"</span>.getBytes()));</span><br><span class="line">msgList.add(<span class="keyword">new</span> Message(<span class="string">"topic01"</span>,<span class="string">"同步普通多条03"</span>.getBytes()));</span><br><span class="line">SendResult send = producer.send(msgList);</span><br><span class="line"></span><br><span class="line">producer.shutdown();</span><br></pre></td></tr></table></figure>
 
 
 
-<h4 id="异步消息"><a href="#异步消息" class="headerlink" title="异步消息"></a>异步消息</h4><img src="images/roketmq/异步发送.png" style="zoom:67%;" />
+<h4 id="异步消息"><a href="#异步消息" class="headerlink" title="异步消息"></a>异步消息</h4><img src="/images/roketmq/异步发送.png" style="zoom:67%;" />
 
 <p>​        异步发送是指发送方发出一条消息后，不等服务端返回响应，接着发送下一条消息的通讯方式。消息队列RocketMQ版的异步发送，需要您实现异步发送回调接口（SendCallback）。消息发送方在发送了一条消息后，不需要等待服务端响应即可发送第二条消息。发送方通过回调接口接收服务端响应，并处理响应结果。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DefaultMQProducer producer = <span class="keyword">new</span> DefaultMQProducer(<span class="string">"group02"</span>);</span><br><span class="line"><span class="comment">//设置nameServer</span></span><br><span class="line">producer.setNamesrvAddr(<span class="string">"192.168.1.18:9876"</span>);</span><br><span class="line"><span class="comment">//启动生产者</span></span><br><span class="line">producer.start();</span><br><span class="line"></span><br><span class="line">Message message = <span class="keyword">new</span> Message(<span class="string">"topic02"</span>,<span class="string">"异步消息"</span>.getBytes());</span><br><span class="line"><span class="comment">//异步发送消息</span></span><br><span class="line">producer.send(message, <span class="keyword">new</span> SendCallback() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">(SendResult sendResult)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"成功回调:"</span> + sendResult);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onException</span><span class="params">(Throwable throwable)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"失败回调:"</span> + throwable);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//异步回调不能关闭生产者，因为无法确定回调的消息什么时候执行，会出现异常</span></span><br><span class="line"><span class="comment">//producer.shutdown();</span></span><br></pre></td></tr></table></figure>
 
 
 
-<h4 id="单向消息"><a href="#单向消息" class="headerlink" title="单向消息"></a>单向消息</h4><img src="images/roketmq/单向发送.png" style="zoom:67%;" />
+<h4 id="单向消息"><a href="#单向消息" class="headerlink" title="单向消息"></a>单向消息</h4><img src="/images/roketmq/单向发送.png" style="zoom:67%;" />
 
 <p>​        发送方只负责发送消息，不等待服务端返回响应且没有回调函数触发，即只发送请求不等待应答。此方式发送消息的过程耗时非常短，一般在微秒级别。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DefaultMQProducer producer = <span class="keyword">new</span> DefaultMQProducer(<span class="string">"group02"</span>);</span><br><span class="line"><span class="comment">//设置nameServer</span></span><br><span class="line">producer.setNamesrvAddr(<span class="string">"192.168.1.18:9876"</span>);</span><br><span class="line"><span class="comment">//启动</span></span><br><span class="line">producer.start();</span><br><span class="line">Message message = <span class="keyword">new</span> Message(<span class="string">"topic02"</span>,<span class="string">"单向消息"</span>.getBytes());</span><br><span class="line"><span class="comment">//发送单向消息</span></span><br><span class="line">producer.sendOneway(message);</span><br><span class="line"></span><br><span class="line">producer.shutdown();</span><br></pre></td></tr></table></figure>
@@ -6326,7 +6326,7 @@
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">nohup ../bin/mqbroker -n 127.0.0.1:9876 -c broker.conf  &amp;</span><br></pre></td></tr></table></figure>
 
 <p>rocketmq-console中可以看到</p>
-<p><img src="images/roketmq/%E9%85%8D%E7%BD%AE.png" alt=""></p>
+<p><img src="/images/roketmq/%E9%85%8D%E7%BD%AE.png" alt=""></p>
 <h5 id="生产者-1"><a href="#生产者-1" class="headerlink" title="生产者"></a>生产者</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Message message = <span class="keyword">new</span> Message();</span><br><span class="line">message.setBody(<span class="string">"消息体123456"</span>.getBytes());</span><br><span class="line">message.setTopic(<span class="string">"topic05"</span>);</span><br><span class="line"><span class="comment">//指定额外参数</span></span><br><span class="line">message.putUserProperty(<span class="string">"userId"</span>,<span class="string">"123"</span>);</span><br></pre></td></tr></table></figure>
 
 <h5 id="消费者-1"><a href="#消费者-1" class="headerlink" title="消费者"></a>消费者</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//对额外参数进行sql过滤</span></span><br><span class="line">MessageSelector messageSelector = MessageSelector.bySql(<span class="string">"userId &gt;= 2"</span>);</span><br><span class="line">consumer.subscribe(<span class="string">"topic05"</span>,messageSelector);</span><br></pre></td></tr></table></figure>
@@ -6364,7 +6364,7 @@
 <p>但是多个queue的消息同时消费时仍无法保证，此时需要指定消费的线程数为1，当消费完一个queue之后再去消费另一个queue</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> MQClientException </span>&#123;</span><br><span class="line">        DefaultMQPushConsumer consumer = <span class="keyword">new</span> DefaultMQPushConsumer(<span class="string">"order-group"</span>);</span><br><span class="line">        consumer.setNamesrvAddr(<span class="string">"192.168.1.18:9876"</span>);</span><br><span class="line">        <span class="comment">//指定订阅规则</span></span><br><span class="line">        consumer.subscribe(<span class="string">"topic01"</span>,<span class="string">"*"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//最大开启消费线程数</span></span><br><span class="line">        consumer.setConsumeThreadMax(<span class="number">1</span>);</span><br><span class="line">        <span class="comment">//最小线程数</span></span><br><span class="line">        consumer.setConsumeThreadMin(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//注册顺序消息消费监听器</span></span><br><span class="line">        consumer.registerMessageListener(<span class="keyword">new</span> MessageListenerOrderly() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> ConsumeOrderlyStatus <span class="title">consumeMessage</span><span class="params">(List&lt;MessageExt&gt; list, ConsumeOrderlyContext consumeOrderlyContext)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">for</span> (MessageExt messageExt : list) &#123;</span><br><span class="line">                    System.out.println(<span class="keyword">new</span> String(messageExt.getBody()));</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> ConsumeOrderlyStatus.SUCCESS;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">       consumer.start();</span><br><span class="line">        System.out.println(<span class="string">"order consumer start"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="6-4、事务消息"><a href="#6-4、事务消息" class="headerlink" title="6.4、事务消息"></a>6.4、事务消息</h3><p><img src="images/roketmq/%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF.png" alt=""></p>
+<h3 id="6-4、事务消息"><a href="#6-4、事务消息" class="headerlink" title="6.4、事务消息"></a>6.4、事务消息</h3><p><img src="/images/roketmq/%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF.png" alt=""></p>
 <p>事务消息发送步骤如下：</p>
 <ol>
 <li>发送方将半事务消息发送至消息队列RocketMQ版服务端。</li>
@@ -6409,7 +6409,7 @@
   <entry>
     <title>rocketmq 架构介绍、集群部署</title>
     <url>/2021/07/31/rocketmq%20%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D%E3%80%81%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2/</url>
-    <content><![CDATA[<h2 id="rocketmq-架构"><a href="#rocketmq-架构" class="headerlink" title="rocketmq-架构"></a><a href="https://github.com/apache/rocketmq/blob/master/docs/cn/architecture.md" target="_blank" rel="noopener">rocketmq-架构</a></h2><h3 id="组成"><a href="#组成" class="headerlink" title="组成"></a>组成</h3><p><img src="images/roketmq/rocketmq_architecture_1.png" alt=""></p>
+    <content><![CDATA[<h2 id="rocketmq-架构"><a href="#rocketmq-架构" class="headerlink" title="rocketmq-架构"></a><a href="https://github.com/apache/rocketmq/blob/master/docs/cn/architecture.md" target="_blank" rel="noopener">rocketmq-架构</a></h2><h3 id="组成"><a href="#组成" class="headerlink" title="组成"></a>组成</h3><p><img src="/images/roketmq/rocketmq_architecture_1.png" alt=""></p>
 <a id="more"></a>
 
 <p>RocketMQ架构上主要分为四部分，如上图所示:</p>
@@ -6427,7 +6427,7 @@
 <p>NameServer通常也是集群的方式部署，各实例间相互不进行信息通讯。Broker是向每一台NameServer注册自己的路由信息，所以每一个NameServer实例上面都保存一份完整的路由信息。当某个NameServer因某种原因下线了，Broker仍然可以向其它NameServer同步其路由信息，Producer,Consumer仍然可以动态感知Broker的路由的信息。</p>
 </li>
 <li><p>BrokerServer：Broker主要负责消息的存储、投递和查询以及服务高可用保证，为了实现这些功能，Broker包含了以下几个重要子模块。</p>
-<img src="images/roketmq/rocketmq_architecture_2.png" style="zoom:80%;" />
+<img src="/images/roketmq/rocketmq_architecture_2.png" style="zoom:80%;" />
 
 <ol>
 <li>Remoting Module：整个Broker的实体，负责处理来自clients端的请求。</li>
@@ -6444,7 +6444,7 @@
 <li>Producer与NameServer集群中的其中一个节点（随机选择）建立长连接，定期从NameServer获取Topic路由信息，并向提供Topic 服务的Master建立长连接，且定时向Master发送心跳。Producer完全无状态，可集群部署。</li>
 <li>Consumer与NameServer集群中的其中一个节点（随机选择）建立长连接，定期从NameServer获取Topic路由信息，并向提供Topic服务的Master、Slave建立长连接，且定时向Master、Slave发送心跳。Consumer既可以从Master订阅消息，也可以从Slave订阅消息，消费者在向Master拉取消息时，Master服务器会根据拉取偏移量与最大偏移量的距离（判断是否读老消息，产生读I/O），以及从服务器是否可读等因素建议下一次是从Master还是Slave拉取。</li>
 </ul>
-<h3 id="集群工作流程"><a href="#集群工作流程" class="headerlink" title="集群工作流程"></a>集群工作流程</h3><p><img src="images/roketmq/rocketmq_architecture_3.png" alt=""></p>
+<h3 id="集群工作流程"><a href="#集群工作流程" class="headerlink" title="集群工作流程"></a>集群工作流程</h3><p><img src="/images/roketmq/rocketmq_architecture_3.png" alt=""></p>
 <ul>
 <li>启动NameServer，NameServer起来后监听端口，等待Broker、Producer、Consumer连上来，相当于一个路由控制中心。</li>
 <li>Broker启动，跟所有的NameServer保持长连接，定时发送心跳包。心跳包中包含当前Broker信息(IP+端口等)以及存储所有Topic信息。注册成功后，NameServer集群中就有Topic跟Broker的映射关系。</li>
@@ -6468,7 +6468,7 @@
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">### 在centos-1，启动第一个Master，例如NameServer为：192.168.1.18:9876;192.168.1.19:9876</span></span><br><span class="line">nohup sh mqbroker -n 192.168.1.18:9876 -c ../conf/2m-noslave/broker-a.properties &amp;</span><br><span class="line"> </span><br><span class="line"><span class="comment">### 在centos-1，启动第二个Master，例如NameServer为：192.168.1.18:9876;192.168.1.19:9876</span></span><br><span class="line">nohup sh mqbroker -n 192.168.1.19:9876 -c ../conf/2m-noslave/broker-b.properties &amp;</span><br></pre></td></tr></table></figure>
 
 <p>使用客户端<code>producer</code>连接任一<code>nameSevre</code>发送10条消息到top01，可以看到top01对应的数据分散到两个<code>broker</code>各自的四个不同queue上</p>
-<img src="images/roketmq/多主模式消息发送.png" style="zoom: 80%;" />
+<img src="/images/roketmq/多主模式消息发送.png" style="zoom: 80%;" />
 
 <p>开启<code>consumer</code>连接任一<code>nameServer</code>，获取topic01数据存在的broker信息，连接对应的broker进行消息消费</p>
 <h3 id="多主多从-异步复制模式"><a href="#多主多从-异步复制模式" class="headerlink" title="多主多从-异步复制模式"></a>多主多从-异步复制模式</h3><p>每个Master配置一个Slave，有多对Master-Slave，HA采用异步复制方式，主备有短暂消息延迟（毫秒级），这种模式的优缺点如下：</p>
@@ -6488,10 +6488,10 @@
 
 
 
-<img src="images/roketmq/双主双从.png" style="zoom:80%;" />
+<img src="/images/roketmq/双主双从.png" style="zoom:80%;" />
 
 <p>使用客户端<code>producer</code>连接任一<code>nameSevre</code>发送10条消息到top02，可以看到top02对应的数据分散到两个<code>broker</code>各自的四个不同queue上</p>
-<img src="images/roketmq/多主多从模式消息发送.png" style="zoom:80%;" />
+<img src="/images/roketmq/多主多从模式消息发送.png" style="zoom:80%;" />
 
 <h3 id="多主多从-同步复制模式"><a href="#多主多从-同步复制模式" class="headerlink" title="多主多从-同步复制模式"></a>多主多从-同步复制模式</h3><ul>
 <li>每个Master配置一个Slave，有多对Master-Slave，HA采用同步双写方式，即只有主备都写成功，才向应用返回成功，这种模式的优缺点如下：<ul>
