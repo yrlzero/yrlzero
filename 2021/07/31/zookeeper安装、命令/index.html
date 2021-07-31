@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、介绍ZooKeeper 是一个开源的分布式协调服务。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zookeeper 安装">
+<meta property="og:url" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="一、介绍ZooKeeper 是一个开源的分布式协调服务。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/zk01.png">
+<meta property="og:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/zk-02-1.jpg">
+<meta property="og:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/zk-02-%E8%8A%82%E7%82%B9%E7%BB%93%E6%9E%84.png">
+<meta property="og:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/ls.jpg">
+<meta property="og:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/config.jpg">
+<meta property="og:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/create.jpg">
+<meta property="og:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/get.jpg">
+<meta property="og:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/history.jpg">
+<meta property="article:published_time" content="2021-07-31T15:24:00.787Z">
+<meta property="article:modified_time" content="2021-07-31T15:36:27.150Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="zookeeper">
+<meta property="article:tag" content="中间件">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/images/zk/zk01.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>zookeeper 安装 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          zookeeper 安装
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-31 23:24:00 / 修改时间：23:36:27" itemprop="dateCreated datePublished" datetime="2021-07-31T23:24:00+08:00">2021-07-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/zookeeper/" itemprop="url" rel="index"><span itemprop="name">zookeeper</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、介绍"><a href="#一、介绍" class="headerlink" title="一、介绍"></a>一、介绍</h2><p>ZooKeeper 是一个开源的<strong>分布式协调服务</strong>。</p>
+<p><img src="images/zk/zk01.png" alt=""></p>
+<a id="more"></a>
+
+<h2 id="二、概念"><a href="#二、概念" class="headerlink" title="二、概念"></a>二、概念</h2><h3 id="Data-model（数据模型）"><a href="#Data-model（数据模型）" class="headerlink" title="Data model（数据模型）"></a>Data model（数据模型）</h3><p>ZooKeeper 数据模型采用层次化的多叉树形结构，每个节点上都可以存储数据，这些数据可以是数字、字符串或者是二级制序列。并且。每个节点还可以拥有 N 个子节点，最上层是根节点以“/”来代表。每个数据节点在 ZooKeeper 中被称为 <strong>znode</strong>，它是 ZooKeeper 中数据的最小单元。并且，每个 znode 都一个唯一的路径标识。</p>
+<p><img src="images/zk/zk-02-1.jpg" alt=""></p>
+<p>ZooKeeper 主要是用来协调服务的，而不是用来存储业务数据的，所以不要放比较大的数据在 znode 上，ZooKeeper 给出的上限是每个结点的数据大小最大是 <code>1M</code>。</p>
+<p><img src="images/zk/zk-02-%E8%8A%82%E7%82%B9%E7%BB%93%E6%9E%84.png" alt=""></p>
+<h3 id="znode（数据节点）"><a href="#znode（数据节点）" class="headerlink" title="znode（数据节点）"></a>znode（数据节点）</h3><p>在 ZooKeeper 中被称为 <strong>znode</strong>，它是 ZooKeeper 中数据的最小单元。</p>
+<p>znode 分为 4 大类：</p>
+<ul>
+<li><strong>持久（PERSISTENT）节点</strong> ：一旦创建就一直存在即使 ZooKeeper 集群宕机，直到将其删除。</li>
+<li><strong>临时（EPHEMERAL）节点</strong> ：临时节点的生命周期是与 <strong>客户端会话（session）</strong> 绑定的，<strong>会话消失则节点消失</strong> 。并且，<strong>临时节点只能做叶子节点</strong> ，不能创建子节点。</li>
+<li><strong>持久顺序（PERSISTENT_SEQUENTIAL）节点</strong> ：除了具有持久（PERSISTENT）节点的特性之外， 子节点的名称还具有顺序性。比如 <code>/node1/app0000000001</code> 、<code>/node1/app0000000002</code> 。</li>
+<li><strong>临时顺序（EPHEMERAL_SEQUENTIAL）节点</strong> ：除了具备临时（EPHEMERAL）节点的特性之外，子节点的名称还具有顺序性。</li>
+</ul>
+<p>每个 znode 由 2 部分组成:</p>
+<ul>
+<li><strong>stat</strong> ：状态信息</li>
+<li><strong>data</strong> ： 节点存放的数据的具体内容</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>znode 状态信息</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cZxid</td>
+<td>create ZXID，即该数据节点被创建时的事务 id</td>
+</tr>
+<tr>
+<td>ctime</td>
+<td>create time，即该节点的创建时间</td>
+</tr>
+<tr>
+<td>mZxid</td>
+<td>modified ZXID，即该节点最终一次更新时的事务 id</td>
+</tr>
+<tr>
+<td>mtime</td>
+<td>modified time，即该节点最后一次的更新时间</td>
+</tr>
+<tr>
+<td>pZxid</td>
+<td>该节点的子节点列表最后一次修改时的事务 id，只有子节点列表变更才会更新 pZxid，子节点内容变更不会更新</td>
+</tr>
+<tr>
+<td>cversion</td>
+<td>子节点版本号，当前节点的子节点每次变化时值增加 1</td>
+</tr>
+<tr>
+<td>dataVersion</td>
+<td>数据节点内容版本号，节点创建时为 0，每更新一次节点内容(不管内容有无变化)该版本号的值增加 1</td>
+</tr>
+<tr>
+<td>aclVersion</td>
+<td>节点的 ACL 版本号，表示该节点 ACL 信息变更次数</td>
+</tr>
+<tr>
+<td>ephemeralOwner</td>
+<td>创建该临时节点的会话的 sessionId；如果当前节点为持久节点，则 ephemeralOwner=0</td>
+</tr>
+<tr>
+<td>dataLength</td>
+<td>数据节点内容长度</td>
+</tr>
+<tr>
+<td>numChildren</td>
+<td>当前节点的子节点个数</td>
+</tr>
+</tbody></table>
+<h3 id="ACL（权限控制）"><a href="#ACL（权限控制）" class="headerlink" title="ACL（权限控制）"></a>ACL（权限控制）</h3><p>ZooKeeper 采用 ACL（AccessControlLists）策略来进行权限控制，类似于 UNIX 文件系统的权限控制。</p>
+<p>对于 znode 操作的权限，ZooKeeper 提供了以下 5 种：</p>
+<ul>
+<li><strong>CREATE</strong> : 能创建子节点</li>
+<li><strong>READ</strong> ：能获取节点数据和列出其子节点</li>
+<li><strong>WRITE</strong> : 能设置/更新节点数据</li>
+<li><strong>DELETE</strong> : 能删除子节点</li>
+<li><strong>ADMIN</strong> : 能设置节点 ACL 的权限</li>
+</ul>
+<p>其中尤其需要注意的是，<strong>CREATE</strong> 和 <strong>DELETE</strong> 这两种权限都是针对 <strong>子节点</strong> 的权限控制。</p>
+<p>对于身份认证，提供了以下几种方式：</p>
+<ul>
+<li><strong>world</strong> ： 默认方式，所有用户都可无条件访问。</li>
+<li><strong>auth</strong> :不使用任何 id，代表任何已认证的用户。</li>
+<li><strong>digest</strong> :用户名:密码认证方式： <em>username:password</em> 。</li>
+<li><strong>ip</strong> : 对指定 ip 进行限制。</li>
+</ul>
+<h3 id="Watcher（事件监听器）"><a href="#Watcher（事件监听器）" class="headerlink" title="Watcher（事件监听器）"></a>Watcher（事件监听器）</h3><p>​        Watcher（事件监听器），是 ZooKeeper 中的一个很重要的特性。ZooKeeper 允许用户在指定节点上注册一些 Watcher，并且在一些特定事件触发的时候，ZooKeeper 服务端会将事件通知到感兴趣的客户端上去，该机制是 ZooKeeper 实现分布式协调服务的重要特性。</p>
+<h2 id="三、下载安装"><a href="#三、下载安装" class="headerlink" title="三、下载安装"></a>三、<a href="https://zookeeper.apache.org/releases.html" target="_blank" rel="noopener">下载安装</a></h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#解压</span></span><br><span class="line">tar -zxvf apache-zookeeper-3.7.0-bin.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment">#配置环境变量</span></span><br><span class="line">vim /etc/profile</span><br><span class="line">ZK_HOME=/opt/apache-zookeeper-3.7.0-bin</span><br><span class="line">PATH=<span class="variable">$PATH</span>:<span class="variable">$JAVA_HOME</span>/bin:<span class="variable">$JRE_HOME</span>/bin:<span class="variable">$ZK_HOME</span>/bin</span><br><span class="line"><span class="built_in">source</span> /etc/profile</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、配置"><a href="#四、配置" class="headerlink" title="四、配置"></a>四、配置</h2><h3 id="zoo-cfg"><a href="#zoo-cfg" class="headerlink" title="zoo.cfg"></a>zoo.cfg</h3><p>拷贝配置<code>cp zoo_sample.cfg zoo.cfg</code>，并需要修改<code>zoo.cfg</code>文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># the directory where the snapshot is stored.</span></span><br><span class="line"><span class="comment"># do not use /tmp for storage, /tmp here is just </span></span><br><span class="line"><span class="comment"># example sakes.</span></span><br><span class="line"><span class="comment">#dataDir=/tmp/zookeeper</span></span><br><span class="line"><span class="comment">#数据存放文件路径</span></span><br><span class="line"><span class="string">dataDir=/var/zookeeper</span></span><br><span class="line"><span class="comment">#文件尾部插入zookeeper服务节点</span></span><br><span class="line"><span class="comment">#2888是leader接收write请求的端口</span></span><br><span class="line"><span class="comment">#3888是投票选举的端口</span></span><br><span class="line"><span class="string">server.1=192.168.142.121:2888:3888</span></span><br><span class="line"><span class="string">server.2=192.168.142.122:2888:3888</span></span><br><span class="line"><span class="string">server.3=192.168.142.123:2888:3888</span></span><br><span class="line"><span class="string">server.4=192.168.142.124:2888:3888</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="myid"><a href="#myid" class="headerlink" title="myid"></a>myid</h3><p><code>myid</code>文件标识当前zookeeper是节点中的哪个服务，文件内容与上面的<code>server.x</code>的<code>x</code>对应</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#第一种</span></span><br><span class="line">vim /var/zookeeper/myid</span><br><span class="line">1 <span class="comment">#填写服务节点对应的数字</span></span><br><span class="line"><span class="comment">#第二种</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /var/zookeeper/myid</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、远程复制"><a href="#五、远程复制" class="headerlink" title="五、远程复制"></a>五、远程复制</h2><p>将zookeeper复制到每一台机子上</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r /opt/apache-zookeeper-3.7.0-bin/ root@192.168.142.122:/opt/apache-zookeeper-3.7.0-bin/</span><br></pre></td></tr></table></figure>
+
+<p>每台机子重复创建myid并设置属于自己的server.x的x值</p>
+<h2 id="六、相关参数"><a href="#六、相关参数" class="headerlink" title="六、相关参数"></a>六、相关参数</h2><h3 id="服务端参数"><a href="#服务端参数" class="headerlink" title="服务端参数"></a>服务端参数</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#前台启动</span></span><br><span class="line">zkServer.sh start-foreground</span><br><span class="line"><span class="comment">#后台启动</span></span><br><span class="line">zkServer.sh start</span><br><span class="line"><span class="comment">#停止</span></span><br><span class="line">zkServer.sh stop</span><br><span class="line"><span class="comment">#版本信息</span></span><br><span class="line">zkServer.sh version</span><br><span class="line"><span class="comment">#重启</span></span><br><span class="line">zkServer.sh restart</span><br><span class="line"><span class="comment">#状态信息（版本+角色）</span></span><br><span class="line">zkServer.sh status</span><br><span class="line"><span class="comment">#启动命令参数</span></span><br><span class="line">zkServer.sh <span class="built_in">print</span>-cmd</span><br></pre></td></tr></table></figure>
+
+<h3 id="客户端参数"><a href="#客户端参数" class="headerlink" title="客户端参数"></a>客户端参数</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#客户端连接</span></span><br><span class="line">zkCli.sh</span><br><span class="line">zkCli.sh -server 192.168.142.121:2181</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、命令"><a href="#七、命令" class="headerlink" title="七、命令"></a>七、命令</h2><p>登录zk客户端可执行以下命令</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">ZooKeeper -server host:port -client-configuration properties-file cmd args</span><br><span class="line">        addWatch [-m mode] path <span class="comment"># optional mode is one of [PERSISTENT, PERSISTENT_RECURSIVE] - default is PERSISTENT_RECURSIVE</span></span><br><span class="line">        addauth scheme auth</span><br><span class="line">        close </span><br><span class="line">        config [-c] [-w] [-s]</span><br><span class="line">        connect host:port</span><br><span class="line">        create [-s] [-e] [-c] [-t ttl] path [data] [acl]</span><br><span class="line">        delete [-v version] path</span><br><span class="line">        deleteall path [-b batch size]</span><br><span class="line">        delquota [-n|-b|-N|-B] path</span><br><span class="line">        get [-s] [-w] path</span><br><span class="line">        getAcl [-s] path</span><br><span class="line">        getAllChildrenNumber path</span><br><span class="line">        getEphemerals path</span><br><span class="line">        <span class="built_in">history</span> </span><br><span class="line">        listquota path</span><br><span class="line">        ls [-s] [-w] [-R] path</span><br><span class="line">        printwatches on|off</span><br><span class="line">        quit </span><br><span class="line">        reconfig [-s] [-v version] [[-file path] | [-members serverID=host:port1:port2;port3[,...]*]] | [-add serverId=host:port1:port2;port3[,...]]* [-remove serverId[,...]*]</span><br><span class="line">        redo cmdno</span><br><span class="line">        removewatches path [-c|-d|-a] [-l]</span><br><span class="line">        <span class="built_in">set</span> [-s] [-v version] path data</span><br><span class="line">        setAcl [-s] [-v version] [-R] path acl</span><br><span class="line">        setquota -n|-b|-N|-B val path</span><br><span class="line">        <span class="built_in">stat</span> [-w] path</span><br><span class="line">        sync path</span><br><span class="line">        version </span><br><span class="line">        whoami</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="ls"><a href="#ls" class="headerlink" title="ls"></a>ls</h4><p>#查看目录下文件节点信息<br><code>ls [-s] [-w] [-R] path</code></p>
+<p><img src="images/zk/ls.jpg" alt=""></p>
+<h4 id="config"><a href="#config" class="headerlink" title="config"></a>config</h4><p>#查看配置信息<br>config [-c] [-w] [-s]</p>
+<p><img src="images/zk/config.jpg" alt=""></p>
+<h4 id="create"><a href="#create" class="headerlink" title="create"></a>create</h4><p>创建空节点</p>
+<p>​    <code>-e</code>创建临时节点，当前客户端退出则消失</p>
+<p>​    <code>-s</code>创建分布式节点，用于多线程竞争创建，创建时会在文件名后拼接递增的序列数值</p>
+<p><img src="images/zk/create.jpg" alt=""></p>
+<h4 id="get"><a href="#get" class="headerlink" title="get"></a>get</h4><p>获取节点参数值，图中<code>/node/data</code>为有值节点、<code>/node/test</code>为无值节点</p>
+<p><img src="images/zk/get.jpg" alt=""></p>
+<h4 id="set"><a href="#set" class="headerlink" title="set"></a>set</h4><p>设置节点参数</p>
+<h4 id="history"><a href="#history" class="headerlink" title="history"></a>history</h4><p>当前客户端自登录链接以来执行的历史命令</p>
+<p><img src="images/zk/history.jpg" alt=""></p>
+<h4 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h4><p>删除节点，不是<code>子节点</code>不能删除</p>
+<h4 id="stat"><a href="#stat" class="headerlink" title="stat"></a>stat</h4><p>节点状态信息</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[zk: 192.168.142.121:2181(CONNECTED) 1] <span class="built_in">stat</span> /node</span><br><span class="line"><span class="comment"># cZxid 有64位，前32位表示Leader的纪元，后32位表示事务ID</span></span><br><span class="line"><span class="comment"># ZK顺序执行，Leader维护着一个自增事务ID：00000002</span></span><br><span class="line"><span class="comment"># 0x2 表示的是Leader的纪元</span></span><br><span class="line"><span class="comment"># cZxid 的 c 表示 create，cZxid表示也就是创建节点的事务ID</span></span><br><span class="line">cZxid = 0x10000000e</span><br><span class="line"><span class="comment"># 创建时间</span></span><br><span class="line">ctime = Mon May 17 13:58:57 CST 2021</span><br><span class="line"><span class="comment"># 修改节点的事务ID</span></span><br><span class="line">mZxid = 0x10000001d</span><br><span class="line">mtime = Mon May 17 14:54:09 CST 2021</span><br><span class="line"><span class="comment"># 当前这个节点下创建的最后一个节点的ID</span></span><br><span class="line">pZxid = 0x10000001b</span><br><span class="line">cversion = 7</span><br><span class="line">dataVersion = 2</span><br><span class="line">aclVersion = 0</span><br><span class="line"><span class="comment">#临时持有者 0x0表示持久节点，临时节点则存对应的是sessionId</span></span><br><span class="line">ephemeralOwner = 0x0</span><br><span class="line">dataLength = 3</span><br><span class="line">numChildren = 5</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/zookeeper/" rel="tag"># zookeeper</a>
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" rel="tag"># 中间件</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/31/zookeeper%20%E5%AE%9E%E7%8E%B0%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" rel="prev" title="zookeeper 实现配置中心、分布式锁">
+      <i class="fa fa-chevron-left"></i> zookeeper 实现配置中心、分布式锁
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/07/31/rocketmq%20%E5%AE%89%E8%A3%85/" rel="next" title="rocketmq 安装">
+      rocketmq 安装 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、介绍"><span class="nav-text">一、介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、概念"><span class="nav-text">二、概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-model（数据模型）"><span class="nav-text">Data model（数据模型）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#znode（数据节点）"><span class="nav-text">znode（数据节点）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ACL（权限控制）"><span class="nav-text">ACL（权限控制）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Watcher（事件监听器）"><span class="nav-text">Watcher（事件监听器）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、下载安装"><span class="nav-text">三、下载安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、配置"><span class="nav-text">四、配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#zoo-cfg"><span class="nav-text">zoo.cfg</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#myid"><span class="nav-text">myid</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、远程复制"><span class="nav-text">五、远程复制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、相关参数"><span class="nav-text">六、相关参数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端参数"><span class="nav-text">服务端参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端参数"><span class="nav-text">客户端参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、命令"><span class="nav-text">七、命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ls"><span class="nav-text">ls</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#config"><span class="nav-text">config</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#create"><span class="nav-text">create</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#get"><span class="nav-text">get</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#set"><span class="nav-text">set</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#history"><span class="nav-text">history</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#delete"><span class="nav-text">delete</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stat"><span class="nav-text">stat</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>

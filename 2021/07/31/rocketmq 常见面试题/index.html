@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="为什么要使用MQ？因为项目比较大，做了分布式系统，所有远程服务调用请求都是同步执行经常出问题，所以引入了mq 解耦：系统耦合度降低，没有强依赖关系 异步：不需要同步执行的远程调用可以有效提高响应时间 削峰：请求达到峰值后，后端service还可以保持固定消费速率消费，不会被压垮">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rocketmq 常见面试题">
+<meta property="og:url" content="http://yrlzero.github.io/2021/07/31/rocketmq%20%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="为什么要使用MQ？因为项目比较大，做了分布式系统，所有远程服务调用请求都是同步执行经常出问题，所以引入了mq 解耦：系统耦合度降低，没有强依赖关系 异步：不需要同步执行的远程调用可以有效提高响应时间 削峰：请求达到峰值后，后端service还可以保持固定消费速率消费，不会被压垮">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-31T15:24:08.845Z">
+<meta property="article:modified_time" content="2021-07-31T15:34:35.884Z">
+<meta property="article:author" content="yrl">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yrlzero.github.io/2021/07/31/rocketmq%20%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>rocketmq 常见面试题 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/07/31/rocketmq%20%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          rocketmq 常见面试题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-31 23:24:08 / 修改时间：23:34:35" itemprop="dateCreated datePublished" datetime="2021-07-31T23:24:08+08:00">2021-07-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/" itemprop="url" rel="index"><span itemprop="name">mq</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/rocketmq/" itemprop="url" rel="index"><span itemprop="name">rocketmq</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="为什么要使用MQ？"><a href="#为什么要使用MQ？" class="headerlink" title="为什么要使用MQ？"></a>为什么要使用MQ？</h2><p>因为项目比较大，做了分布式系统，所有远程服务调用请求都是<strong>同步执行</strong>经常出问题，所以引入了mq</p>
+<p><strong>解耦</strong>：系统耦合度降低，没有强依赖关系</p>
+<p><strong>异步</strong>：不需要同步执行的远程调用可以有效提高响应时间</p>
+<p><strong>削峰</strong>：请求达到峰值后，后端service还可以保持固定消费速率消费，不会被压垮</p>
+<a id="more"></a>
+
+<hr>
+<h3 id="多个mq如何选型？"><a href="#多个mq如何选型？" class="headerlink" title="多个mq如何选型？"></a>多个mq如何选型？</h3><p><strong>RabbitMQ</strong>：erlang开发，延迟比较低</p>
+<p><strong>RocketMQ</strong>：java开发，面向互联网集群化功能丰富</p>
+<p><strong>kafka</strong>：Scala开发，面向日志功能丰富</p>
+<p><strong>ActiveMQ</strong>：java开发，简单，稳定</p>
+<p>小项目：ActiveMQ</p>
+<p>大项目：RocketMQ或kafka、RabbitMq</p>
+<hr>
+<h2 id="RocketMQ中的Topic和ActiveMQ有什么区别？"><a href="#RocketMQ中的Topic和ActiveMQ有什么区别？" class="headerlink" title="RocketMQ中的Topic和ActiveMQ有什么区别？"></a>RocketMQ中的Topic和ActiveMQ有什么区别？</h2><p>ActiveMQ </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">有destination的概念，即消息目的地</span><br><span class="line">destination分为两类：</span><br><span class="line">- topic</span><br><span class="line">  - 广播消息</span><br><span class="line">- queue</span><br><span class="line">  - 队列消息</span><br></pre></td></tr></table></figure>
+
+
+
+<p>RocketMQ</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RocketMQ的Topic是一组Message Queue的集合&#x3D;&gt;对应在多个brokert的ConsumeQueue逻辑文件</span><br><span class="line">一条消息是广播消息还是队列消息由客户端消费决定</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="RocketMQ-Broker中的消息被消费后会立即删除吗？"><a href="#RocketMQ-Broker中的消息被消费后会立即删除吗？" class="headerlink" title="RocketMQ Broker中的消息被消费后会立即删除吗？"></a>RocketMQ Broker中的消息被消费后会立即删除吗？</h2><p>不会，每条消息都会持久化到CommitLog中，每个consumer连接到broker后会维持消费进度信息，当有消息消费后只是当前consumer的消费进度（CommitLog的offset）更新了。</p>
+<hr>
+<h2 id="消息会堆积吗？什么时候清理过期消息？"><a href="#消息会堆积吗？什么时候清理过期消息？" class="headerlink" title="消息会堆积吗？什么时候清理过期消息？"></a>消息会堆积吗？什么时候清理过期消息？</h2><p>4.6版本默认48小时后会删除不再使用的CommitLog文件</p>
+<ul>
+<li>检查这个文件最后访问时间</li>
+<li>判断是否大于过期时间</li>
+<li>指定时间删除，默认凌晨4点</li>
+</ul>
+<hr>
+<h2 id="rocketMq的消息堆积如何处理"><a href="#rocketMq的消息堆积如何处理" class="headerlink" title="rocketMq的消息堆积如何处理"></a>rocketMq的消息堆积如何处理</h2><p><strong>下游消费系统如果宕机了，导致几百万条消息在消息中间件里积压，此时怎么处理?</strong></p>
+<p><strong>你们线上是否遇到过消息积压的生产故障?如果没遇到过，你考虑一下如何应对?</strong></p>
+<p>具体表现为 ui中转圈圈</p>
+<p>对于大规模消息发送接收可以使用pull模式，手动处理消息拉取速度,消费的时候统计消费时间以供参考</p>
+<p>保证消息消费速度固定，即可通过上线更多consumer临时解决消息堆积问题</p>
+<hr>
+<h3 id="堆积时间过长消息超时了？"><a href="#堆积时间过长消息超时了？" class="headerlink" title="堆积时间过长消息超时了？"></a>堆积时间过长消息超时了？</h3><p>RocketMQ中的消息只会在commitLog被删除的时候才会消失，不会超时</p>
+<hr>
+<h3 id="堆积的消息会不会进死信队列？"><a href="#堆积的消息会不会进死信队列？" class="headerlink" title="堆积的消息会不会进死信队列？"></a>堆积的消息会不会进死信队列？</h3><p>不会，消息在消费失败后会进入重试队列（%RETRY%+consumergroup），多次（默认16）才会进入死信队列（%DLQ%+consumergroup）</p>
+<hr>
+<h2 id="RocketMQ消费模式有几种？"><a href="#RocketMQ消费模式有几种？" class="headerlink" title="RocketMQ消费模式有几种？"></a>RocketMQ消费模式有几种？</h2><p>消费模型由consumer决定，消费维度为Topic</p>
+<h3 id="集群消费"><a href="#集群消费" class="headerlink" title="集群消费"></a>集群消费</h3><p>一组consumer同时消费一个topic，可以分配消费负载均衡策略分配consumer对应消费topic下的哪些queue</p>
+<p>多个group同时消费一个topic时，每个group都会消费到数据</p>
+<p>一条消息只会被一个group中的consumer消费，</p>
+<h3 id="广播消费"><a href="#广播消费" class="headerlink" title="广播消费"></a>广播消费</h3><p>消息将对一 个Consumer Group 下的各个 Consumer 实例都消费一遍。即即使这些 Consumer 属于同一个Consumer Group ，消息也会被 Consumer Group 中的每个 Consumer 都消费一次。</p>
+<hr>
+<h2 id="消费消息时使用的是push还是pull？"><a href="#消费消息时使用的是push还是pull？" class="headerlink" title="消费消息时使用的是push还是pull？"></a>消费消息时使用的是push还是pull？</h2><p>在刚开始的时候就要决定使用哪种方式消费</p>
+<p>两种：</p>
+<p><code>DefaultLitePullConsumerImpl</code>  拉</p>
+<p><code>DefaultMQPushConsumerImpl</code>推</p>
+<p>两个实现 <code>DefaultLitePullConsumerImpl</code> <code>DefaultMQPushConsumerImpl</code>都实现了MQConsumerInner接口接口</p>
+<p>名称上看起来是一个推，一个拉，但实际底层实现都是采用的<strong>长轮询机制</strong>，即拉取方式</p>
+<p>DefaultMQPushConsumerImpl帮我们定义好了拉取数据的规则；DefaultMQPullConsumerImpl需要我们自己定义拉取规则</p>
+<p>broker端属性 longPollingEnable 标记是否开启长轮询。可以配置hold住的时间长短，默认true为5s，false则为1s</p>
+<hr>
+<h2 id="为什么要主动拉取消息而不使用事件监听方式？"><a href="#为什么要主动拉取消息而不使用事件监听方式？" class="headerlink" title="为什么要主动拉取消息而不使用事件监听方式？"></a>为什么要主动拉取消息而不使用事件监听方式？</h2><p>事件驱动方式是建立好长连接，由事件（发送数据）的方式来实时推送。</p>
+<p>如果broker主动推送消息的话有可能push速度快，消费速度慢的情况，那么就会造成消息在consumer端堆积过多，同时又不能被其他consumer消费的情况，如果改由consumer主动拉取的方式，则主动权在客户端，可以根据实际消费能力进行消费。</p>
+<hr>
+<h2 id="broker如何处理拉取请求的？"><a href="#broker如何处理拉取请求的？" class="headerlink" title="broker如何处理拉取请求的？"></a>broker如何处理拉取请求的？</h2><p>consumer首次请求broker</p>
+<ul>
+<li>broker中是否有符合条件的消息</li>
+<li>有 -&gt; <ul>
+<li>响应consumer</li>
+<li>等待下次consumer的请求</li>
+</ul>
+</li>
+<li>没有<ul>
+<li>挂起consumer的请求，即不断开连接，也不返回数据</li>
+<li>挂起时间长短，写死在代码里的吗？长轮询写死，短轮询可以配</li>
+<li>使用consumer的offset，<ul>
+<li>DefaultMessageStore#ReputMessageService#run方法<ul>
+<li>每隔1ms检查commitLog中是否有新消息，有的话写入到pullRequestTable</li>
+<li>当有新消息的时候返回请求</li>
+</ul>
+</li>
+<li>PullRequestHoldService 来Hold连接，每个5s执行一次检查pullRequestTable有没有消息，有的话立即推送</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="消息丢失"><a href="#消息丢失" class="headerlink" title="消息丢失"></a>消息丢失</h2><p>producer在发送同步/异步可靠消息后，会接收到SendResult，表示消息发送成功</p>
+<p>SendResult其中属性sendStatus表示了broker是否真正完成了消息存储</p>
+<p>当sendStatus!=”ok”的时候，应该重新发送消息，避免丢失</p>
+<p>当producer.setRetryAnotherBrokerWhenNotStoreOK</p>
+<h2 id="消息重复消费"><a href="#消息重复消费" class="headerlink" title="消息重复消费"></a>消息重复消费</h2><h3 id="引起重复消费的原因"><a href="#引起重复消费的原因" class="headerlink" title="引起重复消费的原因"></a>引起重复消费的原因</h3><p><strong>ACK</strong>(网络的不确定性)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">正常情况下在consumer真正消费完消息后应该发送ack，通知broker该消息已正常消费，从queue中剔除</span><br><span class="line"></span><br><span class="line">当ack因为网络原因无法发送到broker，broker会认为词条消息没有被消费，此后会开启消息重投机制把消息再次投递到consumer</span><br></pre></td></tr></table></figure>
+
+<p><strong>group</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">在CLUSTERING模式下，消息在broker中会保证相同group的consumer消费一次，但是针对不同group的consumer会推送多次</span><br><span class="line"></span><br><span class="line">也可能是因为consumer首次启动引起重复消费：需要设置&#96;consumer.setConsumeFromWhere&#96;，只对一个新的consumeGroup第一次启动时有效,设置从头消费还是从维护开始消费</span><br></pre></td></tr></table></figure>
+
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>数据库表：处理消息前，使用消息主键在表中带有约束的字段中insert</p>
+<p>Map：单机时可以使用map <em>ConcurrentHashMap</em> -&gt; putIfAbsent   guava cache</p>
+<p>Redis：使用主键或set操作</p>
+<hr>
+<h2 id="RocketMQ如何保证消息不丢失"><a href="#RocketMQ如何保证消息不丢失" class="headerlink" title="RocketMQ如何保证消息不丢失"></a>RocketMQ如何保证消息不丢失</h2><ol>
+<li><p>生产端如何保证投递出去的消息不丢失：消息在半路丢失，或者在MQ内存中宕机导致丢失，此时你如何基于MQ的功能保证消息不要丢失？</p>
+</li>
+<li><p>MQ自身如何保证消息不丢失？</p>
+</li>
+<li><p>消费端如何保证消费到的消息不丢失：如果你处理到一半消费端宕机，导致消息丢失，此时怎么办？</p>
+<hr>
+</li>
+</ol>
+<h2 id="如何让RocketMQ保证消息的顺序消费"><a href="#如何让RocketMQ保证消息的顺序消费" class="headerlink" title="如何让RocketMQ保证消息的顺序消费"></a>如何让RocketMQ保证消息的顺序消费</h2><p><strong>你们线上业务用消息中间件的时候，是否需要保证消息的顺序性?</strong></p>
+<p><strong>如果不需要保证消息顺序，为什么不需要?假如我有一个场景要保证消息的顺序，你们应该如何保证?</strong></p>
+<ul>
+<li><p>同一topic</p>
+</li>
+<li><p>同一个QUEUE</p>
+</li>
+<li></li>
+<li><p>发消息的时候一个线程去发送消息</p>
+</li>
+<li><p>消费的时候 一个线程 消费一个queue里的消息或者使用MessageListenerOrderly</p>
+</li>
+<li><p>多个queue 只能保证单个queue里的顺序</p>
+<hr>
+</li>
+</ul>
+<h2 id="RocketMQ-是如何保证数据的高容错性的"><a href="#RocketMQ-是如何保证数据的高容错性的" class="headerlink" title="RocketMQ 是如何保证数据的高容错性的?"></a>RocketMQ 是如何保证数据的高容错性的?</h2><ul>
+<li>在不开启容错的情况下，轮询队列进行发送，如果失败了，重试的时候过滤失败的Broker</li>
+<li>如果开启了容错策略，会通过RocketMQ的预测机制来预测一个Broker是否可用</li>
+<li>如果上次失败的Broker可用那么还是会选择该Broker的队列</li>
+<li>如果上述情况失败，则随机选择一个进行发送</li>
+<li>在发送消息的时候会记录一下调用的时间与是否报错，根据该时间去预测broker的可用时间</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/31/rocketmq%20%E5%AE%89%E8%A3%85/" rel="prev" title="rocketmq 安装">
+      <i class="fa fa-chevron-left"></i> rocketmq 安装
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要使用MQ？"><span class="nav-text">为什么要使用MQ？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多个mq如何选型？"><span class="nav-text">多个mq如何选型？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RocketMQ中的Topic和ActiveMQ有什么区别？"><span class="nav-text">RocketMQ中的Topic和ActiveMQ有什么区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RocketMQ-Broker中的消息被消费后会立即删除吗？"><span class="nav-text">RocketMQ Broker中的消息被消费后会立即删除吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息会堆积吗？什么时候清理过期消息？"><span class="nav-text">消息会堆积吗？什么时候清理过期消息？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rocketMq的消息堆积如何处理"><span class="nav-text">rocketMq的消息堆积如何处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#堆积时间过长消息超时了？"><span class="nav-text">堆积时间过长消息超时了？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#堆积的消息会不会进死信队列？"><span class="nav-text">堆积的消息会不会进死信队列？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RocketMQ消费模式有几种？"><span class="nav-text">RocketMQ消费模式有几种？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#集群消费"><span class="nav-text">集群消费</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#广播消费"><span class="nav-text">广播消费</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消费消息时使用的是push还是pull？"><span class="nav-text">消费消息时使用的是push还是pull？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要主动拉取消息而不使用事件监听方式？"><span class="nav-text">为什么要主动拉取消息而不使用事件监听方式？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#broker如何处理拉取请求的？"><span class="nav-text">broker如何处理拉取请求的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息丢失"><span class="nav-text">消息丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息重复消费"><span class="nav-text">消息重复消费</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#引起重复消费的原因"><span class="nav-text">引起重复消费的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案"><span class="nav-text">解决方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RocketMQ如何保证消息不丢失"><span class="nav-text">RocketMQ如何保证消息不丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何让RocketMQ保证消息的顺序消费"><span class="nav-text">如何让RocketMQ保证消息的顺序消费</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RocketMQ-是如何保证数据的高容错性的"><span class="nav-text">RocketMQ 是如何保证数据的高容错性的?</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
