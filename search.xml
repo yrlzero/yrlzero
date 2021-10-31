@@ -6670,6 +6670,10 @@
         <category>分布式事务</category>
         <category>LCN</category>
       </categories>
+      <tags>
+        <tag>事务</tag>
+        <tag>LCN</tag>
+      </tags>
   </entry>
   <entry>
     <title>分布式事务-多种理论模式</title>
@@ -6789,6 +6793,10 @@
         <category>分布式事务</category>
         <category>多种理论模式</category>
       </categories>
+      <tags>
+        <tag>事务</tag>
+        <tag>理论模式</tag>
+      </tags>
   </entry>
   <entry>
     <title>分布式事务-Seata</title>
@@ -6888,5 +6896,9 @@
         <category>分布式事务</category>
         <category>Seata</category>
       </categories>
+      <tags>
+        <tag>事务</tag>
+        <tag>Seata</tag>
+      </tags>
   </entry>
 </search>
