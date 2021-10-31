@@ -6672,7 +6672,6 @@
       </categories>
       <tags>
         <tag>事务</tag>
-        <tag>LCN</tag>
       </tags>
   </entry>
   <entry>
@@ -6795,7 +6794,6 @@
       </categories>
       <tags>
         <tag>事务</tag>
-        <tag>理论模式</tag>
       </tags>
   </entry>
   <entry>
@@ -6898,7 +6896,6 @@
       </categories>
       <tags>
         <tag>事务</tag>
-        <tag>Seata</tag>
       </tags>
   </entry>
 </search>
