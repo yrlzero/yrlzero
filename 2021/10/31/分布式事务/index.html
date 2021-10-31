@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="2PC第一阶段（提交事务） 事务询问 TM向所有的RM询问是否可以执行提交操作，并开始等待RM的响应。  预执行事务 RM预提交当前所有事务操作，并将相关信息写入Undo和Redo日志  事务反馈 RM提交事务后响应TM的询问。如果所有RM都提交成功，则返回一个“同意”消息；如果任一RM提交失败，则返回TM“终止”消息。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式事务-多种理论模式">
+<meta property="og:url" content="http://yrlzero.github.io/2021/10/31/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="2PC第一阶段（提交事务） 事务询问 TM向所有的RM询问是否可以执行提交操作，并开始等待RM的响应。  预执行事务 RM预提交当前所有事务操作，并将相关信息写入Undo和Redo日志  事务反馈 RM提交事务后响应TM的询问。如果所有RM都提交成功，则返回一个“同意”消息；如果任一RM提交失败，则返回TM“终止”消息。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="e:/study/消息队列+本地事物表.jpg">
+<meta property="article:published_time" content="2021-10-31T08:00:00.000Z">
+<meta property="article:modified_time" content="2021-10-31T08:42:37.631Z">
+<meta property="article:author" content="yrl">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="e:/study/消息队列+本地事物表.jpg">
+
+<link rel="canonical" href="http://yrlzero.github.io/2021/10/31/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式事务-多种理论模式 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/10/31/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式事务-多种理论模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-10-31 16:00:00 / 修改时间：16:42:37" itemprop="dateCreated datePublished" datetime="2021-10-31T16:00:00+08:00">2021-10-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" itemprop="url" rel="index"><span itemprop="name">分布式事务</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/%E5%A4%9A%E7%A7%8D%E7%90%86%E8%AE%BA%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">多种理论模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h2><h3 id="第一阶段（提交事务）"><a href="#第一阶段（提交事务）" class="headerlink" title="第一阶段（提交事务）"></a>第一阶段（提交事务）</h3><ul>
+<li><p>事务询问</p>
+<p>TM向所有的RM询问是否可以执行提交操作，并开始等待RM的响应。</p>
+</li>
+<li><p>预执行事务</p>
+<p>RM预提交当前所有事务操作，并将相关信息写入Undo和Redo日志</p>
+</li>
+<li><p>事务反馈</p>
+<p>RM提交事务后响应TM的询问。如果所有RM都提交成功，则返回一个“同意”消息；如果任一RM提交失败，则返回TM“终止”消息。</p>
+<a id="more"></a>
+
+</li>
+</ul>
+<h3 id="第二阶段（执行事务）"><a href="#第二阶段（执行事务）" class="headerlink" title="第二阶段（执行事务）"></a>第二阶段（执行事务）</h3><ul>
+<li><p>提交</p>
+<p>当TM从所有RM获得的响应都为“同意”时，向所有RM发送“正式提交（commot）”的请求。</p>
+</li>
+<li><p>回滚</p>
+<p>当TM接收到任一RM的“终止消息”时，向所有RM发送“回滚操作（rollback）”的请求；</p>
+<p>RM利用之前写入Undo Log的日志进行回滚，并释放整个事务占用的资源。</p>
+</li>
+</ul>
+<blockquote>
+<p>定义：TM：事务管理器、RM：资源管理器</p>
+<p>总结：第一阶段预提交事务，当有RM出错后，TM于第二阶段通知所有RM回滚预提交事务。</p>
+<p>2PC可能出现的问题<br>    1、第一阶段持有连接未释放，占用资源高<br>    2、第一阶段预提交成功之后，在第二阶段RM的执行失败，无法进行回滚  </p>
+</blockquote>
+<h2 id="3PC"><a href="#3PC" class="headerlink" title="3PC"></a>3PC</h2><h3 id="第一阶段（can-commit）"><a href="#第一阶段（can-commit）" class="headerlink" title="第一阶段（can commit）"></a>第一阶段（can commit）</h3><ul>
+<li><p>询问是否能够提交</p>
+<p>TM 向RM询问是否能够提交，RM全部响应“YES”后才进入第二阶段</p>
+</li>
+</ul>
+<h3 id="第二阶段（pre-commit）"><a href="#第二阶段（pre-commit）" class="headerlink" title="第二阶段（pre commit）"></a>第二阶段（pre commit）</h3><ul>
+<li><p>事务的预提交 </p>
+<p>​    与2PC的第一阶段类似，进行事务的预提交 </p>
+</li>
+</ul>
+<h3 id="第三阶段（do-commit-）"><a href="#第三阶段（do-commit-）" class="headerlink" title="第三阶段（do commit ）"></a>第三阶段（do commit ）</h3><ul>
+<li>集体提交</li>
+<li>集体回滚</li>
+</ul>
+<blockquote>
+<p>定义：TM：事务管理器、RM：资源管理器</p>
+<p>总结：<br>1、增加了can commit阶段，降低锁定资源的概率和时长（当RM异常的时候，无需像2PC一样一开始就锁定，而是确认RM都正常的情况下才执行预提交，锁定资源）<br>2、增加超时机制<br>    2.1、TM超时未抽到RM的反馈，主动给RM发送中断命令<br>    2.2、RM在第三阶段超时未收到TM命令，默认提交</p>
+</blockquote>
+<h2 id="TCC"><a href="#TCC" class="headerlink" title="TCC"></a>TCC</h2><h3 id="Try-尝试执行业务"><a href="#Try-尝试执行业务" class="headerlink" title="Try: 尝试执行业务"></a>Try: 尝试执行业务</h3><h3 id="Confirm-确认执行业务"><a href="#Confirm-确认执行业务" class="headerlink" title="Confirm:确认执行业务"></a>Confirm:确认执行业务</h3><h3 id="Cancel-取消执行业务"><a href="#Cancel-取消执行业务" class="headerlink" title="Cancel: 取消执行业务"></a>Cancel: 取消执行业务</h3><p>具体实现参见<a href="">LCN</a>、<a href="">SEATA</a></p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><h4 id="幂等性处理"><a href="#幂等性处理" class="headerlink" title="幂等性处理"></a>幂等性处理</h4><p>因为网络抖动等原因，分布式事务框架可能会<strong>重复调用同一个分布式事务中的一个分支事务的二阶段接口(Confirm/Cancel)</strong>。所以分支事务的二阶段接口Confirm/Cancel需要能够保证幂等性。如果二阶段接口不能保证幂等性，则会产生严重的问题，造成资源的重复使用或者重复释放，进而导致业务故障。</p>
+<h4 id="空回滚"><a href="#空回滚" class="headerlink" title="空回滚"></a>空回滚</h4><p>当<code>没有</code>调用参与方<code>Try</code>方法的情况下，就<code>调用</code>了二阶段的<code>Cancel</code>方法，Cancel方法需要有办法识别出此时Try有没有执行。如果Try还没执行，表示这个Cancel操作是无效的，即本次Cancel属于空回滚；如果Try已经执行，那么执行的是正常的回滚逻辑</p>
+<p>总而言之，Try方法没有执行成功，然而此时这笔分布式事务和分支事务已经落库。有两种情况会触发分布式事务的回滚：</p>
+<ol>
+<li>发起方认为当前分布式事务无法成功，主动通知TC回滚</li>
+<li>TC发现分布式事务超时，被动触发回滚</li>
+</ol>
+<h4 id="资源悬挂"><a href="#资源悬挂" class="headerlink" title="资源悬挂"></a>资源悬挂</h4><p>Cannel在Try之前执行</p>
+<p>这种一阶段比二阶段执行的还晚的情况看似不可能，但是仔细考虑RPC调用的时序，其实这种情况在复杂多变的网络中是完全可能的，下面的时序展示了这种可能性：</p>
+<ol>
+<li>发起方通过RPC调用参与者一阶段Try，但是发生网络阻塞导致RPC超时</li>
+<li>RPC超时后，TC会回滚分布式事务(可能是发起方主动通知TC回滚或者是TC发现事务超时后回滚)，调用已注册的各个参与方的二阶段Cancel</li>
+<li>参与方空回滚后，发起方对参与者的一阶段Try才开始执行，进行资源预留从而形成悬挂</li>
+</ol>
+<h3 id="处理方案"><a href="#处理方案" class="headerlink" title="处理方案"></a>处理方案</h3><p>增加事件处理表，通过<code>主事务ID</code>、<code>分支事务ID</code>、<code>分支事务处理状态（try、confirm、cancel三个状态）</code>进行数据控制</p>
+<p>幂等性处理：第二阶段进行事件表状态判断，第一阶段状态已执行的情况下，才执行第二阶段；第二阶段已经存在的情况下，不重复执行</p>
+<p>空回滚：在执行第二阶段之前，对第一阶段是否执行进行判断</p>
+<p>资源悬挂：通过事件状态进行控制，没有第一阶段状态时，第二阶段不执行具体业务逻辑；插入第二阶段记录，等待第一阶段到来时，判断到第二阶段状态时不处理</p>
+<h2 id="消息队列-事件表"><a href="#消息队列-事件表" class="headerlink" title="消息队列+事件表"></a>消息队列+事件表</h2><p>当一个请求涉及到多个微服务系统时，可以采取消息队列加事件表的形式进行处理。</p>
+<img src="E:\study\消息队列+本地事物表.jpg" style="zoom: 150%;" />
+
+<p>以接收第三方支付回调请求，更新支付流水记录、订单状态为例：</p>
+<h3 id="支付系统"><a href="#支付系统" class="headerlink" title="支付系统"></a>支付系统</h3><ul>
+<li><p>接收第三方请求，处理本地事务</p>
+</li>
+<li><p>插入支付事件到事件表，状态为“新建”</p>
+<blockquote>
+<p>当前两个动作为一个事务，当处理失败一起回滚后，返回错误响应给第三方，等待第三方再次调起（支付回调接口有多次重试机制）</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="定时任务"><a href="#定时任务" class="headerlink" title="定时任务"></a>定时任务</h3><ul>
+<li><p>查询事件表，“新建”状态的支付事件</p>
+</li>
+<li><p>更新时间表状态为“已发送”</p>
+</li>
+<li><p>发送消息到消息队列</p>
+<blockquote>
+<p>当前三个动作为一个事务，消息发送失败可以让事务回滚，该“新建”时间等待下一次定时任务周期调起处理</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="订单系统"><a href="#订单系统" class="headerlink" title="订单系统"></a>订单系统</h3><ul>
+<li><p>消息监听者消费消息</p>
+</li>
+<li><p>将消息插入事件表，状态为“已接收”，同时解决幂等性问题（业务key唯一索引）</p>
+<blockquote>
+<p>当前几个动作为一个事务，失败回滚，同时响应给mq，让其重试</p>
+<p>事件表唯一键冲突时，提交消息，不让mq重试</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="定时任务-1"><a href="#定时任务-1" class="headerlink" title="定时任务"></a>定时任务</h3><ul>
+<li><p>查询“已接收”状态的事件进行</p>
+</li>
+<li><p>根据事件处理本地事务</p>
+</li>
+<li><p>修改事件状态为“已处理”</p>
+<blockquote>
+<p>当前几个动作为一个事务，失败回滚，该“已接收”状态事件等待下一次定时任务周期调起处理</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="事务消息"><a href="#事务消息" class="headerlink" title="事务消息"></a>事务消息</h2><p>参见<a href="https://yrlzero.gitee.io/2021/07/31/rocketmq%20%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%8F%8A%E4%BD%BF%E7%94%A8/#6-4%E3%80%81%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF" target="_blank" rel="noopener">rocketmq事务消息章节</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/31/tcp%20http%20https/" rel="prev" title="TCP HTTP HTTPS">
+      <i class="fa fa-chevron-left"></i> TCP HTTP HTTPS
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/31/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-LCN/" rel="next" title="分布式事务-LCN">
+      分布式事务-LCN <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2PC"><span class="nav-text">2PC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一阶段（提交事务）"><span class="nav-text">第一阶段（提交事务）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二阶段（执行事务）"><span class="nav-text">第二阶段（执行事务）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3PC"><span class="nav-text">3PC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一阶段（can-commit）"><span class="nav-text">第一阶段（can commit）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二阶段（pre-commit）"><span class="nav-text">第二阶段（pre commit）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第三阶段（do-commit-）"><span class="nav-text">第三阶段（do commit ）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCC"><span class="nav-text">TCC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Try-尝试执行业务"><span class="nav-text">Try: 尝试执行业务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Confirm-确认执行业务"><span class="nav-text">Confirm:确认执行业务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cancel-取消执行业务"><span class="nav-text">Cancel: 取消执行业务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-text">问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#幂等性处理"><span class="nav-text">幂等性处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#空回滚"><span class="nav-text">空回滚</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#资源悬挂"><span class="nav-text">资源悬挂</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#处理方案"><span class="nav-text">处理方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息队列-事件表"><span class="nav-text">消息队列+事件表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#支付系统"><span class="nav-text">支付系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定时任务"><span class="nav-text">定时任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#订单系统"><span class="nav-text">订单系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定时任务-1"><span class="nav-text">定时任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务消息"><span class="nav-text">事务消息</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
