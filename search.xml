@@ -1804,37 +1804,6 @@
       </tags>
   </entry>
   <entry>
-    <title>gitlab安装部署</title>
-    <url>/2021/11/13/gitlab/</url>
-    <content><![CDATA[<h3 id="创建清华源"><a href="#创建清华源" class="headerlink" title="创建清华源"></a>创建清华源</h3><p><code>vim /etc/yum.repos.d/gitlab-ce.repo</code></p>
-<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[gitlab-ce]</span><br><span class="line">name=Gitlab CE Repository </span><br><span class="line">baseurl=https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el<span class="variable">$releasever</span>/</span><br><span class="line">gpgcheck=0</span><br><span class="line">enabled=1</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p><code>yum makecache &amp;&amp; yum install -y gitlab-ce</code></p>
-<a id="more"></a>
-
-<h3 id="修改访问地址"><a href="#修改访问地址" class="headerlink" title="修改访问地址"></a>修改访问地址</h3><p><code>vim /etc/gitlab/gitlab.rb</code></p>
-<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">external_url <span class="string">'IP地址+端口号'</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/gitlab/gitlab%E8%AE%BF%E9%97%AE%E5%9C%B0%E5%9D%80.jpg" alt=""></p>
-<h3 id="重新编译"><a href="#重新编译" class="headerlink" title="重新编译"></a>重新编译</h3><p><code>gitlab-ctl reconfigure</code></p>
-<p><img src="/images/gitlab/gitlab%E7%BC%96%E8%AF%91%E5%AE%8C%E6%88%90.jpg" alt=""></p>
-<h3 id="获取root账户密码"><a href="#获取root账户密码" class="headerlink" title="获取root账户密码"></a>获取root账户密码</h3><p><code>more /etc/gitlab/initial_root_password</code></p>
-<p><img src="/images/gitlab/%E6%9F%A5%E7%9C%8Broot%E8%B4%A6%E6%88%B7%E5%AF%86%E7%A0%81.jpg" alt=""></p>
-<h3 id="修改默认密码"><a href="#修改默认密码" class="headerlink" title="修改默认密码"></a>修改默认密码</h3><p><img src="/images/gitlab/%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E5%AF%86%E7%A0%81.jpg" alt=""></p>
-<h3 id="防火墙"><a href="#防火墙" class="headerlink" title="防火墙"></a>防火墙</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 防火墙中打开gitlab访问端口</span><br><span class="line">firewall-cmd --zone&#x3D;public --add-port&#x3D;8001&#x2F;tcp --permanent</span><br><span class="line"></span><br><span class="line">–zone：作用域</span><br><span class="line">–add-port&#x3D;8001&#x2F;tcp：添加端口，格式为：端口&#x2F;通讯协议</span><br><span class="line">–permanent：永久生效，没有此参数重启后失效</span><br><span class="line"></span><br><span class="line"># 重启防火墙</span><br><span class="line">firewall-cmd --reload</span><br><span class="line"># 查看已经开放的端口</span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line"></span><br><span class="line"># 停止防火墙</span><br><span class="line">systemctl stop firewalld.service</span><br><span class="line"># 启动防火墙</span><br><span class="line">systemctl start firewalld.service</span><br><span class="line"># 禁止防火墙开机启动</span><br><span class="line">systemctl disable firewalld.service</span><br></pre></td></tr></table></figure>
-
-<h3 id="导入项目"><a href="#导入项目" class="headerlink" title="导入项目"></a>导入项目</h3><p><img src="/images/gitlab/%E5%AF%BC%E5%85%A5%E5%A4%96%E9%83%A8%E9%A1%B9%E7%9B%AE.jpg" alt=""></p>
-]]></content>
-      <categories>
-        <category>devops</category>
-        <category>gitlab</category>
-      </categories>
-      <tags>
-        <tag>devops</tag>
-        <tag>gitlab</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>elasticsearch（十一）Highlight、Suggest</title>
     <url>/2021/06/12/elasticsearch%EF%BC%88%E5%8D%81%E4%B8%80%EF%BC%89Highlight%E3%80%81Suggest/</url>
     <content><![CDATA[<h2 id="一、-Highlight-高亮查询"><a href="#一、-Highlight-高亮查询" class="headerlink" title="一、 Highlight-高亮查询"></a>一、 <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/highlighting.html" target="_blank" rel="noopener">Highlight-高亮查询</a></h2><h3 id="三种高亮方式"><a href="#三种高亮方式" class="headerlink" title="三种高亮方式"></a>三种高亮方式</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">unified：默认的高亮方式，使用Lucene的实现方式</span><br><span class="line"></span><br><span class="line">plain：性能较高，消耗少量内存，性价比高</span><br><span class="line"></span><br><span class="line">fvh &#x3D;&gt; fast vactor highlighter 适合字段较大，较复杂的查询情况</span><br></pre></td></tr></table></figure>
@@ -1926,52 +1895,6 @@
         <tag>eureka</tag>
         <tag>注册中心</tag>
         <tag>netflix</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>jenkins安装部署</title>
-    <url>/2021/11/13/jenkins/</url>
-    <content><![CDATA[<h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>需要有java环境</p>
-<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>使用<a href="https://mirrors.tuna.tsinghua.edu.cn/" target="_blank" rel="noopener">清华源</a>进行安装</p>
-<p><code>yum install -y https://mirrors.tuna.tsinghua.edu.cn/jenkins/redhat/jenkins-2.317-1.1.noarch.rpm</code></p>
-<a id="more"></a>
-
-<p>出现如下错误</p>
-<p><img src="/images/jenkins/%E5%AE%89%E8%A3%85jinkens%E5%A4%B1%E8%B4%A5.jpg" alt=""></p>
-<p>执行<code>yum -y install epel-release</code>、<code>yum -y install daemonize</code>安装指定依赖后再重新安装</p>
-<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p><code>vim /etc/sysconfig/jenkins</code></p>
-<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#修改jenkins用户名为root，或者将jenkins假如用户组，否则之后执行脚本可能出问题</span></span><br><span class="line"><span class="comment">#JENKINS_USER="jenkins"</span></span><br><span class="line">JENKINS_USER=<span class="string">"root"</span></span><br><span class="line"><span class="comment">#修改端口号，默认8080</span></span><br><span class="line">JENKINS_PORT=<span class="string">"8002"</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="插件加速源"><a href="#插件加速源" class="headerlink" title="插件加速源"></a>插件加速源</h3><p>执行<code>vim /var/lib/jenkins/updates/default.json</code> 将google的搜索以及国外的服务器搜索替换成百度</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sed -i &#39;s&#x2F;http:\&#x2F;\&#x2F;updates.jenkins- ci.org\&#x2F;download&#x2F;https:\&#x2F;\&#x2F;mirrors.tuna.tsinghua.edu.cn\&#x2F;jenkins&#x2F;g&#39; default.json &amp;&amp; sed -i &#39;s&#x2F;http:\&#x2F;\&#x2F;www.google.com&#x2F;https:\&#x2F;\&#x2F;www.baidu.com&#x2F;g&#39; default.json</span><br></pre></td></tr></table></figure>
-
-<p>在没有启动jenkins的时候<code>var/lib/jenkins</code>下是空的，执行<code>systemctl start jenkins</code>启动服务后将出现目录</p>
-<p>启动报错，jenkins默认java路径加载错误</p>
-<p><img src="/images/jenkins/java%E8%B7%AF%E5%BE%84%E4%B8%8D%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98.jpg" alt=""></p>
-<p><code>vim  /etc/init.d/jenkins</code>如下图，增加本机jdk位置，需指定到bin目录下得java执行文件</p>
-<p><img src="/images/jenkins/java%E8%B7%AF%E5%BE%84%E4%B8%8D%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3.jpg" alt=""></p>
-<p>保存后执行<code>systemctl faemon-reload</code>、<code>systemctl start jenkins</code></p>
-<p>如果启动界面卡住不动，就需要进入<code>/var/lib/jenkins/hudson.model.UpdateCenter.xml</code>将center换成清华源<code>https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json</code></p>
-<p><img src="/images/jenkins/%E5%90%AF%E5%8A%A8%E6%85%A2%E6%9B%BF%E6%8D%A2%E6%B8%85%E5%8D%8E%E6%BA%90.jpg" alt=""></p>
-<p>重新启动jenkins<code>systemctl restart jenkins</code></p>
-<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>访问jenkins</p>
-<p><img src="/images/jenkins/jenkins%E5%88%9D%E5%A7%8B%E5%8C%96%E7%99%BB%E5%BD%95.jpg" alt=""></p>
-<p>执行<code>cat /var/lib/jenkins/secrets/initialAdminPassword</code>从服务器获取初始密码</p>
-<p><img src="/images/jenkins/%E8%8E%B7%E5%8F%96%E5%88%9D%E5%A7%8B%E5%AF%86%E7%A0%81.jpg" alt=""></p>
-<p>安装插件</p>
-<p><img src="/images/jenkins/%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85.jpg" alt=""></p>
-<p>创建第一个管理员用户，账户：jkadmin、密码：123</p>
-<p><img src="/images/jenkins/%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7.jpg" alt=""></p>
-<p>进入系统</p>
-<p><img src="/images/jenkins/%E8%BF%9B%E5%85%A5%E7%B3%BB%E7%BB%9F.jpg" alt=""></p>
-]]></content>
-      <categories>
-        <category>devops</category>
-        <category>jenkins</category>
-      </categories>
-      <tags>
-        <tag>devops</tag>
-        <tag>jenkins</tag>
       </tags>
   </entry>
   <entry>
@@ -6973,6 +6896,404 @@
       <tags>
         <tag>多线程</tag>
         <tag>线程池</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker私有仓库</title>
+    <url>/2021/11/17/docker%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93/</url>
+    <content><![CDATA[<h3 id="创建私有仓库-registry"><a href="#创建私有仓库-registry" class="headerlink" title="创建私有仓库-registry"></a>创建私有仓库-registry</h3><p>1、拉取私有仓库镜像</p>
+<p><code>docker pull registry</code></p>
+<p>2、启动私有仓库容器</p>
+<p><code>docker run -di --name=registry -p 5000:5000 registry</code></p>
+<p>3、访问私有仓库</p>
+<p>访问<code>http://192.168.1.18:5000/v2/_catalog</code>看到 <code>{&quot;repositories&quot;:[]}</code>表示私有仓库搭建成功并且内容为空 </p>
+<a id="more"></a>
+
+<p><img src="/images/docker/%E8%AE%BF%E9%97%AE%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93.jpg" alt=""></p>
+<p>4、修改daemon.json</p>
+<p><code>vim /etc/docker/daemon.json</code> 添加<code>{&quot;insecure-registries&quot;:[&quot;192.168.1.18:5000&quot;]}</code>保存退出，此步骤是为了让docker信任私有仓库地址</p>
+<p>5、重启docker服务</p>
+<p><code>systemctl restart docker</code></p>
+<p><img src="/images/docker/dockerinfo.jpg" alt=""></p>
+<h3 id="创建私有仓库-harbor"><a href="#创建私有仓库-harbor" class="headerlink" title="创建私有仓库-harbor"></a>创建私有仓库-harbor</h3><p>1、上传<code>docker-compose-Linux-x86_64</code>、<code>harbor-offline-installer-v1.9.4.tgz</code> 到服务器</p>
+<p>2、docker-compose</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">cp -r docker-compose-Linux-x86_64 /usr/<span class="built_in">local</span>/bin/docker-commpose</span><br><span class="line"><span class="comment">#授权</span></span><br><span class="line">chmod +x /usr/<span class="built_in">local</span>/bin/docker-commpose</span><br><span class="line"><span class="comment">#查看是否成功</span></span><br><span class="line">docker-commpose --version</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/docker/docker-compose.jpg" alt=""></p>
+<p>3、harbor</p>
+<p>3.1、编译<code>/images/docker/prepare</code></p>
+<p>3.2、修改配置<code>vim harbor.yml</code></p>
+<p><img src="/images/docker/harbor%E9%85%8D%E7%BD%AE.jpg" alt=""></p>
+<p>3.3、安装<code>/images/docker/install.sh</code></p>
+<blockquote>
+<p>注意：docker中不能存在名称registry的容器，会在安装时失败</p>
+</blockquote>
+<p>3.4、浏览器输入<code>192.168.1.18</code>访问harbor管理页，账号：admin、密码（配置文件中）: Harbor12345</p>
+<p><img src="/images/docker/harbor%E7%99%BB%E5%BD%95%E9%A1%B5.jpg" alt=""></p>
+<p>4、制作systemctl服务</p>
+<p><code>vim /lib/systemd/system/harbor.service</code></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Harbor</span><br><span class="line">After=docker.service systemd-networkd.service systemd-resolved.service</span><br><span class="line">Requires=docker.service</span><br><span class="line">Documentation=http://github.com/vmware/harbor</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">Restart=on-failure</span><br><span class="line">RestartSec=5</span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/bin/docker-compose -f /opt/harbor/docker-compose.yml up</span><br><span class="line">ExecStop=/usr/<span class="built_in">local</span>/bin/docker-compose -f /opt/harbor/docker-compose.yml down</span><br></pre></td></tr></table></figure>
+
+<p>可通过<code>systemctl start/status/stop harbor</code>等命令操作</p>
+<p>5、修改daemon.json</p>
+<p><code>vim /etc/docker/daemon.json</code> 添加<code>{&quot;insecure-registries&quot;:[&quot;192.168.1.18&quot;]}</code>保存退出，此步骤是为了让docker信任私有仓库地址</p>
+<p>6、重启<code>systemctl daemon-reload</code>、<code>systemctl restart docker</code></p>
+<p>7、登录私有仓库<code>docker login 192.168.1.18</code></p>
+<p><img src="/images/docker/dockerlogin.jpg" alt=""></p>
+<h3 id="上传镜像到私有仓库"><a href="#上传镜像到私有仓库" class="headerlink" title="上传镜像到私有仓库"></a>上传镜像到私有仓库</h3><p>标记此镜像为私有仓库的镜像 <code>tag jdk1.8 192.168.1.18:5000/jdk1.8</code></p>
+<p>上传标记的镜像 <code>docker push 192.168.1.18:5000/jdk1.8</code></p>
+<p><img src="/images/docker/%E4%B8%8A%E4%BC%A0%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%9301.jpg" alt=""></p>
+<p><img src="/images/docker/%E4%B8%8A%E4%BC%A0%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93.jpg" alt=""></p>
+<h3 id="拉取私有仓库镜像"><a href="#拉取私有仓库镜像" class="headerlink" title="拉取私有仓库镜像"></a>拉取私有仓库镜像</h3><p><code>docker pull 192.168.1.18:5000/jdk1.8</code></p>
+<p><img src="/images/docker/%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93%E6%8B%89%E5%8F%96.jpg" alt=""></p>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>devops</tag>
+        <tag>docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker常用命令</title>
+    <url>/2021/11/17/docker%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<p><img src="/images/docker/%E5%91%BD%E4%BB%A4%E4%BA%A4%E4%BA%92%E5%9B%BE.jpg" alt=""></p>
+<a id="more"></a>
+
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><p><code>systemctl start docker</code></p>
+<h3 id="停止"><a href="#停止" class="headerlink" title="停止"></a>停止</h3><p><code>systemctl stop docker</code></p>
+<h3 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h3><p><code>systemctl restart docker</code></p>
+<h3 id="状态"><a href="#状态" class="headerlink" title="状态"></a>状态</h3><p><code>systemctl status docker</code></p>
+<h3 id="开机自启"><a href="#开机自启" class="headerlink" title="开机自启"></a>开机自启</h3><p><code>systemctl enable docker</code></p>
+<h3 id="关闭开机自启"><a href="#关闭开机自启" class="headerlink" title="关闭开机自启"></a>关闭开机自启</h3><p><code>systemctl disable docker</code></p>
+<hr>
+<h2 id="镜像"><a href="#镜像" class="headerlink" title="镜像"></a>镜像</h2><h3 id="查看镜像"><a href="#查看镜像" class="headerlink" title="查看镜像"></a>查看镜像</h3><p>查看当前拥有的镜像</p>
+<p><code>docker images</code></p>
+<p><img src="/images/docker/images.jpg" alt=""></p>
+<blockquote>
+<p>REPOSITORY：镜像名称<br>TAG：镜像标签<br>IMAGE ID：镜像ID<br>CREATED：镜像的创建日期（不是获取该镜像的日期）<br>SIZE：镜像大小</p>
+</blockquote>
+<h3 id="搜索镜像"><a href="#搜索镜像" class="headerlink" title="搜索镜像"></a><a href="[https://hub.docker.com](https://links.jianshu.com/go?to=https%3A%2F%2Fhub.docker.com%2F)">搜索镜像</a></h3><p><code>docker search 镜像名称</code></p>
+<p>可以从网络中查找需要的镜像，可以通过以下命令搜索</p>
+<p><img src="/images/docker/search.jpg" alt=""></p>
+<blockquote>
+<p>NAME：仓库名称<br>DESCRIPTION：镜像描述<br>STARS：用户评价，反应一个镜像的受欢迎程度<br>OFFICIAL：是否官方<br>AUTOMATED：自动构建，表示该镜像由 Docker Hub自动构建流程创建的</p>
+</blockquote>
+<h3 id="拉取镜像"><a href="#拉取镜像" class="headerlink" title="拉取镜像"></a>拉取镜像</h3><p><code>docker pull 镜像名称</code> 默认拉取最新版本</p>
+<p><code>docker pull 镜像名称:版本</code>拉取指定版本</p>
+<p>从中央仓库中下载镜像到本地</p>
+<p><img src="/images/docker/pull.jpg" alt=""></p>
+<h3 id="删除镜像"><a href="#删除镜像" class="headerlink" title="删除镜像"></a>删除镜像</h3><p><code>docker rmi 镜像名称/ID</code></p>
+<p><img src="/images/docker/rmi.jpg" alt=""></p>
+<hr>
+<h2 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h2><h3 id="查看正在运行的容器"><a href="#查看正在运行的容器" class="headerlink" title="查看正在运行的容器"></a>查看正在运行的容器</h3><p><code>docker ps</code></p>
+<h3 id="查看所有容器"><a href="#查看所有容器" class="headerlink" title="查看所有容器"></a>查看所有容器</h3><p><code>docker ps -a</code></p>
+<h3 id="查看最后一次运行的容器"><a href="#查看最后一次运行的容器" class="headerlink" title="查看最后一次运行的容器"></a>查看最后一次运行的容器</h3><p><code>docker ps -l</code></p>
+<h3 id="创建容器"><a href="#创建容器" class="headerlink" title="创建容器"></a>创建容器</h3><p><code>docker run 参数</code></p>
+<blockquote>
+<p>-i：表示运行容器<br>-t：表示容器启动后会进入其命令行。加入这两个参数后，容器创建就能登录进去。即分配一个伪终端。<br>–name :为创建的容器命名。<br>-v：表示目录映射关系（前者是宿主机目录，后者是映射到宿主机上的目录），可以使用 多个－v 做多个目录或文件映射。注意：最好做目录映射，在宿主机上做修改，然后共享到 容器上。<br>-d：在 run 后面加上-d 参数,则会创建一个守护式容器在后台运行（这样创建容器后不会自 动登录容器，如果只加-i -t 两个参数，创建后就会自动进去容器）。<br>-p：表示端口映射，前者是宿主机端口，后者是容器内的映射端口。可以使用多个-p 做多 个端口映射</p>
+</blockquote>
+<h4 id="交互式创建"><a href="#交互式创建" class="headerlink" title="交互式创建"></a>交互式创建</h4><p><code>docker run -it --name=容器名称 镜像名称:标签 /bin/bash</code></p>
+<p>退出当前容器</p>
+<p><code>exit</code></p>
+<h4 id="守护式创建"><a href="#守护式创建" class="headerlink" title="守护式创建"></a>守护式创建</h4><p><code>docker run -di --name=容器名称 镜像名称:标签</code></p>
+<p>登录守护容器方式</p>
+<p><code>docker exec -it 容器名称/ID /bin/bash</code></p>
+<h4 id="进入容器"><a href="#进入容器" class="headerlink" title="进入容器"></a>进入容器</h4><p><code>docker exec</code>进入容器</p>
+<p><code>docker attach</code>此方式进入容器，在退出容器终端后会导致容器终止，不建议使用</p>
+<h3 id="停止容器"><a href="#停止容器" class="headerlink" title="停止容器"></a>停止容器</h3><p><code>docker stop 容器名称/ID</code></p>
+<h3 id="启动容器"><a href="#启动容器" class="headerlink" title="启动容器"></a>启动容器</h3><p><code>docker start 容器名称/ID</code></p>
+<h3 id="文件拷贝"><a href="#文件拷贝" class="headerlink" title="文件拷贝"></a>文件拷贝</h3><p>拷贝文件到容器中</p>
+<p><code>docker cp 需要拷贝的文件或目录 容器名称:容器目录</code></p>
+<p>从容器拷贝文件出来</p>
+<p><code>docker cp 容器名称:容器目录 存放路径</code></p>
+<h3 id="目录挂载"><a href="#目录挂载" class="headerlink" title="目录挂载"></a>目录挂载</h3><p>在创建容器的时候，将宿主机的目录与容器内的目录进行映射，这样我们就可以通 过修改宿主机某个目录的文件从而去影响容器。创建容器 添加-v 参数 后边为 宿主机目录: 容器目录</p>
+<p><code>docker run -di -v 宿主机目录:容器目录 --name=容器名称</code></p>
+<h3 id="删除容器"><a href="#删除容器" class="headerlink" title="删除容器"></a>删除容器</h3><p>​    <code>docker rm 容器名称/ID</code></p>
+<h3 id="查看日志"><a href="#查看日志" class="headerlink" title="查看日志"></a>查看日志</h3><p><code>dokcer logs 容器名称/ID</code></p>
+<hr>
+<h2 id="Dockerfile"><a href="#Dockerfile" class="headerlink" title="Dockerfile"></a>Dockerfile</h2><p>Dockerfile 是由一系列命令和参数构成的脚本，这些命令应用于基础镜像并最终创建一个新 的镜像。</p>
+<table>
+<thead>
+<tr>
+<th align="left">命令</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">FROM image_name:tag</td>
+<td align="left">义了使用哪个基础镜像启动构建流程</td>
+</tr>
+<tr>
+<td align="left">MAINTAINER user_name</td>
+<td align="left">声明镜像的创建者</td>
+</tr>
+<tr>
+<td align="left">ENV key value</td>
+<td align="left">设置环境变量 (可以写多条)</td>
+</tr>
+<tr>
+<td align="left">RUN command</td>
+<td align="left">是 Dockerfile 的核心部分(可以写多条)</td>
+</tr>
+<tr>
+<td align="left">ADD source_dir/file dest_dir/file</td>
+<td align="left">将宿主机的文件复制到容器内，如果是一个压缩文件，将会在复制后自动解压</td>
+</tr>
+<tr>
+<td align="left">COPY source_dir/file dest_dir/file</td>
+<td align="left">和 ADD 相似，但是如果有压缩文件并不能解压</td>
+</tr>
+<tr>
+<td align="left">WORKDIR path_dir</td>
+<td align="left">设置工作目录</td>
+</tr>
+<tr>
+<td align="left">EXPOSE</td>
+<td align="left">开发容器端口</td>
+</tr>
+<tr>
+<td align="left">VOLUME</td>
+<td align="left">挂载卷</td>
+</tr>
+<tr>
+<td align="left">USER</td>
+<td align="left">运行的用户</td>
+</tr>
+</tbody></table>
+<p>创建镜像</p>
+<p>创建目录</p>
+<p><code>mkdir –p /root/dockerdata/dockerjdk8</code></p>
+<p>上传<code>jdk-8u181-linux-x64.tar.gz</code>到该目录下</p>
+<p>创建Dockerfile文件<code>vim Dockerfile</code></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#依赖镜像名称和ID</span></span><br><span class="line">FROM centos:7</span><br><span class="line"><span class="comment">#指定镜像创建者信息</span></span><br><span class="line">MAINTAINER YRL</span><br><span class="line"><span class="comment">#切换工作目录</span></span><br><span class="line">WORKDIR /usr</span><br><span class="line">RUN mkdir /usr/<span class="built_in">local</span>/java</span><br><span class="line"><span class="comment">#将相对路径的jdk加到容器中</span></span><br><span class="line">ADD jdk-8u181-linux-x64.tar.gz /usr/<span class="built_in">local</span>/java/</span><br><span class="line"></span><br><span class="line"><span class="comment">#配置java环境变量</span></span><br><span class="line">ENV JAVA_HOME /usr/<span class="built_in">local</span>/jdk1.8.0_181</span><br><span class="line">ENV JRE_HOME <span class="variable">$JAVA_HOME</span>/jre</span><br><span class="line">ENV PATH <span class="variable">$JAVA_HOME</span>/bin:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
+
+<p>构建镜像</p>
+<p><code>docker build -t=&#39;jdk1.8&#39; .</code> 需注意后面的空格和点，不要省略</p>
+<p><img src="/images/docker/dockerfile%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F.jpg" alt=""></p>
+<p>查看镜像</p>
+<p><code>docker images</code></p>
+<p><img src="/images/docker/dockerfile%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F02.jpg" alt=""></p>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>devops</tag>
+        <tag>docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker常用软件安装</title>
+    <url>/2021/11/17/docker%E5%B8%B8%E7%94%A8%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<h3 id="mysq"><a href="#mysq" class="headerlink" title="mysq"></a>mysq</h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#搜索镜像</span></span><br><span class="line">docker search mysql</span><br><span class="line"><span class="comment">#拉取镜像</span></span><br><span class="line">docker pull mysql:5.7</span><br><span class="line"><span class="comment">#创建挂载目录</span></span><br><span class="line">mkdir -p ~/dockerdata/mysql/conf ~/dockerdata/mysql/logs ~/dockerdata/mysql/data</span><br><span class="line"><span class="comment">#守护模式启动容器</span></span><br><span class="line">docker run -di --name myMsql -p 33306:3306 -v ~/dockerdata/mysql/conf:/etc/mysql/conf.d -v ~/dockerdata/mysql/logs:/logs -v ~/dockerdata/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>p 代表端口映射，格式为 宿主机映射端口:容器运行端口 </p>
+<p>-e 代表添加环境变量 MYSQL_ROOT_PASSWORD 是 root 用户的登陆密码</p>
+<p>-v ~/dockerdata/mysql/conf:/etc/mysql/conf.d：将主机当前目录下的 conf/my.cnf 挂载到容器的 /etc/mysql/my.cnf<br>-v ~/dockerdata/mysql/logs:/logs：将主机当前目录下的 logs 目录挂载到容器的 /logs<br>-v ~/dockerdata/mysql/data:/var/lib/mysql ：将主机当前目录下的data目录挂载到容器的 /var/lib/mysql</p>
+</blockquote>
+<h3 id="tomcat"><a href="#tomcat" class="headerlink" title="tomcat"></a>tomcat</h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#搜索镜像</span></span><br><span class="line">docker search tomcat</span><br><span class="line"><span class="comment">#拉取镜像</span></span><br><span class="line">dokcer pull tomcat</span><br><span class="line"><span class="comment">#创建挂载目录</span></span><br><span class="line">mkdir -p ~/dockerdata/tomcat/webapps ~/dockerdata/tomcat/logs ~/dockerdata/tomcat/conf</span><br><span class="line"><span class="comment">#从现有的tomcat中拷贝server.xml，没有此操作的话容器启动时挂载 -v ~/dockerdata/tomcat/conf:/usr/local/tomcat/conf会报错</span></span><br><span class="line">docker cp 6dd4380ba708:/usr/<span class="built_in">local</span>/tomcat/conf/server.xml ~/dockerdata/tomcat/conf</span><br><span class="line"><span class="comment">#守护方式运行镜像</span></span><br><span class="line">docker run -di --name myTomcat -p 9000:8080 -v ~/dockerdata/tomcat/webapps:/usr/<span class="built_in">local</span>/tomcat/webapps -v ~/dockerdata/tomcat/logs:/usr/<span class="built_in">local</span>/tomcat/logs  tomcat</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>-v ~/dockerdata/tomcat/conf:/usr/local/tomcat/conf</p>
+</blockquote>
+<h3 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#搜索镜像</span></span><br><span class="line">docker nginx</span><br><span class="line"><span class="comment">#拉取镜像</span></span><br><span class="line">docker pull nginx</span><br><span class="line"><span class="comment">#守护方式运行镜像</span></span><br><span class="line">docker -di --name=myNginx -p 90:80 nginx</span><br></pre></td></tr></table></figure>
+
+<h3 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#搜索镜像</span></span><br><span class="line">docker search redis</span><br><span class="line"><span class="comment">#拉取镜像</span></span><br><span class="line">docker pull redis</span><br><span class="line"><span class="comment">#创建挂载目录</span></span><br><span class="line">mkdir -p ~/dockerdata/redis/data</span><br><span class="line"><span class="comment">#守护方式运行镜像</span></span><br><span class="line">docker run -di --name=myRedis -p 33306:3306 -v ~/dockerdata/redis/data:/data redis redis-server --appendonly yes</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>redis-server –appendonly yes :</strong> 在容器执行redis-server启动命令，并打开redis持久化配置</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>devops</tag>
+        <tag>docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker迁移备份</title>
+    <url>/2021/11/17/docker%E8%BF%81%E7%A7%BB%E5%A4%87%E4%BB%BD/</url>
+    <content><![CDATA[<h2 id="迁移备份"><a href="#迁移备份" class="headerlink" title="迁移备份"></a>迁移备份</h2><h3 id="容器转镜像"><a href="#容器转镜像" class="headerlink" title="容器转镜像"></a>容器转镜像</h3><p><code>docker commit 容器名称 镜像名称</code></p>
+<p><img src="/images/docker/%E5%AE%B9%E5%99%A8%E8%BD%AC%E9%95%9C%E5%83%8F.jpg" alt=""></p>
+<blockquote>
+<p>镜像名称不能大写</p>
+</blockquote>
+<a id="more"></a>
+
+<h3 id="镜像备份"><a href="#镜像备份" class="headerlink" title="镜像备份"></a>镜像备份</h3><p><code>docker save -o xxx.tar 镜像名称</code></p>
+<p><img src="/images/docker/%E9%95%9C%E5%83%8F%E5%A4%87%E4%BB%BD.jpg" alt=""></p>
+<h3 id="镜像恢复"><a href="#镜像恢复" class="headerlink" title="镜像恢复"></a>镜像恢复</h3><p><code>docker load -i xxx.tar</code></p>
+<p><img src="/images/docker/%E9%95%9C%E5%83%8F%E6%81%A2%E5%A4%8D.jpg" alt=""></p>
+<p><code>docker load &lt; xxx.tar</code></p>
+<p><img src="/images/docker/%E9%95%9C%E5%83%8F%E6%81%A2%E5%A4%8D02.jpg" alt=""></p>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>devops</tag>
+        <tag>docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker安装部署</title>
+    <url>/2021/11/17/docker%E9%83%A8%E7%BD%B2%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<p>一、确保内核版本在3.8以上</p>
+<p><code>uname -a</code></p>
+<p><img src="/images/docker/%E5%86%85%E6%A0%B8%E7%89%88%E6%9C%AC.jpg" alt=""></p>
+<p>二、更新组件</p>
+<p><code>yum update</code></p>
+<a id="more"></a>
+
+<p>三、安装相关依赖</p>
+<p><code>yum install -y yum-utils device-mapper-persistent-data lvm2</code></p>
+<p>四、指定阿里源</p>
+<p><code>yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</code></p>
+<p>五、查看指定的安装源docker信息</p>
+<p><code>yum list docker-ce --showduplicates | sort -r</code></p>
+<p>六、安装</p>
+<p>最新版本安装<code>yum install -y docker-ce</code>、制定版本安装<code>yum install -y docker-ce-18.03.1.ce</code></p>
+<p>七、启动服务</p>
+<p><code>systemctl start docker</code></p>
+<p>八、docker版本信息</p>
+<p><code>docker version</code></p>
+<p><img src="/images/docker/%E7%89%88%E6%9C%AC%E4%BF%A1%E6%81%AF.jpg" alt=""></p>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>devops</tag>
+        <tag>docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>gitlab安装部署</title>
+    <url>/2021/11/13/gitlab%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/</url>
+    <content><![CDATA[<h3 id="创建清华源"><a href="#创建清华源" class="headerlink" title="创建清华源"></a>创建清华源</h3><p><code>vim /etc/yum.repos.d/gitlab-ce.repo</code></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[gitlab-ce]</span><br><span class="line">name=Gitlab CE Repository </span><br><span class="line">baseurl=https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el<span class="variable">$releasever</span>/</span><br><span class="line">gpgcheck=0</span><br><span class="line">enabled=1</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p><code>yum makecache &amp;&amp; yum install -y gitlab-ce</code></p>
+<a id="more"></a>
+
+<h3 id="修改访问地址"><a href="#修改访问地址" class="headerlink" title="修改访问地址"></a>修改访问地址</h3><p><code>vim /etc/gitlab/gitlab.rb</code></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">external_url <span class="string">'IP地址+端口号'</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/gitlab/gitlab%E8%AE%BF%E9%97%AE%E5%9C%B0%E5%9D%80.jpg" alt=""></p>
+<h3 id="重新编译"><a href="#重新编译" class="headerlink" title="重新编译"></a>重新编译</h3><p><code>gitlab-ctl reconfigure</code></p>
+<p><img src="/images/gitlab/gitlab%E7%BC%96%E8%AF%91%E5%AE%8C%E6%88%90.jpg" alt=""></p>
+<h3 id="获取root账户密码"><a href="#获取root账户密码" class="headerlink" title="获取root账户密码"></a>获取root账户密码</h3><p><code>more /etc/gitlab/initial_root_password</code></p>
+<p><img src="/images/gitlab/%E6%9F%A5%E7%9C%8Broot%E8%B4%A6%E6%88%B7%E5%AF%86%E7%A0%81.jpg" alt=""></p>
+<h3 id="修改默认密码"><a href="#修改默认密码" class="headerlink" title="修改默认密码"></a>修改默认密码</h3><p><img src="/images/gitlab/%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E5%AF%86%E7%A0%81.jpg" alt=""></p>
+<h3 id="防火墙"><a href="#防火墙" class="headerlink" title="防火墙"></a>防火墙</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 防火墙中打开gitlab访问端口</span><br><span class="line">firewall-cmd --zone&#x3D;public --add-port&#x3D;8001&#x2F;tcp --permanent</span><br><span class="line"></span><br><span class="line">–zone：作用域</span><br><span class="line">–add-port&#x3D;8001&#x2F;tcp：添加端口，格式为：端口&#x2F;通讯协议</span><br><span class="line">–permanent：永久生效，没有此参数重启后失效</span><br><span class="line"></span><br><span class="line"># 重启防火墙</span><br><span class="line">firewall-cmd --reload</span><br><span class="line"># 查看已经开放的端口</span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line"></span><br><span class="line"># 停止防火墙</span><br><span class="line">systemctl stop firewalld.service</span><br><span class="line"># 启动防火墙</span><br><span class="line">systemctl start firewalld.service</span><br><span class="line"># 禁止防火墙开机启动</span><br><span class="line">systemctl disable firewalld.service</span><br></pre></td></tr></table></figure>
+
+<h3 id="导入项目"><a href="#导入项目" class="headerlink" title="导入项目"></a>导入项目</h3><p><img src="/images/gitlab/%E5%AF%BC%E5%85%A5%E5%A4%96%E9%83%A8%E9%A1%B9%E7%9B%AE.jpg" alt=""></p>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>gitlab</category>
+      </categories>
+      <tags>
+        <tag>devops</tag>
+        <tag>gitlab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>jenkins安装部署</title>
+    <url>/2021/11/13/jenkins%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/</url>
+    <content><![CDATA[<h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>需要有java环境</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>使用<a href="https://mirrors.tuna.tsinghua.edu.cn/" target="_blank" rel="noopener">清华源</a>进行安装</p>
+<p><code>yum install -y https://mirrors.tuna.tsinghua.edu.cn/jenkins/redhat/jenkins-2.317-1.1.noarch.rpm</code></p>
+<a id="more"></a>
+
+<p>出现如下错误</p>
+<p><img src="/images/jenkins/%E5%AE%89%E8%A3%85jinkens%E5%A4%B1%E8%B4%A5.jpg" alt=""></p>
+<p>执行<code>yum -y install epel-release</code>、<code>yum -y install daemonize</code>安装指定依赖后再重新安装</p>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p><code>vim /etc/sysconfig/jenkins</code></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#修改jenkins用户名为root，或者将jenkins假如用户组，否则之后执行脚本可能出问题</span></span><br><span class="line"><span class="comment">#JENKINS_USER="jenkins"</span></span><br><span class="line">JENKINS_USER=<span class="string">"root"</span></span><br><span class="line"><span class="comment">#修改端口号，默认8080</span></span><br><span class="line">JENKINS_PORT=<span class="string">"8002"</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="插件加速源"><a href="#插件加速源" class="headerlink" title="插件加速源"></a>插件加速源</h3><p>执行<code>vim /var/lib/jenkins/updates/default.json</code> 将google的搜索以及国外的服务器搜索替换成百度</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sed -i &#39;s&#x2F;http:\&#x2F;\&#x2F;updates.jenkins- ci.org\&#x2F;download&#x2F;https:\&#x2F;\&#x2F;mirrors.tuna.tsinghua.edu.cn\&#x2F;jenkins&#x2F;g&#39; default.json &amp;&amp; sed -i &#39;s&#x2F;http:\&#x2F;\&#x2F;www.google.com&#x2F;https:\&#x2F;\&#x2F;www.baidu.com&#x2F;g&#39; default.json</span><br></pre></td></tr></table></figure>
+
+<p>在没有启动jenkins的时候<code>var/lib/jenkins</code>下是空的，执行<code>systemctl start jenkins</code>启动服务后将出现目录</p>
+<p>启动报错，jenkins默认java路径加载错误</p>
+<p><img src="/images/jenkins/java%E8%B7%AF%E5%BE%84%E4%B8%8D%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98.jpg" alt=""></p>
+<p><code>vim  /etc/init.d/jenkins</code>如下图，增加本机jdk位置，需指定到bin目录下得java执行文件</p>
+<p><img src="/images/jenkins/java%E8%B7%AF%E5%BE%84%E4%B8%8D%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3.jpg" alt=""></p>
+<p>保存后执行<code>systemctl faemon-reload</code>、<code>systemctl start jenkins</code></p>
+<p>如果启动界面卡住不动，就需要进入<code>/var/lib/jenkins/hudson.model.UpdateCenter.xml</code>将center换成清华源<code>https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json</code></p>
+<p><img src="/images/jenkins/%E5%90%AF%E5%8A%A8%E6%85%A2%E6%9B%BF%E6%8D%A2%E6%B8%85%E5%8D%8E%E6%BA%90.jpg" alt=""></p>
+<p>重新启动jenkins<code>systemctl restart jenkins</code></p>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>访问jenkins</p>
+<p><img src="/images/jenkins/jenkins%E5%88%9D%E5%A7%8B%E5%8C%96%E7%99%BB%E5%BD%95.jpg" alt=""></p>
+<p>执行<code>cat /var/lib/jenkins/secrets/initialAdminPassword</code>从服务器获取初始密码</p>
+<p><img src="/images/jenkins/%E8%8E%B7%E5%8F%96%E5%88%9D%E5%A7%8B%E5%AF%86%E7%A0%81.jpg" alt=""></p>
+<p>安装插件</p>
+<p><img src="/images/jenkins/%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85.jpg" alt=""></p>
+<p>创建第一个管理员用户，账户：jkadmin、密码：123</p>
+<p><img src="/images/jenkins/%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7.jpg" alt=""></p>
+<p>进入系统</p>
+<p><img src="/images/jenkins/%E8%BF%9B%E5%85%A5%E7%B3%BB%E7%BB%9F.jpg" alt=""></p>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>jenkins</category>
+      </categories>
+      <tags>
+        <tag>devops</tag>
+        <tag>jenkins</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>jenkins自动构建</title>
+    <url>/2021/11/17/jenkins%E8%87%AA%E5%8A%A8%E6%9E%84%E5%BB%BA/</url>
+    <content><![CDATA[<h3 id="jenkins安装maven插件"><a href="#jenkins安装maven插件" class="headerlink" title="jenkins安装maven插件"></a>jenkins安装maven插件</h3><p><img src="/images/jenkins/%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%851.jpg" alt=""></p>
+<p><img src="/images/jenkins/maven%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85.jpg" alt=""></p>
+<a id="more"></a>
+
+<h3 id="配置jenkins全局环境"><a href="#配置jenkins全局环境" class="headerlink" title="配置jenkins全局环境"></a>配置jenkins全局环境</h3><p><img src="/images/jenkins/jenkins%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE.jpg" alt=""></p>
+<p>git环境，通过<code>whereis git</code>命令查看git安装位置</p>
+<p>![](/images/jenkins/whereis git.jpg)</p>
+<h4 id="配置git"><a href="#配置git" class="headerlink" title="配置git"></a>配置git</h4><p><img src="/images/jenkins/jenkins%E7%9A%84git%E9%85%8D%E7%BD%AE.jpg" alt=""></p>
+<h4 id="配置maven"><a href="#配置maven" class="headerlink" title="配置maven"></a>配置maven</h4><p><img src="/images/jenkins/jenkins%E7%9A%84maven%E9%85%8D%E7%BD%AE.jpg" alt=""></p>
+<h4 id="配置jdk"><a href="#配置jdk" class="headerlink" title="配置jdk"></a>配置jdk</h4><p><img src="/images/jenkins/jenkins%E7%9A%84jdk%E9%85%8D%E7%BD%AE.jpg" alt=""></p>
+<h3 id="构建任务"><a href="#构建任务" class="headerlink" title="构建任务"></a>构建任务</h3><p><img src="/images/jenkins/%E5%88%9B%E5%BB%BA%E8%87%AA%E5%8A%A8%E6%9E%84%E5%BB%BA%E7%9A%84maven%E9%A1%B9%E7%9B%AE.jpg" alt=""></p>
+<p>任务构建</p>
+<p><img src="/images/jenkins/maven%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA.jpg" alt=""></p>
+<p>构建触发器</p>
+<p><img src="/images/jenkins/%E6%9E%84%E5%BB%BA%E8%A7%A6%E5%8F%91%E5%99%A801.jpg" alt=""></p>
+<blockquote>
+<p>拷贝 jenkins的钩子地址到gitlab上<a href="http://192.168.1.18:8002/project/my-maven-test" target="_blank" rel="noopener">http://192.168.1.18:8002/project/my-maven-test</a></p>
+<p>生成访问的Secret token</p>
+</blockquote>
+<p><img src="/images/jenkins/gitlab%E9%85%8D%E7%BD%AE.jpg" alt=""></p>
+<blockquote>
+<p>当gitlab触发指定分支和事件时，触发webhooks调起jenkins执行指定任务</p>
+</blockquote>
+<p>gitlab添加webhooks失败</p>
+<p><img src="/images/jenkins/gitlab%E6%B7%BB%E5%8A%A0%E9%92%A9%E5%AD%90%E5%A4%B1%E8%B4%A5.jpg" alt=""></p>
+<p>解决方式</p>
+<p><img src="/images/jenkins/gitlab%E6%B7%BB%E5%8A%A0%E9%92%A9%E5%AD%90%E5%A4%B1%E8%B4%A5%E8%A7%A3%E5%86%B3.jpg" alt=""></p>
+<p>之后再重新添加webhooks，如下图可以看到有一个项目的钩子出现</p>
+<p><img src="/images/jenkins/gitlab%E6%B7%BB%E5%8A%A0%E9%92%A9%E5%AD%90.jpg" alt=""></p>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>jenkins</category>
+      </categories>
+      <tags>
+        <tag>devops</tag>
+        <tag>jenkins</tag>
       </tags>
   </entry>
 </search>
