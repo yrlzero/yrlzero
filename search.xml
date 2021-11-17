@@ -7096,6 +7096,8 @@
 <p>-e 代表添加环境变量 MYSQL_ROOT_PASSWORD 是 root 用户的登陆密码</p>
 <p>-v ~/dockerdata/mysql/conf:/etc/mysql/conf.d：将主机当前目录下的 conf/my.cnf 挂载到容器的 /etc/mysql/my.cnf<br>-v ~/dockerdata/mysql/logs:/logs：将主机当前目录下的 logs 目录挂载到容器的 /logs<br>-v ~/dockerdata/mysql/data:/var/lib/mysql ：将主机当前目录下的data目录挂载到容器的 /var/lib/mysql</p>
 </blockquote>
+<a id="more"></a>
+
 <h3 id="tomcat"><a href="#tomcat" class="headerlink" title="tomcat"></a>tomcat</h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#搜索镜像</span></span><br><span class="line">docker search tomcat</span><br><span class="line"><span class="comment">#拉取镜像</span></span><br><span class="line">dokcer pull tomcat</span><br><span class="line"><span class="comment">#创建挂载目录</span></span><br><span class="line">mkdir -p ~/dockerdata/tomcat/webapps ~/dockerdata/tomcat/logs ~/dockerdata/tomcat/conf</span><br><span class="line"><span class="comment">#从现有的tomcat中拷贝server.xml，没有此操作的话容器启动时挂载 -v ~/dockerdata/tomcat/conf:/usr/local/tomcat/conf会报错</span></span><br><span class="line">docker cp 6dd4380ba708:/usr/<span class="built_in">local</span>/tomcat/conf/server.xml ~/dockerdata/tomcat/conf</span><br><span class="line"><span class="comment">#守护方式运行镜像</span></span><br><span class="line">docker run -di --name myTomcat -p 9000:8080 -v ~/dockerdata/tomcat/webapps:/usr/<span class="built_in">local</span>/tomcat/webapps -v ~/dockerdata/tomcat/logs:/usr/<span class="built_in">local</span>/tomcat/logs  tomcat</span><br></pre></td></tr></table></figure>
 
 <blockquote>

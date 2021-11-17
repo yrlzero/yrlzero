@@ -287,7 +287,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-11-17 22:52:13 / 修改时间：23:00:36" itemprop="dateCreated datePublished" datetime="2021-11-17T22:52:13+08:00">2021-11-17</time>
+              <time title="创建时间：2021-11-17 22:52:13 / 修改时间：23:09:40" itemprop="dateCreated datePublished" datetime="2021-11-17T22:52:13+08:00">2021-11-17</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -321,19 +321,14 @@
 <p>-e 代表添加环境变量 MYSQL_ROOT_PASSWORD 是 root 用户的登陆密码</p>
 <p>-v ~/dockerdata/mysql/conf:/etc/mysql/conf.d：将主机当前目录下的 conf/my.cnf 挂载到容器的 /etc/mysql/my.cnf<br>-v ~/dockerdata/mysql/logs:/logs：将主机当前目录下的 logs 目录挂载到容器的 /logs<br>-v ~/dockerdata/mysql/data:/var/lib/mysql ：将主机当前目录下的data目录挂载到容器的 /var/lib/mysql</p>
 </blockquote>
-<h3 id="tomcat"><a href="#tomcat" class="headerlink" title="tomcat"></a>tomcat</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#搜索镜像</span></span><br><span class="line">docker search tomcat</span><br><span class="line"><span class="comment">#拉取镜像</span></span><br><span class="line">dokcer pull tomcat</span><br><span class="line"><span class="comment">#创建挂载目录</span></span><br><span class="line">mkdir -p ~/dockerdata/tomcat/webapps ~/dockerdata/tomcat/logs ~/dockerdata/tomcat/conf</span><br><span class="line"><span class="comment">#从现有的tomcat中拷贝server.xml，没有此操作的话容器启动时挂载 -v ~/dockerdata/tomcat/conf:/usr/local/tomcat/conf会报错</span></span><br><span class="line">docker cp 6dd4380ba708:/usr/<span class="built_in">local</span>/tomcat/conf/server.xml ~/dockerdata/tomcat/conf</span><br><span class="line"><span class="comment">#守护方式运行镜像</span></span><br><span class="line">docker run -di --name myTomcat -p 9000:8080 -v ~/dockerdata/tomcat/webapps:/usr/<span class="built_in">local</span>/tomcat/webapps -v ~/dockerdata/tomcat/logs:/usr/<span class="built_in">local</span>/tomcat/logs  tomcat</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>-v ~/dockerdata/tomcat/conf:/usr/local/tomcat/conf</p>
-</blockquote>
-<h3 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#搜索镜像</span></span><br><span class="line">docker nginx</span><br><span class="line"><span class="comment">#拉取镜像</span></span><br><span class="line">docker pull nginx</span><br><span class="line"><span class="comment">#守护方式运行镜像</span></span><br><span class="line">docker -di --name=myNginx -p 90:80 nginx</span><br></pre></td></tr></table></figure>
-
-<h3 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#搜索镜像</span></span><br><span class="line">docker search redis</span><br><span class="line"><span class="comment">#拉取镜像</span></span><br><span class="line">docker pull redis</span><br><span class="line"><span class="comment">#创建挂载目录</span></span><br><span class="line">mkdir -p ~/dockerdata/redis/data</span><br><span class="line"><span class="comment">#守护方式运行镜像</span></span><br><span class="line">docker run -di --name=myRedis -p 33306:3306 -v ~/dockerdata/redis/data:/data redis redis-server --appendonly yes</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>redis-server –appendonly yes :</strong> 在容器执行redis-server启动命令，并打开redis持久化配置</p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/11/17/docker%E5%B8%B8%E7%94%A8%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
