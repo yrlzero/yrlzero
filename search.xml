@@ -599,7 +599,7 @@
 <h3 id="写操作"><a href="#写操作" class="headerlink" title="写操作"></a>写操作</h3><p><img src="/images/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/%E5%86%99%E6%93%8D%E4%BD%9C.jpg" alt=""></p>
 <p><img src="/images/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/es%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86-03.jpg" alt=""></p>
 <p><img src="/images/elasticsearch%EF%BC%88%E4%B8%89%EF%BC%89%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E5%92%8C%E5%86%99%E5%85%A5%E5%8E%9F%E7%90%86/es-01.jpg" alt=""></p>
-<p>当有写入请求时，数据会先写到内存的Buffer中（Buffer专门用于写入操作），每间隔1S会创建一个<code>index segment</code>的<code>file</code>，然后<code>segment</code>会同步到<code>OS cache</code>中，<code>OS cache</code>会返回一个<code>status = Open</code>，<strong>这时候的<code>segment</code>就能对外提供搜索操作。</strong></p>
+<p>当有写入请求时，数据会先写到内存的Buffer中（Buffer专门用于写入操作，默认占jvm的10%），每间隔1S会创建一个<code>index segment</code>的<code>file</code>，然后<code>segment</code>会同步到<code>OS cache</code>中，<code>OS cache</code>会返回一个<code>status = Open</code>，<strong>这时候的<code>segment</code>就能对外提供搜索操作。</strong></p>
 <p><strong>读写操作进行了异步分离操作，segment对外提供读搜索操作，OS cache后台异步写入数据。</strong></p>
 <blockquote>
 <p>在这种方式下，如果宕机会造成少部分数据的丢失，ES是怎么避免的？</p>
@@ -4010,13 +4010,29 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">checkpoint，在检查点之前的日志已经被记录到磁盘并擦除；</span><br><span class="line">write post表示当前写的位置；</span><br><span class="line">当两者相遇表示redo log日志已经写满，此时数据库停止进行相关的语句更新，转而进行redo log日志同步到磁盘的操作</span><br></pre></td></tr></table></figure>
 
 <p>redo log刷盘</p>
-<p>MariaDB/MySQL是工作在用户空间的，它们的log buffer要写入磁盘需要经过操作系统内核空间的os buffer，再调用fsync()将OS buffer中的日志刷到磁盘上的log file中</p>
+<p><code>MySQL</code> 中数据是以页为单位，你查询一条记录，会从硬盘把一页的数据加载出来，加载出来的数据叫数据页，会放入到 <code>Buffer Pool</code> 中。后续的查询都是先从 <code>Buffer Pool</code> 中找，没有命中再去硬盘加载，减少硬盘 <code>IO</code> 开销，提升性能。</p>
+<p>更新表数据的时候，也是如此，发现 <code>Buffer Pool</code> 里存在要更新的数据，就直接在 <code>Buffer Pool</code> 里更新。然后会把“在某个数据页上做了什么修改”记录到重做日志缓存（<code>redo log buffer</code>）里，接着刷盘到 <code>redo log</code> 文件里。</p>
+<p><code>InnoDB</code> 存储引擎有一个后台线程，每隔<code>1</code> 秒，就会把 <code>redo log buffer</code> 中的内容写到文件系统缓存（<code>page cache</code>），然后调用 <code>fsync</code> 刷盘。</p>
 <p><img src="/images/linux/mysql/redo-logbuffer.jpg" alt=""></p>
 <p>如右图所示，redo log的刷盘存在三种方式，可以通过<code>innodb_flush_log_at_trx_commit</code>参数进行调整，主要控制innodb将log buffer中的数据写入日志文件并flush磁盘的时间点，值分别为0，1，2</p>
 <ul>
-<li>值0：在提交事务时，InnoDB不会立即触发将缓存日志写到磁盘文件的操作，而是每秒触发一次缓存日志回写磁盘操作，并调用操作系统fsync()刷新IO缓存。</li>
-<li>值1：在每个事务提交时，InnoDB立即将缓存中的redo日志回写到日志文件，并调用操作系统fsync()刷新IO缓存。</li>
-<li>值2：在每个事务提交时，InnoDB立即将缓存中的redo日志回写到日志文件，但并不马上调用fsync()来刷新IO缓存，而是每秒只做一次磁盘IO缓存刷新操作。</li>
+<li><p>值0：在提交事务时，InnoDB不会立即触发将缓存日志写到磁盘文件的操作，而是等待后台线程每秒将缓存日志回写入文件缓存系统(OS Cache)，并fsync()刷盘。</p>
+<blockquote>
+<p>为<code>0</code>时，如果<code>MySQL</code>挂了或宕机可能会有<code>1</code>秒数据的丢失。</p>
+</blockquote>
+</li>
+<li><p>值1：在事务提交时，InnoDB立即将缓存日志写入文件缓存系统(OS Cache)，并fsync()刷盘。</p>
+<blockquote>
+<p>为<code>1</code>时， 只要事务提交成功，<code>redo log</code>记录就一定在硬盘里，不会有任何数据丢失。</p>
+<p>如果事务执行期间<code>MySQL</code>挂了或宕机，这部分日志丢了，但是事务并没有提交，所以日志丢了也不会有损失。</p>
+</blockquote>
+</li>
+<li><p>值2：在每个事务提交时，InnoDB立即将缓存中的redo日志回写到文件缓存系统(OS Cache)，但后台线程刷盘。</p>
+<blockquote>
+<p>为<code>2</code>时， 只要事务提交成功，<code>redo log buffer</code>中的内容只写入文件系统缓存（<code>page cache</code>）。</p>
+<p>如果仅仅只是<code>MySQL</code>挂了不会有任何数据丢失，但是宕机可能会有<code>1</code>秒数据的丢失。</p>
+</blockquote>
+</li>
 </ul>
 <p>执行<code>SHOW VARIABLES LIKE &#39;innodb_flush_log_at_trx_commit&#39;</code>命令可知，mysql默认值为1</p>
 <p><img src="/images/linux/mysql/innodb_flush.jpg" alt=""></p>
