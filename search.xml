@@ -41,6 +41,7 @@
 ]]></content>
       <categories>
         <category>多线程</category>
+        <category>AQS</category>
       </categories>
       <tags>
         <tag>AQS</tag>
