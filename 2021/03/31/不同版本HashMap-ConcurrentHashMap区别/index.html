@@ -29,7 +29,7 @@
 <meta property="og:description" content="HashMap区别JDK7和JDK8中的HashMap底层数据结构有什么区别? 123JDK7:数组 + 链表JDK8:数组 + 链表 + 红黑树     链表包括单向链表和双向链表，双线链表主要是为了链表操作方便，在插入、扩容链表转红黑树的过程中使用">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-03-31T14:04:16.978Z">
-<meta property="article:modified_time" content="2021-03-31T14:03:00.432Z">
+<meta property="article:modified_time" content="2022-02-13T07:16:56.854Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="HashMap">
@@ -208,10 +208,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-03-31 22:04:16 / 修改时间：22:03:00" itemprop="dateCreated datePublished" datetime="2021-03-31T22:04:16+08:00">2021-03-31</time>
+              <time title="创建时间：2021-03-31 22:04:16" itemprop="dateCreated datePublished" datetime="2021-03-31T22:04:16+08:00">2021-03-31</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-02-13 15:16:56" itemprop="dateModified" datetime="2022-02-13T15:16:56+08:00">2022-02-13</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -248,7 +254,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">1.根据Key生成HashCode</span><br><span class="line">2.判断当前HashMap对象中的数组是否为空，如果为空则初始化数组</span><br><span class="line">3.根据逻辑与运算，算出HashCode基于当前数组对应的数组下标i</span><br><span class="line">4.判断数组的第i个位置的元素(tab[i])是否为空</span><br><span class="line">   a.如果为空，则将key,value封装为Node对象赋值给tab[i]</span><br><span class="line">   b.如果不为空：</span><br><span class="line">     I.如果put方法传入进来的key等于tab[i].key，那么存在相同的key</span><br><span class="line">     II.如果不等于tab[i].key，则:</span><br><span class="line">       1.如果tab[i]的类型是TreeNode，插入红黑树之前判断树中是否存在相同的key,然后Key和Value插入到红黑树中</span><br><span class="line">       2.如果tab[i]的类型不是TreeNode，则表示当前是个链表，遍历寻找相同的key，找不到则插入，然后判断是否Size大于8，大于则树化。</span><br><span class="line">     III.如果上诉步骤发现相同的key，则更新value值，返回oldValue</span><br><span class="line">5.modCount++</span><br><span class="line">6.HashMap的元素个数size + 1</span><br><span class="line">7.如果size大于扩容阈值，则进行扩容</span><br></pre></td></tr></table></figure>
 
 <p>JDK8中HashMap的get方法的实现过程?</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1.根据Key生成HashCode</span><br><span class="line">2.如果数组为空，则直接返回空</span><br><span class="line">3.如果数组不为空，则利用HashCode和数组长度通过逻辑与操作是厒Key所对应的数组下标i</span><br><span class="line">4.如果数组的第i个位置上没有元素，则直接返回空</span><br><span class="line">5.如果数组的第1个位置上的元素key等于get方法传进来的key，则返回该元素，并取该元素的value</span><br><span class="line">6.如果不等于则判断该元素有没有下一个元素，如果没有，返回空</span><br><span class="line">7.如果有则判断该元素的类型是链表节点还是红黑树节点</span><br><span class="line">  a.如果是链表则遍历链表</span><br><span class="line">  b.如果是红黑树则遍历红黑树</span><br><span class="line">8.找到则返回元素，没找到则返回空</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1.根据Key生成HashCode</span><br><span class="line">2.如果数组为空，则直接返回空</span><br><span class="line">3.如果数组不为空，则利用HashCode&amp;（数组长度-1）计算Key所对应的数组下标i</span><br><span class="line">4.如果数组的第i个位置上没有元素，则直接返回空</span><br><span class="line">5.如果数组的第1个位置上的元素key等于get方法传进来的key，则返回该元素，并取该元素的value</span><br><span class="line">6.如果不等于则判断该元素有没有下一个元素，如果没有，返回空</span><br><span class="line">7.如果有则判断该元素的类型是链表节点还是红黑树节点</span><br><span class="line">  a.如果是链表则遍历链表</span><br><span class="line">  b.如果是红黑树则遍历红黑树</span><br><span class="line">8.找到则返回元素，没找到则返回空</span><br></pre></td></tr></table></figure>
 
 <p>JDK7与JDK8中HashMap的不同点?</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.JDK8使用了红黑树</span><br><span class="line">2.JDK7中链表插入使用的头插法，但是会造成循环链表CPU100%的问题，JDK8使用尾插法</span><br><span class="line">3.JDK7的Hash算法比JDK8复杂，散列性更好能提高链表查询效率，而JDK8增加红黑树查询性能得到保障，所以简化了Hash算法</span><br><span class="line">4.扩容的过程JDK7可能会对Key进行reHash(和Hash种子有关)，而JDK8&#x3D;的Key没有reHash的过程</span><br><span class="line">5.JDK8中的扩容条件和JDK7不同，在JDK7中，若tab[i]为空，则不进行扩容，而JDK8移除了该条件</span><br><span class="line">6.JDK8增加了API：putIfAbsent(Key,Value)</span><br><span class="line">7.扩容过程转移元素的逻辑不同，JDK7是一次转移一个元素，JDK8是算出尾部同一个位置的数组直接头结点迁移</span><br></pre></td></tr></table></figure>
