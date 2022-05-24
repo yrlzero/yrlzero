@@ -354,8 +354,10 @@
 </ul>
 <p>硬件优化</p>
 <ul>
-<li>全能型：数据节点处理与数据相关的操作，例如CRUD、搜索和聚合。这些操作时IO、内存和CPU密集型的，所以他们需要更高配置的服务器以及更高的带宽，并且集群的性能冗余非常重要</li>
-<li>带宽：由于仅投票节点不参与master竞选，所以和真正的master节点相比，它需要的内存和CPU较少。但是所有候选节点以及仅投票节点都可能是数据及诶单，所以他们都需要快速稳定低延迟的网络</li>
+<li><p>全能型：数据节点处理与数据相关的操作，例如CRUD、搜索和聚合。这些操作时IO、内存和CPU密集型的，所以他们需要更高配置的服务器以及更高的带宽，并且集群的性能冗余非常重要</p>
+</li>
+<li><p>带宽：由于仅投票节点不参与master竞选，所以和真正的master节点相比，它需要的内存和CPU较少。但是所有候选节点以及仅投票节点都可能是数据及诶单，所以他们都需要快速稳定低延迟的网络</p>
+</li>
 </ul>
 ]]></content>
       <categories>
@@ -3920,7 +3922,7 @@
 <td align="center">×</td>
 <td align="center">√</td>
 <td align="center">√</td>
-<td>每次读取之前创建read view，<br/>通过mvcc控制</td>
+<td>每次读取前都创建read view，<br/>通过mvcc控制</td>
 <td>Oracle、Sql Server</td>
 </tr>
 <tr>
@@ -3929,7 +3931,7 @@
 <td align="center">×</td>
 <td align="center">×</td>
 <td align="center">√</td>
-<td>每次读取之前创建read view，<br/>通过mvcc控制</td>
+<td>第一次读取之前创建read view，<br/>通过mvcc控制</td>
 <td>Mysql</td>
 </tr>
 <tr>
