@@ -179,6 +179,97 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/02/08/%E5%85%B1%E8%AF%86%E6%80%A7%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/08/%E5%85%B1%E8%AF%86%E6%80%A7%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">共识性算法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-02-08 22:00:00" itemprop="dateCreated datePublished" datetime="2022-02-08T22:00:00+08:00">2022-02-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-14 15:24:13" itemprop="dateModified" datetime="2022-11-14T15:24:13+08:00">2022-11-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">分布式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="一、paxos"><a href="#一、paxos" class="headerlink" title="一、paxos"></a>一、paxos</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>一种基于消息传递且具有高度容错性的共识性算法。</p>
+<p>解决分布式共识性问题，即一个分布式系统中各个进程如何进某个值（决议）通过共识达成一致。</p>
+<p>Paxos将系统中的角色分为<strong>提议者 (Proposer)</strong>，<strong>决策者 (Acceptor)</strong>，<strong>最终决策学习者 (Learner)</strong>：</p>
+<ul>
+<li><strong>Proposer-提议者</strong>：提出提案（Proposal），信息包括提案编号（Proposal ID）、提议值（Value）。</li>
+<li><strong>Acceptor-决策者</strong>：参与决策，回应Proposer的提案。收到提案后可以接受提案，若Proposal获得多数Acceptors接受，则称该Proposal被批准。</li>
+<li><strong>Learner-学习者</strong>：不参与决策，从Proposers/Acceptors学习最新达成一致的信息（Value）。</li>
+</ul>
+<blockquote>
+<p>Proposer向Acceptor集合发送提案，Acceptor集合中的每个成员都有可能同意该提案且每个Acceptor 只能批准一个提案，只有当一半以上的成员同意了一个提案，就认为该提案被选定了。</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/08/%E5%85%B1%E8%AF%86%E6%80%A7%E7%AE%97%E6%B3%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/02/07/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%8E%A8%E9%80%81%E6%8A%80%E6%9C%AF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -923,86 +1014,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/10/31/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-seata/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/10/31/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-seata/" class="post-title-link" itemprop="url">分布式事务-Seata</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-10-31 16:02:00 / 修改时间：16:56:34" itemprop="dateCreated datePublished" datetime="2021-10-31T16:02:00+08:00">2021-10-31</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" itemprop="url" rel="index"><span itemprop="name">分布式事务</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/Seata/" itemprop="url" rel="index"><span itemprop="name">Seata</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="seata"><a href="#seata" class="headerlink" title="seata"></a><a href="https://github.com/seata/seata/releases" target="_blank" rel="noopener">seata</a></h1><p>Seata 是一款开源的分布式事务解决方案，致力于提供高性能和简单易用的分布式事务服务。Seata 将为用户提供了 AT、TCC、SAGA 和 XA 事务模式，为用户打造一站式的分布式解决方案。</p>
-<h2 id="server端"><a href="#server端" class="headerlink" title="server端"></a><a href="http://seata.io/zh-cn/docs/ops/deploy-guide-beginner.html" target="_blank" rel="noopener">server端</a></h2><h3 id="点击下载"><a href="#点击下载" class="headerlink" title="点击下载"></a><a href="https://github.com/seata/seata/releases" target="_blank" rel="noopener">点击下载</a></h3><h3 id="mysql-sql"><a href="#mysql-sql" class="headerlink" title="mysql-sql"></a><a href="https://github.com/seata/seata/tree/develop/script/server/db" target="_blank" rel="noopener">mysql-sql</a></h3><p>全局事务会话信息由3块内容构成，全局事务–&gt;分支事务–&gt;全局锁，对应表global_table、branch_table、lock_table</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/10/31/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-seata/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1074,19 +1085,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">82</span>
+          <span class="site-state-item-count">83</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-count">45</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

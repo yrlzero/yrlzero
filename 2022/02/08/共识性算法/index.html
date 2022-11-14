@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、paxos概念一种基于消息传递且具有高度容错性的共识性算法。 解决分布式共识性问题，即一个分布式系统中各个进程如何进某个值（决议）通过共识达成一致。 Paxos将系统中的角色分为提议者 (Proposer)，决策者 (Acceptor)，最终决策学习者 (Learner)：  Proposer-提议者：提出提案（Proposal），信息包括提案编号（Proposal ID）、提议值（Value">
+<meta property="og:type" content="article">
+<meta property="og:title" content="共识性算法">
+<meta property="og:url" content="http://yrlzero.github.io/2022/02/08/%E5%85%B1%E8%AF%86%E6%80%A7%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="一、paxos概念一种基于消息传递且具有高度容错性的共识性算法。 解决分布式共识性问题，即一个分布式系统中各个进程如何进某个值（决议）通过共识达成一致。 Paxos将系统中的角色分为提议者 (Proposer)，决策者 (Acceptor)，最终决策学习者 (Learner)：  Proposer-提议者：提出提案（Proposal），信息包括提案编号（Proposal ID）、提议值（Value">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-02-08T14:00:00.000Z">
+<meta property="article:modified_time" content="2022-11-14T07:24:13.930Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="paxos">
+<meta property="article:tag" content="raft">
+<meta property="article:tag" content="zab">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/02/08/%E5%85%B1%E8%AF%86%E6%80%A7%E7%AE%97%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>共识性算法 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/02/08/%E5%85%B1%E8%AF%86%E6%80%A7%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          共识性算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-02-08 22:00:00" itemprop="dateCreated datePublished" datetime="2022-02-08T22:00:00+08:00">2022-02-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-14 15:24:13" itemprop="dateModified" datetime="2022-11-14T15:24:13+08:00">2022-11-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">分布式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、paxos"><a href="#一、paxos" class="headerlink" title="一、paxos"></a>一、paxos</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>一种基于消息传递且具有高度容错性的共识性算法。</p>
+<p>解决分布式共识性问题，即一个分布式系统中各个进程如何进某个值（决议）通过共识达成一致。</p>
+<p>Paxos将系统中的角色分为<strong>提议者 (Proposer)</strong>，<strong>决策者 (Acceptor)</strong>，<strong>最终决策学习者 (Learner)</strong>：</p>
+<ul>
+<li><strong>Proposer-提议者</strong>：提出提案（Proposal），信息包括提案编号（Proposal ID）、提议值（Value）。</li>
+<li><strong>Acceptor-决策者</strong>：参与决策，回应Proposer的提案。收到提案后可以接受提案，若Proposal获得多数Acceptors接受，则称该Proposal被批准。</li>
+<li><strong>Learner-学习者</strong>：不参与决策，从Proposers/Acceptors学习最新达成一致的信息（Value）。</li>
+</ul>
+<blockquote>
+<p>Proposer向Acceptor集合发送提案，Acceptor集合中的每个成员都有可能同意该提案且每个Acceptor 只能批准一个提案，只有当一半以上的成员同意了一个提案，就认为该提案被选定了。</p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="拜占庭问题"><a href="#拜占庭问题" class="headerlink" title="拜占庭问题"></a><strong>拜占庭问题</strong></h2><p>拜占庭问题：是指 拜占庭帝国军队的将军们必须全体一致的决定是否攻击某一支敌军。问题是这些将军在地理上是分隔开来的， 只能依靠通讯员进行传递命令，但是通讯员中存在叛徒，<strong>「它们可以篡改消息」</strong>，叛徒可以欺骗某些将军采取进攻行动；促成一个不是所有将军都同意的决定， 如当将军们不希望进攻时促成进攻行动；或者迷惑某些将军，使他们无法做出决定。</p>
+<p>Paxos算法的前提假设是不存在拜占庭将军问题，即通讯安全不会丢失，且发出的消息不被修改。</p>
+<h2 id="第一阶段"><a href="#第一阶段" class="headerlink" title="第一阶段"></a>第一阶段</h2><ul>
+<li>一个<strong>Proposer-提议者</strong>选择一个提案编号（Proposal ID），让如prepare request中发送给其他<strong>Acceptor-决策者</strong></li>
+<li>如果一个<strong>Acceptor-决策者</strong>接受了一个prepare request，其中的提案编号（Proposal ID）大于它之前回复过的prepare request，那么它会回复该请求，并承诺不接受比其小的提案编号（Proposal ID），并返回它已经接受的最大提案编号（Proposal ID）。</li>
+</ul>
+<h2 id="第二阶段"><a href="#第二阶段" class="headerlink" title="第二阶段"></a>第二阶段</h2><ul>
+<li><p>如果<strong>Proposer-提议者</strong>收到了大多数<strong>Acceptor-决策者</strong>的回复，则会对这些<strong>Acceptor-决策者</strong>再发送一个accept request，其中包含<strong>提案编号（Proposal ID）、提议值（Value）</strong></p>
+</li>
+<li><p>如果一个<strong>Acceptor-决策者</strong>收到的提案编号（Proposal ID）不小于之前回复的其他请求的提案编号（Proposal ID），则接收此提议</p>
+</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>paxos协议会拒绝小于等于当前提议ID（处理或者未处理）的提议，当半数以上通过，该提议才会被通过</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>当有两个<strong>Proposer-提议者</strong>依次剔除提案时</p>
+<ul>
+<li><strong>Proposer P1</strong>发送<strong>提案编号1</strong>的prepare请求，收到过半响应，完成阶段一</li>
+<li><strong>Proposer P2</strong>发送<strong>提案编号2</strong>的prepare请求，<strong>提案编号2</strong>大于<strong>提案编号1</strong>，收到过半响应，，完成阶段一</li>
+<li><strong>P1</strong>进入第二阶段，发送accept请求被<strong>Acceptor-决策者</strong>忽略，此时<strong>P1</strong>重新进入节点一，发送<strong>提案编号3</strong></li>
+<li>P2进入第二阶段，发送accept请求被<strong>Acceptor-决策者</strong>忽略，此时<strong>P1*2重新进入节点一，发送</strong>提案编号4**</li>
+<li>此时陷入死循环</li>
+<li>避免以上情况，Multi Paxos算法，选取一个主Proposer，只有主Proposer才能发起提案</li>
+</ul>
+<hr>
+<h1 id="二、Raft"><a href="#二、Raft" class="headerlink" title="二、Raft"></a>二、Raft</h1><p>Raft算法是Paxos算法的一种简化实现。<a href="http://thesecretlivesofdata.com/raft/" target="_blank" rel="noopener">点击查看动图</a></p>
+<p>一个节点在任意状态时刻处于一下三种角色之一：</p>
+<ul>
+<li><strong>follower</strong>：所有节点都以follower的状态开始，如果没有收到leader消息则会变成candidate状态。</li>
+<li><strong>candidate</strong>：会向其他节点拉选票，如果得到大部分的票则成为leader，这个过程是Leader选举。</li>
+<li><strong>leader</strong>：所有对系统的修改都会先经过leader。</li>
+</ul>
+<h2 id="日志复制"><a href="#日志复制" class="headerlink" title="日志复制"></a>日志复制</h2><ul>
+<li><p>对于系统的修改都会先经过leader</p>
+</li>
+<li><p>每个修改都生成一条日志，这些日志处理未提交状态，不会影响真实值</p>
+</li>
+<li><p>leader将日志复制到follower节点，</p>
+</li>
+<li><p>当半数以上节点响应时，通知所有的follower正式提交</p>
+</li>
+<li><p>此时整个系统处于一致状态。</p>
+</li>
+</ul>
+<h2 id="选举-Leader-Election"><a href="#选举-Leader-Election" class="headerlink" title="选举-Leader Election"></a>选举-Leader Election</h2><ul>
+<li><p>每个节点生成随机选举超时时间，在这个时间内节点必须等待</p>
+</li>
+<li><p>当超过此时间时/节点没有监听到leader的心跳，节点变成Candidate，发起投票</p>
+<ul>
+<li>重置选举超时时间</li>
+<li>发起选举投票（投自己一票）<ul>
+<li>如果接收节点没有发起投票，则投给该Candidate，并重置自己的选举超时时间</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>当Candidate获取半数以上票数时，当选leader</p>
+</li>
+<li><p>平票或者票数不足时，本次term没有leader，等待有节点的计时器超时变成candidate开始新一轮的投票</p>
+</li>
+</ul>
+<h1 id="三、ZAB"><a href="#三、ZAB" class="headerlink" title="三、ZAB"></a>三、ZAB</h1><p>ZAB（Zookeeper Atomic Broadcast）是分布式协调服务ZooKeeper，专门设计的一种支持崩溃恢复的一致性协议。</p>
+<p>基于该协议，ZooKeeper 实现了一种 主从模式的系统架构来保持集群中各个副本之间的数据一致性。</p>
+<h2 id="概念-1"><a href="#概念-1" class="headerlink" title="概念"></a>概念</h2><h3 id="节点角色"><a href="#节点角色" class="headerlink" title="节点角色"></a>节点角色</h3><ul>
+<li><p>Leader ：负责整个Zookeeper 集群工作机制中的核心，主要工作有以下两个：</p>
+<ul>
+<li>事务请求的唯一调度和处理者，保证集群事务处理的顺序性</li>
+<li>集群内部各服务器的调度者</li>
+</ul>
+</li>
+<li><p>Follower ：它是 Leader 的追随者，其主要工作如下：</p>
+<ul>
+<li>处理客户端的非实物请求，转发事务请求给 Leader 服务器</li>
+<li>参与事务请求 Proposal 的投票</li>
+<li>参与 Leader 选举投票</li>
+</ul>
+</li>
+<li><p>Observer ：是 zookeeper 自 3.3.0 开始引入的一个角色，它不参与事务请求 Proposal 的投票，也不参与 Leader 选举投票，只提供非事务的服务（查询），通常在不影响集群事务处理能力的前提下提升集群的非事务处理能力。</p>
+</li>
+</ul>
+<h3 id="节点状态"><a href="#节点状态" class="headerlink" title="节点状态"></a>节点状态</h3><ul>
+<li><strong>LOOKING</strong>：不确定Leader状态。该状态下的服务器认为当前集群中没有Leader，会发起Leader选举。</li>
+<li><strong>FOLLOWING</strong>： 跟随者状态。表明当前服务器角色是Follower，并且它知道Leader是谁。</li>
+<li><strong>LEADING</strong>：领导者状态。表明当前服务器角色是Leader，它会维护与Follower间的心跳。</li>
+<li><strong>OBSERVING</strong>： 观察者状态。表明当前服务器角色是Observer，与Folower唯一的不同在于不参与选举，也不参与集群写操作时的投票。</li>
+</ul>
+<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><h3 id="Leader写"><a href="#Leader写" class="headerlink" title="Leader写"></a>Leader写</h3><ul>
+<li><p>当leader收到事务请求后，将请求事务转化成事务proposal。</p>
+</li>
+<li><p>由于leader会为每个follower创建一个队列，按照FIFO的策略，将该事务proposal放入响应队列，保证事务的顺序性。</p>
+</li>
+<li><p>follower收到后会将其以事务的形式写入到本地日志中，并且向leader发送Ack信息确认。</p>
+</li>
+<li><p>当有一半以上的follower返回Ack信息时，leader会提交该提案并且向其它节点（Follower 、Observer ）发送commit信息。</p>
+</li>
+</ul>
+<blockquote>
+<p>leader自己的ack也被计算、不统计Observer的ack、未commit的数据对客户端不可见</p>
+</blockquote>
+<p>整个过程类似于两阶段提交，但却有所不同，只需半数以上follower成功即可提交。</p>
+<h3 id="Follower-Observer写"><a href="#Follower-Observer写" class="headerlink" title="Follower/Observer写"></a>Follower/Observer写</h3><ul>
+<li>Follower/Observer均可接受写请求，但是不直接处理，而是将写请求转发给Leader处理</li>
+<li>其余流程与Leader写一致</li>
+</ul>
+<h3 id="读操作"><a href="#读操作" class="headerlink" title="读操作"></a>读操作</h3><p>Leader/Follower/Observer都可直接处理读请求，从本地内存中读取数据并返回给客户端即可。</p>
+<h2 id="选举"><a href="#选举" class="headerlink" title="选举"></a>选举</h2><h3 id="ZXID"><a href="#ZXID" class="headerlink" title="ZXID"></a>ZXID</h3><p>一个全局有序的 64 位的数字</p>
+<ul>
+<li>高32位，存储epoch，代表选举周期，每次选举都会取出高32位+1，低32位置零</li>
+<li>低32位，事务计数器，每个事务请求会导致其+1，保证全局递增</li>
+</ul>
+<p>每当选举一个新leader时，都会产生一个新的epoch。</p>
+<p>使用新epoch的作用是，防止旧leader网络恢复等情况，重新连上集群，向其他的follower发送请求，follower对比epoch发现当前epoch大于旧leader的epoch，忽略这个请求。</p>
+<h3 id="myid"><a href="#myid" class="headerlink" title="myid"></a>myid</h3><p>每个ZooKeeper服务器，都需要在数据文件夹下创建一个名为myid的文件，该文件包含整个ZooKeeper集群唯一的ID（整数），作为该节点在集群中的标识</p>
+<blockquote>
+<p>1</p>
+</blockquote>
+<p>zoo.cfg配置文件中，<code>server.x</code>的<code>x</code>对应的就是上面myid文件中的1</p>
+<blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#zoo.cfg配置文件</span><br><span class="line">server.1&#x3D;192.168.142.121:2888:3888</span><br><span class="line">server.2&#x3D;192.168.142.122:2888:3888</span><br><span class="line">server.3&#x3D;192.168.142.123:2888:3888</span><br><span class="line">server.4&#x3D;192.168.142.124:2888:3888</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h3 id="流程-1"><a href="#流程-1" class="headerlink" title="流程"></a>流程</h3><ul>
+<li>每轮投票，每个节点维护自己的<strong>logicClock</strong>进行自增操作</li>
+<li>初始化投票，通过广播把票投给自己</li>
+<li>接收外部投票<ul>
+<li>外部投票的<strong>logicClock</strong>大于自身，说明自身落后于其他节点的选举轮次，将票箱数据更改为外部投票数据并广播出去</li>
+<li>外部投票的<strong>logicClock</strong>小于自身，说明自身选举轮次领先，忽略该外部投票</li>
+<li>相等，进行投票PK<ul>
+<li><strong>zxid</strong>大的优先，修改自己的数据广播出去</li>
+<li><strong>zxid</strong>若相同，比较<strong>myid</strong>，小的优先，修改自己的数据广播出去</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>统计选票，当过半的节点认可自己的投票则终止投票，否则继续接受其他节点投票</li>
+<li>更新节点状态，当过半的票投给自己，则修改状态为LEADING，否则修改为FOLLOWIN</li>
+<li>数据同步<ul>
+<li>follower将自己最大的zxid发送给新leader</li>
+<li>新leader找出follower的zxid与自己zxid之间commit的数据同步给follower</li>
+</ul>
+</li>
+<li>数据同步完毕后通知follower可以对外提供服务</li>
+</ul>
+<h1 id="四、Gossip"><a href="#四、Gossip" class="headerlink" title="四、Gossip"></a>四、Gossip</h1><p>一个节点想要分享一些信息给网络中的其他的一些节点。于是，它周期性的随机选择一些节点，并把信息传递给这些节点。这些收到信息的节点接下来会做同样的事情，即把这些信息传递给其他一些随机选择的节点。</p>
+<p>相比于Paxos、Raft、Zab等强一致性协议，Gossip可能会出现一段时间的不一致性，但会达到最终一致性。</p>
+<h2 id="流程-2"><a href="#流程-2" class="headerlink" title="流程"></a>流程</h2><ul>
+<li>固定周期，随机选择与它相连的N个节点传播消息</li>
+<li>节点收到消息后，会在下一个周期选择除给它发消息外的其他相连节点传播消息。尽管需要一定时间，但是最终所有节点都拥有相同的消息</li>
+</ul>
+<h1 id="五、Distro"><a href="#五、Distro" class="headerlink" title="五、Distro"></a>五、Distro</h1><ul>
+<li>nacos每个节点负责部分的写请求</li>
+<li>每个节点会把自己负责的新增数据同步给其他节点</li>
+<li>每个节点定时发送自己负责数据的校验值到其他节点来保持数据一致性</li>
+<li>每个节点独立处理读请求</li>
+<li>新加入的Distro节点会进行全量数据拉取（轮询所有节点发送请求拉取他们各自负责的数据）</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/paxos/" rel="tag"># paxos</a>
+              <a href="/tags/raft/" rel="tag"># raft</a>
+              <a href="/tags/zab/" rel="tag"># zab</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/02/07/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%8E%A8%E9%80%81%E6%8A%80%E6%9C%AF/" rel="prev" title="服务端推送">
+      <i class="fa fa-chevron-left"></i> 服务端推送
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、paxos"><span class="nav-text">一、paxos</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拜占庭问题"><span class="nav-text">拜占庭问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第一阶段"><span class="nav-text">第一阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二阶段"><span class="nav-text">第二阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题"><span class="nav-text">问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、Raft"><span class="nav-text">二、Raft</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#日志复制"><span class="nav-text">日志复制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选举-Leader-Election"><span class="nav-text">选举-Leader Election</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、ZAB"><span class="nav-text">三、ZAB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念-1"><span class="nav-text">概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#节点角色"><span class="nav-text">节点角色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#节点状态"><span class="nav-text">节点状态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流程"><span class="nav-text">流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Leader写"><span class="nav-text">Leader写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Follower-Observer写"><span class="nav-text">Follower&#x2F;Observer写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#读操作"><span class="nav-text">读操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选举"><span class="nav-text">选举</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ZXID"><span class="nav-text">ZXID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#myid"><span class="nav-text">myid</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程-1"><span class="nav-text">流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、Gossip"><span class="nav-text">四、Gossip</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程-2"><span class="nav-text">流程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、Distro"><span class="nav-text">五、Distro</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">83</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
