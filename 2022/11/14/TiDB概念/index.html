@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="简介TiDB 是PingCAP公司设计、研发的开源分布式关系型数据库，是一款同时支持在线事务处理与在线分析处理 (Hybrid Transactional and Analytical Processing, HTAP) 的融合型分布式数据库产品，具备水平扩容或者缩容、实时 HTAP、云原生的分布式数据库、兼容 MySQL 5.7 协议和 MySQL 生态等重要特性。TiDB 适合高可用、强一致要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TiDB概念">
+<meta property="og:url" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="简介TiDB 是PingCAP公司设计、研发的开源分布式关系型数据库，是一款同时支持在线事务处理与在线分析处理 (Hybrid Transactional and Analytical Processing, HTAP) 的融合型分布式数据库产品，具备水平扩容或者缩容、实时 HTAP、云原生的分布式数据库、兼容 MySQL 5.7 协议和 MySQL 生态等重要特性。TiDB 适合高可用、强一致要">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/TiDB%E6%A6%82%E5%BF%B5.assets/tidb-architecture-v3.1-1668435434326.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/%E5%9B%BE%E7%89%8719.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/%E5%9B%BE%E7%89%8723.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/ac18c4b8106d41a79ceab42bf87ffe64.gif">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/tidb-storage-3.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/%E5%9B%BE%E7%89%8721.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/tidb-computing-dist-sql-flow.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/tidb-computing-tidb-sql-layer.png">
+<meta property="article:published_time" content="2022-11-14T14:15:46.255Z">
+<meta property="article:modified_time" content="2022-11-14T14:17:16.763Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="nosql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/TiDB%E6%A6%82%E5%BF%B5.assets/tidb-architecture-v3.1-1668435434326.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>TiDB概念 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TiDB概念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-14 22:15:46 / 修改时间：22:17:16" itemprop="dateCreated datePublished" datetime="2022-11-14T22:15:46+08:00">2022-11-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TiDB%EF%BC%8C%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">TiDB，中间件</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>TiDB 是PingCAP公司设计、研发的开源分布式关系型数据库，是一款同时支持在线事务处理与在线分析处理 (Hybrid Transactional and Analytical Processing, HTAP) 的融合型分布式数据库产品，具备水平扩容或者缩容、实时 HTAP、云原生的分布式数据库、兼容 MySQL 5.7 协议和 MySQL 生态等重要特性。TiDB 适合高可用、强一致要求较高、数据规模较大等各种应用场景。</p>
+<blockquote>
+<p><a href="https://docs.pingcap.com/zh/tidb" target="_blank" rel="noopener">点击跳转官方文档</a></p>
+</blockquote>
+<h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p><img src="TiDB%E6%A6%82%E5%BF%B5.assets/tidb-architecture-v3.1-1668435434326.png" alt="tidb-architecture-v3.1"><a id="more"></a></p>
+<ul>
+<li><a href="https://docs.pingcap.com/zh/tidb/stable/tidb-computing" target="_blank" rel="noopener">TiDB Server</a><ul>
+<li>SQL 层，对外暴露 MySQL 协议的连接 endpoint，负责接受客户端的连接，执行 SQL 解析和优化，最终生成分布式执行计划。</li>
+<li>TiDB 层本身是无状态的，实践中可以启动多个 TiDB 实例，通过负载均衡组件（如 LVS、HAProxy 或 F5）对外提供统一的接入地址，客户端的连接可以均匀地分摊在多个 TiDB 实例上以达到负载均衡的效果。</li>
+<li>TiDB Server 本身并不存储数据，只是解析 SQL，将实际的数据读取请求转发给底层的存储节点 TiKV（或 TiFlash）。</li>
+</ul>
+</li>
+<li><a href="https://docs.pingcap.com/zh/tidb/stable/tidb-scheduling" target="_blank" rel="noopener">PD (Placement Driver) Server</a><ul>
+<li>整个 TiDB 集群的元信息管理模块，负责存储每个 TiKV 节点实时的数据分布情况和集群的整体拓扑结构，提供 TiDB Dashboard 管控界面，并为分布式事务分配事务 ID。</li>
+<li>PD 不仅存储元信息，同时还会根据 TiKV 节点实时上报的数据分布状态，下发数据调度命令给具体的 TiKV 节点，可以说是整个集群的“大脑”。</li>
+<li>此外，PD 本身也是由至少 3 个节点构成，拥有高可用的能力。建议部署奇数个 PD 节点。</li>
+</ul>
+</li>
+<li>存储节点<ul>
+<li><a href="https://docs.pingcap.com/zh/tidb/stable/tidb-storage" target="_blank" rel="noopener">TiKV Server</a><ul>
+<li>负责存储数据，从外部看 TiKV 是一个分布式的提供事务的 Key-Value 存储引擎。</li>
+<li>存储数据的基本单位是 Region，每个 Region 负责存储一个 Key Range（从 StartKey 到 EndKey 的左闭右开区间）的数据，每个 TiKV 节点会负责多个 Region。</li>
+<li>TiKV 的 API 在 KV 键值对层面提供对分布式事务的原生支持，默认提供了 SI (Snapshot Isolation) 的隔离级别，这也是 TiDB 在 SQL 层面支持分布式事务的核心。TiDB 的 SQL 层做完 SQL 解析后，会将 SQL 的执行计划转换为对 TiKV API 的实际调用。所以，数据都存储在 TiKV 中。另外，TiKV 中的数据都会自动维护多副本（默认为三副本），天然支持高可用和自动故障转移。</li>
+</ul>
+</li>
+<li><a href="https://docs.pingcap.com/zh/tidb/stable/tiflash-overview" target="_blank" rel="noopener">TiFlash</a><ul>
+<li>TiFlash 是一类特殊的存储节点。和普通 TiKV 节点不一样的是，在 TiFlash 内部，数据是以列式的形式进行存储，主要的功能是为分析型的场景加速。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="tidb.assets/%E5%9B%BE%E7%89%8719.png" alt="图片19"></p>
+<h1 id="TiKV-Server-存储"><a href="#TiKV-Server-存储" class="headerlink" title="TiKV Server-存储"></a>TiKV Server-存储</h1><p>TiKV负责行数据存储，使用key-value的存储模型。</p>
+<p>基于Facebook开源的RocksDB，进行单机KV存储，因此可以将TiKV看成一个巨大且有序的KV Map。</p>
+<h2 id="Key-Value"><a href="#Key-Value" class="headerlink" title="Key-Value"></a>Key-Value</h2><p>TiDB 会为每个表分配一个表 ID，用 <code>TableID</code>表示。</p>
+<p>TiDB 会为表中每行数据分配一个行 ID，用 <code>RowID</code> 表示，如果某个表有整数型的主键，TiDB 会使用主键的值当做这一行数据的行 ID。</p>
+<p>每行数据按照以下结构编码成键值对：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Key:   tablePrefix&#123;TableID&#125;_recordPrefixSep&#123;RowID&#125;</span><br><span class="line">Value: [col1, col2, col3, col4]</span><br><span class="line"></span><br><span class="line">-- 主键和唯一索引</span><br><span class="line">Key:   tablePrefix&#123;tableID&#125;_indexPrefixSep&#123;indexID&#125;_indexedColumnsValue</span><br><span class="line">Value: RowID</span><br><span class="line"></span><br><span class="line">-- 非唯一的普通二级索引</span><br><span class="line">Key:   tablePrefix&#123;TableID&#125;_indexPrefixSep&#123;IndexID&#125;_indexedColumnsValue_&#123;RowID&#125;</span><br><span class="line">Value: null</span><br></pre></td></tr></table></figure>
+
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">-- 表结构</span><br><span class="line">CREATE TABLE User (</span><br><span class="line">    ID int,</span><br><span class="line">    Name varchar(20),</span><br><span class="line">    Role varchar(20),</span><br><span class="line">    Age int,</span><br><span class="line">    PRIMARY KEY (ID),</span><br><span class="line">    KEY idxAge (Age)</span><br><span class="line">);</span><br><span class="line">-- 数据</span><br><span class="line">1, &quot;TiDB&quot;, &quot;SQL Layer&quot;, 10</span><br><span class="line">2, &quot;TiKV&quot;, &quot;KV Engine&quot;, 20</span><br><span class="line">3, &quot;PD&quot;, &quot;Manager&quot;, 30</span><br><span class="line"></span><br><span class="line">-- 假设该表的 TableID 为 10，则其存储在 TiKV 上的表数据为：</span><br><span class="line">t10_r1 --&gt; [&quot;TiDB&quot;, &quot;SQL Layer&quot;, 10]</span><br><span class="line">t10_r2 --&gt; [&quot;TiKV&quot;, &quot;KV Engine&quot;, 20]</span><br><span class="line">t10_r3 --&gt; [&quot;PD&quot;, &quot;Manager&quot;, 30]</span><br><span class="line"></span><br><span class="line">-- 除了主键外，该表还有一个非唯一的普通二级索引 idxAge，假设这个索引的 IndexID 为 1，则其存储在 TiKV 上的索引数据为：</span><br><span class="line">t10_i1_10_1 --&gt; null</span><br><span class="line">t10_i1_20_2 --&gt; null</span><br><span class="line">t10_i1_30_3 --&gt; null</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Region"><a href="#Region" class="headerlink" title="Region"></a>Region</h2><p>为了实现水平扩展，将数据分散到多台机器上，TiKV使用range方式切分数据，将整个Key-Value空间分成很多段，每个段叫做一个region。</p>
+<img src="tidb.assets/图片23.png" alt="图片23" style="zoom:50%;" />
+
+<p>每个region默认不超过96MB，使用[startkey，endkey)这样左闭右开的区间来描述数据。</p>
+<p>TiKV会以region为单位，将数据分散到多个节点上，尽量保证每个节点上region数量差不多。PD负责将region均匀的调度到所有节点上，且维护region的路由信息，方便查询。</p>
+<img src="tidb.assets/ac18c4b8106d41a79ceab42bf87ffe64.gif" alt="ac18c4b8106d41a79ceab42bf87ffe64" style="zoom:50%;" />
+
+<p>以region为单位做raft数据复制和成员管理。</p>
+<p>一个region会有多个副本，多个replica组成一个raft group，其中一个replica作为这个raft group的leader，其他replica作为follower。</p>
+<img src="tidb.assets/tidb-storage-3.png" alt="tidb-storage-3" style="zoom:55%;" />
+
+
+
+<p>replica之间通过raft协议保持数据一致性，默认所有的复写操作都在leader上进行，写操作由leader复制给follower。</p>
+<img src="tidb.assets/图片21.png" alt="图片21" style="zoom: 67%;" />
+
+
+
+<p>以 Region 为单位做数据的分散和复制，TiKV 就成为了一个分布式的具备一定容灾能力的 KeyValue 系统，不用再担心数据存不下，或者是磁盘故障丢失数据的问题。</p>
+<h2 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h2><p>TiKV 的 MVCC 实现是通过在 Key 后面添加版本号来实现。</p>
+<p>没有MVCC的KV数据如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Key1 -&gt; Value</span><br><span class="line">Key2 -&gt; Value</span><br><span class="line">……</span><br><span class="line">KeyN -&gt; Value</span><br></pre></td></tr></table></figure>
+
+<p>有MVCC：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Key1_Version3 -&gt; Value</span><br><span class="line">Key1_Version2 -&gt; Value</span><br><span class="line">Key1_Version1 -&gt; Value</span><br><span class="line">……</span><br><span class="line">Key2_Version4 -&gt; Value</span><br><span class="line">Key2_Version3 -&gt; Value</span><br><span class="line">Key2_Version2 -&gt; Value</span><br><span class="line">Key2_Version1 -&gt; Value</span><br><span class="line">……</span><br><span class="line">KeyN_Version2 -&gt; Value</span><br><span class="line">KeyN_Version1 -&gt; Value</span><br><span class="line">……</span><br></pre></td></tr></table></figure>
+
+<p>对于同一个 Key 的多个版本，版本号较大的会被放在前面，版本号小的会被放在后面。</p>
+<p>这样当用户通过一个 Key + Version 来获取 Value 的时候，可以通过 Key 和 Version 构造出 MVCC 的 Key，也就是 Key_Version。</p>
+<p>也可以直接通过 RocksDB 的 SeekPrefix(Key_Version) API，定位到第一个大于等于这个 Key_Version 的位置。</p>
+<h1 id="TiDB-Server-SQL层"><a href="#TiDB-Server-SQL层" class="headerlink" title="TiDB Server-SQL层"></a>TiDB Server-SQL层</h1><p>TiDB 的 SQL 层，即 TiDB Server，负责将 SQL 翻译成 Key-Value 操作，将其转发给共用的分布式 Key-Value 存储层 TiKV，然后组装 TiKV 返回的结果，最终将查询结果返回给客户端。</p>
+<p>这一层的节点都是无状态的，节点本身并不存储数据，节点之间完全对等。</p>
+<h2 id="分布式-SQL-运算"><a href="#分布式-SQL-运算" class="headerlink" title="分布式 SQL 运算"></a>分布式 SQL 运算</h2><p>TiDB Server通过RPC从TiKV读取数据，因此为了减少不必要的RPC开销，会将条件带入TiKV查询计算，各个TiKV节点返回运算后的数据，统一处理，提升性能。</p>
+<img src="tidb.assets/tidb-computing-dist-sql-flow.png" alt="tidb-computing-dist-sql-flow" style="zoom:67%;" />
+
+<p>用户的 SQL 请求会直接或者通过 <code>Load Balancer</code> 发送到 TiDB Server，TiDB Server 会解析 <code>MySQL Protocol Packet</code>，获取请求内容，对 SQL 进行语法解析和语义分析，制定和优化查询计划，执行查询计划并获取和处理数据。数据全部存储在 TiKV 集群中，所以在这个过程中 TiDB Server 需要和 TiKV 交互，获取数据。最后 TiDB Server 需要将查询结果返回给用户。</p>
+<p><img src="tidb.assets/tidb-computing-tidb-sql-layer.png" alt="tidb-computing-tidb-sql-layer"></p>
+<h1 id="PD-调度"><a href="#PD-调度" class="headerlink" title="PD-调度"></a>PD-调度</h1><p>PD(Placement Driver) 是 TiDB 集群的管理模块，同时也负责集群数据的实时调度。</p>
+<h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><p>调度依赖于整个集群信息的收集，简单来说，调度需要知道每个 TiKV 节点的状态以及每个 Region 的状态。TiKV 集群会向 PD 汇报两类消息，TiKV 节点信息和 Region 信息。</p>
+<ul>
+<li>TiKV 节点信息：TiKV 节点 (Store) 与 PD 之间存在心跳包，一方面 PD 通过心跳包检测每个 Store 是否存活，以及是否有新加入的 Store；另一方面，心跳包中也会携带这个 Store 的状态信息<ul>
+<li>总磁盘容量</li>
+<li>可用磁盘容量</li>
+<li>承载的 Region 数量</li>
+<li>数据写入/读取速度</li>
+<li>发送/接受的 Snapshot 数量（副本之间可能会通过 Snapshot 同步数据）</li>
+<li>是否过载</li>
+<li>labels 标签信息</li>
+</ul>
+</li>
+<li>Region 信息：每个 Raft Group 的 Leader 和 PD 之间存在心跳包，用于汇报这个 Region 的状态<ul>
+<li>Leader 的位置</li>
+<li>Followers 的位置</li>
+<li>掉线副本的个数</li>
+<li>数据写入/读取的速度</li>
+</ul>
+</li>
+</ul>
+<p>PD 不断的通过这两类心跳消息收集整个集群的信息，再以这些信息作为决策的依据。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+              <a href="/tags/nosql/" rel="tag"># nosql</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/02/08/%E5%85%B1%E8%AF%86%E6%80%A7%E7%AE%97%E6%B3%95/" rel="prev" title="共识性算法">
+      <i class="fa fa-chevron-left"></i> 共识性算法
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架构"><span class="nav-text">架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TiKV-Server-存储"><span class="nav-text">TiKV Server-存储</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Key-Value"><span class="nav-text">Key-Value</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Region"><span class="nav-text">Region</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVCC"><span class="nav-text">MVCC</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TiDB-Server-SQL层"><span class="nav-text">TiDB Server-SQL层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式-SQL-运算"><span class="nav-text">分布式 SQL 运算</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PD-调度"><span class="nav-text">PD-调度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#信息收集"><span class="nav-text">信息收集</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
