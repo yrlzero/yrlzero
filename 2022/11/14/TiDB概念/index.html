@@ -29,15 +29,15 @@
 <meta property="og:description" content="简介TiDB 是PingCAP公司设计、研发的开源分布式关系型数据库，是一款同时支持在线事务处理与在线分析处理 (Hybrid Transactional and Analytical Processing, HTAP) 的融合型分布式数据库产品，具备水平扩容或者缩容、实时 HTAP、云原生的分布式数据库、兼容 MySQL 5.7 协议和 MySQL 生态等重要特性。TiDB 适合高可用、强一致要">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/images/TiDB%E6%A6%82%E5%BF%B5.assets/tidb-architecture-v3.1-1668435434326.png">
-<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/%E5%9B%BE%E7%89%8719.png">
-<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/%E5%9B%BE%E7%89%8723.png">
-<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/ac18c4b8106d41a79ceab42bf87ffe64.gif">
-<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/tidb-storage-3.png">
-<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/%E5%9B%BE%E7%89%8721.png">
-<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/tidb-computing-dist-sql-flow.png">
-<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/tidb.assets/tidb-computing-tidb-sql-layer.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/images/TiDB%E6%A6%82%E5%BF%B5.assets/%E5%9B%BE%E7%89%8719.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/images/TiDB%E6%A6%82%E5%BF%B5.assets/%E5%9B%BE%E7%89%8723.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/images/TiDB%E6%A6%82%E5%BF%B5.assets/ac18c4b8106d41a79ceab42bf87ffe64.gif">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/images/TiDB%E6%A6%82%E5%BF%B5.assets/tidb-storage-3.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/images/TiDB%E6%A6%82%E5%BF%B5.assets/%E5%9B%BE%E7%89%8721.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/images/TiDB%E6%A6%82%E5%BF%B5.assets/tidb-computing-dist-sql-flow.png">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/14/TiDB%E6%A6%82%E5%BF%B5/images/TiDB%E6%A6%82%E5%BF%B5.assets/tidb-computing-tidb-sql-layer.png">
 <meta property="article:published_time" content="2022-11-14T14:15:46.255Z">
-<meta property="article:modified_time" content="2022-11-14T14:55:01.915Z">
+<meta property="article:modified_time" content="2022-11-14T15:13:10.558Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="nosql">
 <meta property="article:tag" content="mysql">
@@ -220,7 +220,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-11-14 22:15:46 / 修改时间：22:55:01" itemprop="dateCreated datePublished" datetime="2022-11-14T22:15:46+08:00">2022-11-14</time>
+              <time title="创建时间：2022-11-14 22:15:46 / 修改时间：23:13:10" itemprop="dateCreated datePublished" datetime="2022-11-14T22:15:46+08:00">2022-11-14</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -279,7 +279,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="tidb.assets/%E5%9B%BE%E7%89%8719.png" alt="图片19"></p>
+<p><img src="images/TiDB%E6%A6%82%E5%BF%B5.assets/%E5%9B%BE%E7%89%8719.png" alt="图片19"></p>
 <h1 id="TiKV-Server-存储"><a href="#TiKV-Server-存储" class="headerlink" title="TiKV Server-存储"></a>TiKV Server-存储</h1><p>TiKV负责行数据存储，使用key-value的存储模型。</p>
 <p>基于Facebook开源的RocksDB，进行单机KV存储，因此可以将TiKV看成一个巨大且有序的KV Map。</p>
 <h2 id="Key-Value"><a href="#Key-Value" class="headerlink" title="Key-Value"></a>Key-Value</h2><p>TiDB 会为每个表分配一个表 ID，用 <code>TableID</code>表示。</p>
@@ -293,20 +293,20 @@
 
 
 <h2 id="Region"><a href="#Region" class="headerlink" title="Region"></a>Region</h2><p>为了实现水平扩展，将数据分散到多台机器上，TiKV使用range方式切分数据，将整个Key-Value空间分成很多段，每个段叫做一个region。</p>
-<img src="tidb.assets/图片23.png" alt="图片23" style="zoom:50%;" />
+<img src="images/TiDB概念.assets/图片23.png" alt="图片23" style="zoom:50%;" />
 
 <p>每个region默认不超过96MB，使用[startkey，endkey)这样左闭右开的区间来描述数据。</p>
 <p>TiKV会以region为单位，将数据分散到多个节点上，尽量保证每个节点上region数量差不多。PD负责将region均匀的调度到所有节点上，且维护region的路由信息，方便查询。</p>
-<img src="tidb.assets/ac18c4b8106d41a79ceab42bf87ffe64.gif" alt="ac18c4b8106d41a79ceab42bf87ffe64" style="zoom:50%;" />
+<img src="images/TiDB概念.assets/ac18c4b8106d41a79ceab42bf87ffe64.gif" alt="ac18c4b8106d41a79ceab42bf87ffe64" style="zoom:50%;" />
 
 <p>以region为单位做raft数据复制和成员管理。</p>
 <p>一个region会有多个副本，多个replica组成一个raft group，其中一个replica作为这个raft group的leader，其他replica作为follower。</p>
-<img src="tidb.assets/tidb-storage-3.png" alt="tidb-storage-3" style="zoom:55%;" />
+<img src="images/TiDB概念.assets/tidb-storage-3.png" alt="tidb-storage-3" style="zoom:55%;" />
 
 
 
 <p>replica之间通过raft协议保持数据一致性，默认所有的复写操作都在leader上进行，写操作由leader复制给follower。</p>
-<img src="tidb.assets/图片21.png" alt="图片21" style="zoom: 67%;" />
+<img src="images/TiDB概念.assets/图片21.png" alt="图片21" style="zoom: 67%;" />
 
 
 
@@ -324,10 +324,10 @@
 <h1 id="TiDB-Server-SQL层"><a href="#TiDB-Server-SQL层" class="headerlink" title="TiDB Server-SQL层"></a>TiDB Server-SQL层</h1><p>TiDB 的 SQL 层，即 TiDB Server，负责将 SQL 翻译成 Key-Value 操作，将其转发给共用的分布式 Key-Value 存储层 TiKV，然后组装 TiKV 返回的结果，最终将查询结果返回给客户端。</p>
 <p>这一层的节点都是无状态的，节点本身并不存储数据，节点之间完全对等。</p>
 <h2 id="分布式-SQL-运算"><a href="#分布式-SQL-运算" class="headerlink" title="分布式 SQL 运算"></a>分布式 SQL 运算</h2><p>TiDB Server通过RPC从TiKV读取数据，因此为了减少不必要的RPC开销，会将条件带入TiKV查询计算，各个TiKV节点返回运算后的数据，统一处理，提升性能。</p>
-<img src="tidb.assets/tidb-computing-dist-sql-flow.png" alt="tidb-computing-dist-sql-flow" style="zoom:67%;" />
+<img src="images/TiDB概念.assets/tidb-computing-dist-sql-flow.png" alt="tidb-computing-dist-sql-flow" style="zoom:67%;" />
 
 <p>用户的 SQL 请求会直接或者通过 <code>Load Balancer</code> 发送到 TiDB Server，TiDB Server 会解析 <code>MySQL Protocol Packet</code>，获取请求内容，对 SQL 进行语法解析和语义分析，制定和优化查询计划，执行查询计划并获取和处理数据。数据全部存储在 TiKV 集群中，所以在这个过程中 TiDB Server 需要和 TiKV 交互，获取数据。最后 TiDB Server 需要将查询结果返回给用户。</p>
-<p><img src="tidb.assets/tidb-computing-tidb-sql-layer.png" alt="tidb-computing-tidb-sql-layer"></p>
+<p><img src="images/TiDB%E6%A6%82%E5%BF%B5.assets/tidb-computing-tidb-sql-layer.png" alt="tidb-computing-tidb-sql-layer"></p>
 <h1 id="PD-调度"><a href="#PD-调度" class="headerlink" title="PD-调度"></a>PD-调度</h1><p>PD(Placement Driver) 是 TiDB 集群的管理模块，同时也负责集群数据的实时调度。</p>
 <h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><p>调度依赖于整个集群信息的收集，简单来说，调度需要知道每个 TiKV 节点的状态以及每个 Region 的状态。TiKV 集群会向 PD 汇报两类消息，TiKV 节点信息和 Region 信息。</p>
 <ul>
