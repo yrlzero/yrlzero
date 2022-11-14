@@ -383,7 +383,9 @@
 <blockquote>
 <p><a href="https://docs.pingcap.com/zh/tidb" target="_blank" rel="noopener">点击跳转官方文档</a></p>
 </blockquote>
-<h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p><img src="/images/TiDB/tidb-architecture-v3.1-1668435434326.png" alt="tidb-architecture-v3.1"><a id="more"></a></p>
+<h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p><img src="/images/TiDB/tidb-architecture-v3.1.png" alt="tidb-architecture-v3.1"></p>
+<a id="more"></a>
+
 <ul>
 <li><a href="https://docs.pingcap.com/zh/tidb/stable/tidb-computing" target="_blank" rel="noopener">TiDB Server</a><ul>
 <li>SQL 层，对外暴露 MySQL 协议的连接 endpoint，负责接受客户端的连接，执行 SQL 解析和优化，最终生成分布式执行计划。</li>
