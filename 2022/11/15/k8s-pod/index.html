@@ -31,7 +31,7 @@
 <meta property="og:image" content="http://yrlzero.github.io/images/k8s-pod/%E6%88%AA%E5%9B%BE16.png">
 <meta property="og:image" content="http://yrlzero.github.io/images/k8s-pod/%E6%88%AA%E5%9B%BE17.png">
 <meta property="article:published_time" content="2022-11-15T07:16:47.905Z">
-<meta property="article:modified_time" content="2022-11-15T08:35:33.373Z">
+<meta property="article:modified_time" content="2022-11-15T08:44:32.294Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="K8s">
 <meta name="twitter:card" content="summary">
@@ -212,7 +212,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-11-15 15:16:47 / 修改时间：16:35:33" itemprop="dateCreated datePublished" datetime="2022-11-15T15:16:47+08:00">2022-11-15</time>
+              <time title="创建时间：2022-11-15 15:16:47 / 修改时间：16:44:32" itemprop="dateCreated datePublished" datetime="2022-11-15T15:16:47+08:00">2022-11-15</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -526,6 +526,10 @@
 <td>指示容器中的应用是否已经启动。如果提供了启动探针，则所有其他探针都会被 禁用，直到此探针成功为止。如果启动探测失败，kubelet 将杀死容器，而容器依其 <a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy" target="_blank" rel="noopener">重启策略</a>进行重启。 如果容器没有提供启动探测，则默认状态为 Success。</td>
 </tr>
 </tbody></table>
+<blockquote>
+<p>liveness主要用来确定何时重启容器。liveness探测的结果会存储在livenessManager中。<br>kubelet在syncPod时，发现该容器的liveness探针检测失败时，会将其加入待启动的容器列表中，在之后的操作中会重新创建该容器。</p>
+<p>readiness主要来确定容器是否已经就绪。只有当Pod中的容器都处于就绪状态，也就是pod的condition里的Ready为true时，kubelet才会认定该Pod处于就绪状态。而pod是否处于就绪状态的作用是控制哪些Pod应该作为service的后端。如果Pod处于非就绪状态，那么它们将会被从service的endpoint中移除。</p>
+</blockquote>
 <h3 id="5-2-2-Probe探测方式"><a href="#5-2-2-Probe探测方式" class="headerlink" title="5.2.2 Probe探测方式"></a><strong>5.2.2 Probe探测方式</strong></h3><table>
 <thead>
 <tr>
