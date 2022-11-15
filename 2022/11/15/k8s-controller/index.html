@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、pod控制器controller1.1 Controller作用及分类controller用于控制pod 参考: https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8s-controller">
+<meta property="og:url" content="http://yrlzero.github.io/2022/11/15/k8s-controller/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="一、pod控制器controller1.1 Controller作用及分类controller用于控制pod 参考: https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/2022/11/15/k8s-controller/images/k8s-controller/%E6%88%AA%E5%9B%BE18.png">
+<meta property="article:published_time" content="2022-11-15T14:32:13.607Z">
+<meta property="article:modified_time" content="2022-11-15T14:33:17.704Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="K8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/2022/11/15/k8s-controller/images/k8s-controller/%E6%88%AA%E5%9B%BE18.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/11/15/k8s-controller/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>K8s-controller | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/15/k8s-controller/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          K8s-controller
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-15 22:32:13 / 修改时间：22:33:17" itemprop="dateCreated datePublished" datetime="2022-11-15T22:32:13+08:00">2022-11-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/" itemprop="url" rel="index"><span itemprop="name">devops</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/K8s/" itemprop="url" rel="index"><span itemprop="name">K8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、pod控制器controller"><a href="#一、pod控制器controller" class="headerlink" title="一、pod控制器controller"></a>一、pod控制器controller</h1><h2 id="1-1-Controller作用及分类"><a href="#1-1-Controller作用及分类" class="headerlink" title="1.1 Controller作用及分类"></a>1.1 Controller作用及分类</h2><p>controller用于控制pod</p>
+<p>参考: <a href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/concepts/workloads/controllers/</a></p>
+<p><img src="images/k8s-controller/%E6%88%AA%E5%9B%BE18.png" alt="截图18"></p>
+<a id="more"></a>
+
+<p>控制器主要分为:</p>
+<ul>
+<li>Deployments   部署无状态应用，控制pod升级,回退</li>
+<li>ReplicaSet       副本集,控制pod扩容,裁减</li>
+<li>ReplicationController(相当于ReplicaSet的老版本,现在建议使用Deployments加ReplicaSet替代RC)</li>
+<li>StatefulSets     部署有状态应用，结合Service、存储等实现对有状态应用部署</li>
+<li>DaemonSet     守护进程集，运行在所有集群节点(包括master), 比如使用filebeat,node_exporter</li>
+<li>Jobs                  一次性</li>
+<li>Cronjob            周期性</li>
+</ul>
+<h2 id="1-2-Deployment"><a href="#1-2-Deployment" class="headerlink" title="1.2 Deployment"></a>1.2 Deployment</h2><h3 id="1-2-1-Replicaset控制器的功能"><a href="#1-2-1-Replicaset控制器的功能" class="headerlink" title="1.2.1 Replicaset控制器的功能"></a>1.2.1 Replicaset控制器的功能</h3><ul>
+<li>支持新的基于集合的selector(以前的rc里没有这种功能)</li>
+<li>通过改变Pod副本数量实现Pod的扩容和缩容</li>
+</ul>
+<h3 id="1-2-2-Deployment控制器的功能"><a href="#1-2-2-Deployment控制器的功能" class="headerlink" title="1.2.2 Deployment控制器的功能"></a>1.2.2 Deployment控制器的功能</h3><ul>
+<li>Deployment集成了上线部署、滚动升级、创建副本、回滚等功能</li>
+<li>Deployment里包含并使用了ReplicaSet</li>
+</ul>
+<h3 id="1-2-3-Deployment用于部署无状态应用"><a href="#1-2-3-Deployment用于部署无状态应用" class="headerlink" title="1.2.3 Deployment用于部署无状态应用"></a>1.2.3 Deployment用于部署无状态应用</h3><p>无状态应用的特点:</p>
+<ul>
+<li>所有pod无差别</li>
+<li>所有pod中容器运行同一个image</li>
+<li>所有pod可以运行在集群中任意node上</li>
+<li>所有pod无启动顺序先后之分</li>
+<li>随意pod数量扩容或缩容</li>
+<li>例如简单运行一个静态web程序</li>
+</ul>
+<h3 id="1-2-4-创建deployment类型应用"><a href="#1-2-4-创建deployment类型应用" class="headerlink" title="1.2.4 创建deployment类型应用"></a>1.2.4 创建deployment类型应用</h3><p> 准备YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim deployment-nginx.yml</span></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: deploy-nginx			<span class="comment"># deployment名</span></span><br><span class="line">spec:				</span><br><span class="line">  replicas: 1					<span class="comment"># 副本集,deployment里使用了replicaset</span></span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx				<span class="comment"># 匹配的pod标签,表示deployment和rs控制器控制带有此标签的pod</span></span><br><span class="line">  template:					    <span class="comment"># 代表pod的配置模板</span></span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx				<span class="comment"># pod的标签</span></span><br><span class="line">    spec:</span><br><span class="line">      containers:				<span class="comment"># 以下为pod里的容器定义</span></span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:1.15-alpine</span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 80</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件创建deployment</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f deployment-nginx.yml</span></span><br><span class="line">deployment.apps/deploy-nginx created</span><br></pre></td></tr></table></figure>
+
+<p>查看验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get deployment				# deployment可简写成depoly</span></span><br><span class="line">NAME           READY   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">deploy-nginx   1/1     1            1           19s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE</span><br><span class="line">deploy-nginx-6c9764bb69-pbc2h   1/1     Running   0          75s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get replicasets				# replicasets可简写成rs</span></span><br><span class="line">NAME                      DESIRED   CURRENT   READY   AGE</span><br><span class="line">deploy-nginx-6c9764bb69   1         1         1       2m6s</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-5-访问deployment"><a href="#1-2-5-访问deployment" class="headerlink" title="1.2.5 访问deployment"></a>1.2.5 访问deployment</h3><p>查看pod的IP地址</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -o wide</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE   IP               NODE          NOMINATED NODE   READINESS GATES</span><br><span class="line">deploy-nginx-6d9d558bb6-88nr8   1/1     Running   0          39s   10.244.159.155   k8s-master1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#pod在k8s-master1节点,pod的IP为10.244.159.155</span></span><br></pre></td></tr></table></figure>
+
+<p>查看所有集群节点的网卡，可以看到所有集群节点的IP都为<code>10.244.0.0/16</code>这个大网段内的子网</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># ifconfig tunl0 |head -2</span></span><br><span class="line">tunl0: flags=193&lt;UP,RUNNING,NOARP&gt;  mtu 1480</span><br><span class="line">        inet 10.244.159.128  netmask 255.255.255.255</span><br><span class="line"></span><br><span class="line">[root@k8s-master3 ~]<span class="comment"># ifconfig tunl0 |head -2</span></span><br><span class="line">tunl0: flags=193&lt;UP,RUNNING,NOARP&gt;  mtu 1480</span><br><span class="line">        inet 10.244.135.192  netmask 255.255.255.255</span><br><span class="line"></span><br><span class="line">[root@k8s-worker1 ~]<span class="comment"># ifconfig tunl0 |head -2</span></span><br><span class="line">tunl0: flags=193&lt;UP,RUNNING,NOARP&gt;  mtu 1480</span><br><span class="line">        inet 10.244.194.64  netmask 255.255.255.255</span><br></pre></td></tr></table></figure>
+
+<p>在任意集群节点上都可以访问此deploy里pod</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl 10.244.159.155</span><br><span class="line"></span><br><span class="line"><span class="comment">#结果是任意集群节点都可以访问这个POD,但集群外部是不能访问的</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-6-删除deployment中的pod"><a href="#1-2-6-删除deployment中的pod" class="headerlink" title="1.2.6 删除deployment中的pod"></a>1.2.6 删除deployment中的pod</h3><p>删除pod（<strong>注意: 是删除deployment中的pod</strong>）</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete pod deploy-nginx-6c9764bb69-pbc2h</span></span><br><span class="line">pod <span class="string">"deploy-nginx-6c9764bb69-pbc2h"</span> deleted</span><br></pre></td></tr></table></figure>
+
+<p>再次查看,发现又重新启动了一个pod(<strong>节点由k8s-master1转为k8s-worker1 了,IP地址也变化了</strong>)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods  -o wide</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE   IP              NODE          NOMINATED NODE   READINESS GATES</span><br><span class="line">deploy-nginx-6d9d558bb6-f2t6r   1/1     Running   0          28s   10.244.194.94   k8s-worker1   &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说<strong>==pod的IP不是固定的==</strong>,比如把整个集群关闭再启动,pod也会自动启动,但是<strong>IP地址也会变化</strong></p>
+<p><strong>既然IP地址不是固定的,所以需要一个固定的访问endpoint给用户,那么这种方式就是service.</strong></p>
+<h3 id="1-2-7-pod版本升级"><a href="#1-2-7-pod版本升级" class="headerlink" title="1.2.7 pod版本升级"></a>1.2.7 pod版本升级</h3><p>查看帮助</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl set image -h</span></span><br></pre></td></tr></table></figure>
+
+<p>升级前验证nginx版本</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pods deploy-nginx-6d9d558bb6-f2t6r | grep Image:</span></span><br><span class="line">    Image:          nginx:1.15-alpine</span><br><span class="line">    </span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec deploy-nginx-6d9d558bb6-f2t6r -- nginx -v</span></span><br><span class="line">nginx version: nginx/1.15.12</span><br></pre></td></tr></table></figure>
+
+<p>升级为1.16版</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl set image deployment deploy-nginx nginx=nginx:1.16-alpine --record</span></span><br><span class="line">deployment.apps/deploy-nginx image updated</span><br></pre></td></tr></table></figure>
+
+<p>说明:</p>
+<ul>
+<li><p><code>deployment deploy-nginx</code>代表名为deploy-nginx的deployment</p>
+</li>
+<li><p><code>nginx=nginx:1.16-alpine</code>前面的nginx为容器名</p>
+</li>
+<li><p>–record  表示会记录</p>
+</li>
+</ul>
+<p><strong>容器名怎么查看?</strong></p>
+<ul>
+<li><code>kubectl describe pod pod名</code>查看</li>
+<li><code>kubectl edit deployment deployment名</code>来查看容器名</li>
+<li><code>kubectl get deployment deployment名 -o yaml</code>来查看容器名</li>
+</ul>
+<p>验证</p>
+<p>如果升级的pod数量较多，则需要一定时间，可通过下面命令查看是否已经成功</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl rollout status deployment deploy-nginx	</span></span><br><span class="line">deployment <span class="string">"deploy-nginx"</span> successfully rolled out</span><br></pre></td></tr></table></figure>
+
+<p>验证 pod</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE</span><br><span class="line">deploy-nginx-5f4749c8c8-nskp9   1/1     Running   0          104s     <span class="comment">#更新后,NAME后面的id变了</span></span><br></pre></td></tr></table></figure>
+
+<p>验证版本</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod deploy-nginx-5f4749c8c8-nskp9 |grep Image:</span></span><br><span class="line">    Image:          nginx:1.16-alpine							<span class="comment">#升级为1.16了</span></span><br><span class="line">    </span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec deploy-nginx-5f4749c8c8-nskp9 -- nginx -v</span></span><br><span class="line">nginx version: nginx/1.16.1										<span class="comment">#升级为1.16了</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#再次升级</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl set image deployment deploy-nginx nginx=nginx:1.17-alpine --record</span></span><br><span class="line">deployment.apps/deploy-nginx image updated</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-8-pod版本回退"><a href="#1-2-8-pod版本回退" class="headerlink" title="1.2.8 pod版本回退"></a>1.2.8 pod版本回退</h3><p>查看版本历史信息</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl rollout history deployment deploy-nginx</span></span><br><span class="line">deployment.apps/deploy-nginx</span><br><span class="line">REVISION  CHANGE-CAUSE</span><br><span class="line">1         &lt;none&gt;												<span class="comment">#原1.15版</span></span><br><span class="line">2         kubectl <span class="built_in">set</span> image deployment deploy-nginx nginx=nginx:1.16-alpine --record=<span class="literal">true</span></span><br><span class="line">3         kubectl <span class="built_in">set</span> image deployment deploy-nginx nginx=nginx:1.17-alpine --record=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>定义要回退的版本（还需要执行才是真的回退版本)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl rollout history deployment deploy-nginx --revision=1</span></span><br><span class="line">deployment.apps/deploy-nginx with revision <span class="comment">#1</span></span><br><span class="line">Pod Template:</span><br><span class="line">  Labels:       app=nginx</span><br><span class="line">        pod-template-hash=6c9764bb69</span><br><span class="line">  Containers:</span><br><span class="line">   nginx:</span><br><span class="line">    Image:      nginx:1.15-alpine				<span class="comment">#可以看到这是要回退的1.15版本</span></span><br><span class="line">    Port:       80/TCP</span><br><span class="line">    Host Port:  0/TCP</span><br><span class="line">    Environment:        &lt;none&gt;</span><br><span class="line">    Mounts:     &lt;none&gt;</span><br><span class="line">  Volumes:      &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<p>执行回退</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl rollout undo deployment deploy-nginx --to-revision=1</span></span><br><span class="line">deployment.apps/deploy-nginx rolled back</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl rollout history deployment deploy-nginx</span></span><br><span class="line">deployment.apps/deploy-nginx</span><br><span class="line">REVISION  CHANGE-CAUSE</span><br><span class="line">2         kubectl <span class="built_in">set</span> image deployment deploy-nginx nginx=nginx:1.16-alpine --record=<span class="literal">true</span></span><br><span class="line">3         kubectl <span class="built_in">set</span> image deployment deploy-nginx nginx=nginx:1.17-alpine --record=<span class="literal">true</span></span><br><span class="line">4         &lt;none&gt;						<span class="comment">#回到了1.15版,但revision的ID变了</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE</span><br><span class="line">deploy-nginx-6c9764bb69-zgwpj   1/1     Running   0          54s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod deploy-nginx-6c9764bb69-zgwpj |grep Image:</span></span><br><span class="line">    Image:          nginx:1.15-alpine				回到了1.15版</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec deploy-nginx-6c9764bb69-zgwpj -- nginx -v</span></span><br><span class="line">nginx version: nginx/1.15.12						回到了1.15版</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-9-副本扩容"><a href="#1-2-9-副本扩容" class="headerlink" title="1.2.9 副本扩容"></a>1.2.9 副本扩容</h3><p>查看帮助</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl scale -h</span></span><br></pre></td></tr></table></figure>
+
+<p>扩容为2个副本</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl scale deployment deploy-nginx --replicas=2</span></span><br><span class="line">deployment.apps/deploy-nginx scaled</span><br></pre></td></tr></table></figure>
+
+<p>查看</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -o wide</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE   IP               NODE          NOMINATED NODE   READINESS GATES</span><br><span class="line">deploy-nginx-6d9d558bb6-4c64l   1/1     Running   0          27s   10.244.159.157   k8s-master1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line">deploy-nginx-6d9d558bb6-hkq2b   1/1     Running   0          71s   10.244.194.95    k8s-worker1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line"></span><br><span class="line">在两个node节点上各1个pod</span><br></pre></td></tr></table></figure>
+
+<p>继续扩容(我们这里只有2个node,但是可以大于node节点数据)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl scale deployment deploy-nginx --replicas=4</span></span><br><span class="line">deployment.extensions/nginx1 scaled</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -o wide</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE     IP               NODE          NOMINATED NODE   READINESS GATES</span><br><span class="line">deploy-nginx-6d9d558bb6-4c64l   1/1     Running   0          87s     10.244.159.157   k8s-master1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line">deploy-nginx-6d9d558bb6-586dr   1/1     Running   0          31s     10.244.135.197   k8s-master3   &lt;none&gt;           &lt;none&gt;</span><br><span class="line">deploy-nginx-6d9d558bb6-hkq2b   1/1     Running   0          2m11s   10.244.194.95    k8s-worker1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line">deploy-nginx-6d9d558bb6-kvgsc   1/1     Running   0          31s     10.244.224.13    k8s-master2   &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-10-副本裁减"><a href="#1-2-10-副本裁减" class="headerlink" title="1.2.10 副本裁减"></a>1.2.10 副本裁减</h3><p>指定副本数为1进行裁减</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl scale deployment deploy-nginx --replicas=1</span></span><br><span class="line">deployment.apps/deploy-nginx scaled</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE</span><br><span class="line">deploy-nginx-6d9d558bb6-hkq2b   1/1     Running   0          2m56s</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-11-多副本滚动更新"><a href="#1-2-11-多副本滚动更新" class="headerlink" title="1.2.11 多副本滚动更新"></a>1.2.11 多副本滚动更新</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl scale deployment deploy-nginx --replicas=16</span></span><br><span class="line">deployment.apps/deploy-nginx scaled</span><br><span class="line"></span><br><span class="line">[root@master ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                      READY   STATUS    RESTARTS   AGE</span><br><span class="line">nginx1-7d9b8757cf-2hd48   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-5m72n   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-5w2xr   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-5wmdh   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-6szjj   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-9dgsw   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-dc7qj   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-l52pr   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-m7rt4   1/1     Running   0          26m</span><br><span class="line">nginx1-7d9b8757cf-mdkj2   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-s79kp   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-shhvk   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-sv8gb   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-xbhf4   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-zgdgd   1/1     Running   0          61s</span><br><span class="line">nginx1-7d9b8757cf-zzljl   1/1     Running   0          61s</span><br><span class="line">nginx2-559567f789-8hstz   1/1     Running   1          114m</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#滚动更新</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl set image deployment deploy-nginx nginx=nginx:1.17-alpine --record</span></span><br><span class="line">deployment.apps/deploy-nginx image updated</span><br><span class="line"></span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl rollout status deployment deploy-nginx</span></span><br><span class="line">......</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"deploy-nginx"</span> rollout to finish: 13 of 16 updated replicas are available...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"deploy-nginx"</span> rollout to finish: 14 of 16 updated replicas are available...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"deploy-nginx"</span> rollout to finish: 15 of 16 updated replicas are available...</span><br><span class="line">deployment <span class="string">"deploy-nginx"</span> successfully rolled out</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-12-删除deployment"><a href="#1-2-12-删除deployment" class="headerlink" title="1.2.12 删除deployment"></a>1.2.12 删除deployment</h3><p>如果使用 <code>kubectl delete deployment deploy-nginx</code>命令删除deployment,那么里面的pod也会被自动删除</p>
+<h2 id="1-3-Replicaset"><a href="#1-3-Replicaset" class="headerlink" title="1.3 Replicaset"></a>1.3 Replicaset</h2><p>提供复制集能力，控制pod扩缩容</p>
+<p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># vim rs-nginx.yml</span></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: ReplicaSet</span><br><span class="line">metadata:</span><br><span class="line">  name: rs-nginx</span><br><span class="line">  namespace: default</span><br><span class="line">spec:                    <span class="comment"># replicaset的spec</span></span><br><span class="line">  replicas: 2            <span class="comment"># 副本数</span></span><br><span class="line">  selector:              <span class="comment"># 标签选择器,对应pod的标签</span></span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx         <span class="comment"># 匹配的label</span></span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      name: nginx		<span class="comment"># pod名</span></span><br><span class="line">      labels:           <span class="comment"># 对应上面定义的标签选择器selector里面的内容</span></span><br><span class="line">        app: nginx</span><br><span class="line">    spec:               <span class="comment"># pod的spec</span></span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:1.15-alpine</span><br><span class="line">        ports:</span><br><span class="line">        - name: http</span><br><span class="line">          containerPort: 80</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f rs-nginx.yml</span></span><br><span class="line">replicaset.apps/rs-nginx created</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get rs</span></span><br><span class="line">NAME       DESIRED   CURRENT   READY   AGE</span><br><span class="line">rs-nginx   2         2         2       26s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME             READY   STATUS    RESTARTS   AGE</span><br><span class="line">rs-nginx-7j9hz   1/1     Running   0          44s</span><br><span class="line">rs-nginx-pncsk   1/1     Running   0          43s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get deployment</span></span><br><span class="line">No resources found.</span><br><span class="line"></span><br><span class="line"><span class="comment">#找不到deployment,说明创建rs并没有创建deployment</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="1-4-StatefulSet控制器作用"><a href="#1-4-StatefulSet控制器作用" class="headerlink" title="1.4 StatefulSet控制器作用"></a>1.4 StatefulSet控制器作用</h2><ul>
+<li>StatefulSet 是用来管理有状态应用的控制器。</li>
+<li>StatefulSet 用来管理某Pod集合的部署和扩缩， 并为这些 Pod 提供持久存储和持久标识符。</li>
+<li>参考: <a href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/statefulset/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/concepts/workloads/controllers/statefulset/</a></li>
+</ul>
+<h3 id="1-4-1-无状态应用与有状态应用"><a href="#1-4-1-无状态应用与有状态应用" class="headerlink" title="1.4.1 无状态应用与有状态应用"></a>1.4.1 无状态应用与有状态应用</h3><h4 id="1-4-1-1-无状态应用"><a href="#1-4-1-1-无状态应用" class="headerlink" title="1.4.1.1 无状态应用"></a>1.4.1.1 无状态应用</h4><ul>
+<li>如nginx</li>
+</ul>
+<ul>
+<li>请求本身包含了响应端为响应这一请求所需的全部信息。每一个请求都像首次执行一样，不会依赖之前的数据进行响应。</li>
+<li>不需要持久化的数据</li>
+<li>无状态应用的多个实例之间互不依赖，可以无序的部署、删除或伸缩</li>
+</ul>
+<h4 id="1-4-1-1-有状态应用"><a href="#1-4-1-1-有状态应用" class="headerlink" title="1.4.1.1 有状态应用"></a>1.4.1.1 有状态应用</h4><ul>
+<li>如mysql</li>
+</ul>
+<ul>
+<li>前后请求有关联与依赖</li>
+<li>需要持久化的数据</li>
+<li>有状态应用的多个实例之间有依赖，不能相互替换：无论怎么调度，每个 Pod 都有一个永久不变的 ID。</li>
+</ul>
+<h3 id="1-4-2-StatefulSet的特点"><a href="#1-4-2-StatefulSet的特点" class="headerlink" title="1.4.2 StatefulSet的特点"></a>1.4.2 StatefulSet的特点</h3><ul>
+<li>稳定的、唯一的网络标识符。        (通过headless服务实现)</li>
+<li>稳定的、持久的存储。                   (通过PV，PVC，storageclass实现)</li>
+<li>有序的、优雅的部署和缩放。       </li>
+<li>有序的、自动的滚动更新。        </li>
+</ul>
+<h3 id="1-4-3-StatefulSet的YAML组成"><a href="#1-4-3-StatefulSet的YAML组成" class="headerlink" title="1.4.3 StatefulSet的YAML组成"></a>1.4.3 StatefulSet的YAML组成</h3><p>需要三个组成部分:</p>
+<ol>
+<li>headless service:                 实现稳定，唯一的网络标识</li>
+<li>statefulset类型资源:            写法和deployment几乎一致，就是类型不一样</li>
+<li>volumeClaimTemplate :     指定存储卷</li>
+</ol>
+<h3 id="1-4-4-创建StatefulSet应用"><a href="#1-4-4-创建StatefulSet应用" class="headerlink" title="1.4.4 创建StatefulSet应用"></a>1.4.4 创建StatefulSet应用</h3><p>参考: <a href="https://kubernetes.io/zh/docs/tutorials/stateful-application/basic-stateful-set/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/tutorials/stateful-application/basic-stateful-set/</a></p>
+<h4 id="1-4-4-1-编辑YAML资源清单文件"><a href="#1-4-4-1-编辑YAML资源清单文件" class="headerlink" title="1.4.4.1  编辑YAML资源清单文件"></a>1.4.4.1  编辑YAML资源清单文件</h4><p>创建statelfulset应用来调用名为nfs-client的storageclass,以实现动态供给</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim nginx-storageclass-nfs.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: nginx</span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - port: 80</span><br><span class="line">    name: web</span><br><span class="line">  clusterIP: None								   <span class="comment"># 无头服务</span></span><br><span class="line">  selector:</span><br><span class="line">    app: nginx</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: web											<span class="comment"># statefulset的名称</span></span><br><span class="line">spec:</span><br><span class="line">  serviceName: <span class="string">"nginx"</span></span><br><span class="line">  replicas: 3										<span class="comment"># 3个副本</span></span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:1.15-alpine</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 80</span><br><span class="line">          name: web</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: www</span><br><span class="line">          mountPath: /usr/share/nginx/html</span><br><span class="line">  volumeClaimTemplates:</span><br><span class="line">  - metadata:</span><br><span class="line">      name: www</span><br><span class="line">    spec:</span><br><span class="line">      accessModes: [ <span class="string">"ReadWriteOnce"</span> ]</span><br><span class="line">      storageClassName: <span class="string">"nfs-client"</span>		<span class="comment"># 与前面定义的storageclass名称对应</span></span><br><span class="line">      resources:</span><br><span class="line">        requests:</span><br><span class="line">          storage: 1Gi</span><br><span class="line">          </span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f nginx-storageclass-nfs.yml</span></span><br><span class="line">service/nginx created</span><br><span class="line">statefulset.apps/web created</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-4-4-2-应用部署后验证"><a href="#1-4-4-2-应用部署后验证" class="headerlink" title="1.4.4.2 应用部署后验证"></a>1.4.4.2 应用部署后验证</h4><p>验证pod</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods |grep web</span></span><br><span class="line">web-0                                     1/1     Running   0          1m15s</span><br><span class="line">web-1                                     1/1     Running   0          1m7s</span><br><span class="line">web-2                                     1/1     Running   0          57s</span><br></pre></td></tr></table></figure>
+
+<p>验证pv</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~] <span class="comment"># kubectl get pv</span></span><br><span class="line">pvc-2436b20d-1be3-4c2e-87a9-5533e5c5e2c6  1Gi  RWO   Delete  Bound  default/www-web-0   nfs-client       3m</span><br><span class="line">pvc-3114be74-5969-40eb-aeb3-87a3b9ae17bc  1Gi  RWO   Delete  Bound  default/www-web-1   nfs-client       2m</span><br><span class="line">pvc-43afb71d-1d02-4699-b00c-71679fd75fc3  1Gi  RWO   Delete  ound   default/www-web-2   nfs-client       2m</span><br></pre></td></tr></table></figure>
+
+<p>验证pvc</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pvc |grep web</span></span><br><span class="line">www-web-0  Bound   pvc-2436b20d-1be3-4c2e-87a9-5533e5c5e2c6   1Gi   RWO  nfs-client  3m</span><br><span class="line">www-web-1  Bound   pvc-3114be74-5969-40eb-aeb3-87a3b9ae17bc   1Gi   RWO  nfs-client  2m</span><br><span class="line">www-web-2  Bound   pvc-43afb71d-1d02-4699-b00c-71679fd75fc3   1Gi   RWO  nfs-client  2m</span><br></pre></td></tr></table></figure>
+
+<p>验证nfs服务目录</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在nfs服务器（这里为hostos)的共享目录中发现自动产生了3个子目录</span></span><br><span class="line">[root@nfsserver ~]<span class="comment"># ls /data/nfs/</span></span><br><span class="line">default-www-web-0-pvc-2436b20d-1be3-4c2e-87a9-5533e5c5e2c6  </span><br><span class="line">default-www-web-2-pvc-43afb71d-1d02-4699-b00c-71679fd75fc3</span><br><span class="line">default-www-web-1-pvc-3114be74-5969-40eb-aeb3-87a3b9ae17bc  </span><br><span class="line"></span><br><span class="line"><span class="comment">#3个子目录默认都为空目录</span></span><br><span class="line">[root@nfsserver ~]<span class="comment"># tree /data/nfs/</span></span><br><span class="line">/data/nfs/</span><br><span class="line">├── default-www-web-0-pvc-2436b20d-1be3-4c2e-87a9-5533e5c5e2c6</span><br><span class="line">├── default-www-web-1-pvc-3114be74-5969-40eb-aeb3-87a3b9ae17bc</span><br><span class="line">└── default-www-web-2-pvc-43afb71d-1d02-4699-b00c-71679fd75fc3</span><br></pre></td></tr></table></figure>
+
+<p>验证存储持久性</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在3个pod中其中一个创建一个主页文件</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -it web-0 -- /bin/sh</span></span><br><span class="line">/ <span class="comment"># echo "haha" &gt;  /usr/share/nginx/html/index.html</span></span><br><span class="line">/ <span class="comment"># exit</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在nfs服务器上发现文件被创建到了对应的目录中</span></span><br><span class="line">[root@nfsserver ~]<span class="comment"># tree /data/nfs/</span></span><br><span class="line">/data/nfs/</span><br><span class="line">├── default-www-web-0-pvc-2436b20d-1be3-4c2e-87a9-5533e5c5e2c6</span><br><span class="line">│   └── index.html								<span class="comment"># 此目录里多了index.html文件，对应刚才在web-0的pod中的创建</span></span><br><span class="line">├── default-www-web-1-pvc-3114be74-5969-40eb-aeb3-87a3b9ae17bc</span><br><span class="line">└── default-www-web-2-pvc-43afb71d-1d02-4699-b00c-71679fd75fc3</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@nfsserver ~]<span class="comment"># cat /data/nfs/default-www-web-0-pvc-2436b20d-1be3-4c2e-87a9-5533e5c5e2c6/index.html</span></span><br><span class="line">haha											<span class="comment"># 文件内的内容也与web-0的pod中创建的一致</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#删除web-0这个pod,再验证</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete pod web-0</span></span><br><span class="line">pod <span class="string">"web-0"</span> deleted</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods |grep web			# 因为控制器的原因，会迅速再拉起web-0这个pod</span></span><br><span class="line">web-0                                     1/1     Running   0          9s	  <span class="comment"># 时间上看到是新拉起的pod</span></span><br><span class="line">web-1                                     1/1     Running   0          37m</span><br><span class="line">web-2                                     1/1     Running   0          37m</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -it web-0 -- cat /usr/share/nginx/html/index.html</span></span><br><span class="line">haha													<span class="comment"># 新拉起的pod仍然是相同的存储数据</span></span><br><span class="line"></span><br><span class="line">[root@nfsserver ~]<span class="comment"># cat /data/nfs/default-www-web-0-pvc-2436b20d-1be3-4c2e-87a9-5533e5c5e2c6/index.html</span></span><br><span class="line">haha													<span class="comment"># nfs服务器上的数据还在</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>结论: 说明数据可持久化</strong></p>
+<p>访问验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">验证Coredns是否可用</span><br><span class="line"><span class="comment"># kubectl get svc -n kube-system</span></span><br><span class="line">NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE</span><br><span class="line">kube-dns   ClusterIP   10.96.0.10   &lt;none&gt;        53/UDP,53/TCP,9153/TCP   6d23h</span><br><span class="line"></span><br><span class="line"><span class="comment"># dig -t a www.baidu.com @10.96.0.10</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># dig -t a nginx.default.svc.cluster.local. @10.96.0.10</span></span><br><span class="line">....</span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">nginx.default.svc.cluster.local. 30 IN  A       10.224.194.75</span><br><span class="line">nginx.default.svc.cluster.local. 30 IN  A       10.224.159.141</span><br><span class="line">nginx.default.svc.cluster.local. 30 IN  A       10.224.126.6</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># dig -t a web-0.nginx.default.svc.cluster.local. @10.96.0.10</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在kubernetes集群内创建pod访问</span></span><br><span class="line"><span class="comment"># kubectl run -it busybox --image=radial/busyboxplus</span></span><br><span class="line">/ <span class="comment"># curl nginx.default.svc.cluster.local.</span></span><br><span class="line">web-0</span><br><span class="line">/ <span class="comment"># curl web-0.nginx.default.svc.cluster.local.</span></span><br><span class="line">web-0</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-5-已部署应用滚动更新-含金丝雀发布"><a href="#1-4-5-已部署应用滚动更新-含金丝雀发布" class="headerlink" title="1.4.5 已部署应用滚动更新(含金丝雀发布)"></a>1.4.5 已部署应用滚动更新(含金丝雀发布)</h3><p>它将按照与 Pod 终止相同的顺序（从最大序号到最小序号）进行，每次更新一个 Pod。</p>
+<p>StatefulSet可以使用partition参数来实现金丝雀更新，partition参数可以控制StatefulSet控制器更新的Pod。下面，我们就进行StatefulSet控制器的金丝雀更新实战。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch sts web -p <span class="string">'&#123;"spec":&#123;"updateStrategy":&#123;"rollingUpdate":&#123;"partition":2&#125;&#125;&#125;&#125;'</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>说明：使用patch参数来指定了StatefulSet控制器的partition参数为2，表示当更新时，只有Pod的编号大于等于2的才更新。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl exec -it web-0 -- nginx -v</span></span><br><span class="line">nginx version: nginx/1.15.12</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl set image sts/web nginx=nginx:latest</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl get pods -w</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl exec -it web-2 -- nginx -v</span></span><br><span class="line">nginx version: nginx/1.21.6</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl get pods -o custom-columns=Name:metadata.name,Image:spec.containers[0].image</span></span><br><span class="line">Name                                     Image</span><br><span class="line">web-0                                    nginx:1.15-alpine</span><br><span class="line">web-1                                    nginx:1.15-alpine</span><br><span class="line">web-2                                    nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p><strong>如何实现全部更新呢？</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch sts web -p <span class="string">'&#123;"spec":&#123;"updateStrategy":&#123;"rollingUpdate":&#123;"partition":0&#125;&#125;&#125;&#125;'</span></span><br><span class="line">kubectl <span class="built_in">set</span> image sts/web nginx=nginx:latest</span><br><span class="line"></span><br><span class="line">kubectl get pods -o custom-columns=Name:metadata.name,Image:spec.containers[0].image</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-6-已部署应用扩容与缩容"><a href="#1-4-6-已部署应用扩容与缩容" class="headerlink" title="1.4.6 已部署应用扩容与缩容"></a>1.4.6 已部署应用扩容与缩容</h3><p>在StatefulSet扩容时，会创建一个新的Pod，该Pod与之前的所有Pod都是有顺序的，并且新Pod的序号最大。在缩容时，StatefulSet控制器删除的也是序号最大的Pod。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl scale sts web --replicas=4</span><br><span class="line">kubectl get pods -w</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="二、pod控制器Controller进阶"><a href="#二、pod控制器Controller进阶" class="headerlink" title="二、pod控制器Controller进阶"></a>二、pod控制器Controller进阶</h1><h2 id="2-1-DaemonSet"><a href="#2-1-DaemonSet" class="headerlink" title="2.1 DaemonSet"></a>2.1 DaemonSet</h2><h3 id="2-1-1-DaemonSet介绍"><a href="#2-1-1-DaemonSet介绍" class="headerlink" title="2.1.1 DaemonSet介绍"></a>2.1.1 DaemonSet介绍</h3><ul>
+<li>DaemonSet能够让所有（或者特定）的节点运行同一个pod。</li>
+<li>当节点加入到K8S集群中，pod会被（DaemonSet）调度到该节点上运行，当节点从K8S集群中被移除，被DaemonSet调度的pod会被移除</li>
+<li>如果删除DaemonSet，所有跟这个DaemonSet相关的pods都会被删除。</li>
+<li>如果一个DaemonSet的Pod被杀死、停止、或者崩溃，那么DaemonSet将会重新创建一个新的副本在这台计算节点上。</li>
+<li>DaemonSet一般应用于日志收集、监控采集、分布式存储守护进程等</li>
+</ul>
+<h3 id="2-1-2-DaemonSet应用案例"><a href="#2-1-2-DaemonSet应用案例" class="headerlink" title="2.1.2 DaemonSet应用案例"></a>2.1.2 DaemonSet应用案例</h3><p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># vim daemonset-nginx.yml</span></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: DaemonSet</span><br><span class="line">metadata:</span><br><span class="line">  name: daemonset-nginx			</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      name: nginx-ds</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        name: nginx-ds</span><br><span class="line">    spec:</span><br><span class="line">      tolerations:						<span class="comment"># tolerations代表容忍</span></span><br><span class="line">      - key: node-role.kubernetes.io/master  <span class="comment"># 能容忍的污点key</span></span><br><span class="line">        effect: NoSchedule   <span class="comment"># kubectl explain pod.spec.tolerations查看(能容忍的污点effect)</span></span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:1.15-alpine</span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        resources:    <span class="comment"># resources资源限制是为了防止master节点的资源被占太多(根据实际情况配置)</span></span><br><span class="line">          limits:</span><br><span class="line">            memory: 100Mi</span><br><span class="line">          requests:</span><br><span class="line">            memory: 100Mi</span><br></pre></td></tr></table></figure>
+
+<p>apply应用YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f daemonset-nginx.yml</span></span><br><span class="line">daemonset.apps/daemonset-nginx created</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl get daemonset				# daemonset可简写为ds</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ds</span></span><br><span class="line">NAME              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE</span><br><span class="line">daemonset-nginx   4         4         4       4            4           &lt;none&gt;          114s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -o wide</span></span><br><span class="line">NAME                    READY   STATUS    RESTARTS   AGE   IP               NODE          NOMINATED NODE   READINESS GATES</span><br><span class="line">daemonset-nginx-94z6d   1/1     Running   0          6s    10.244.194.104   k8s-worker1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line">daemonset-nginx-hs9mk   1/1     Running   0          6s    10.244.135.206   k8s-master3   &lt;none&gt;           &lt;none&gt;</span><br><span class="line">daemonset-nginx-jrcf5   1/1     Running   0          6s    10.244.159.167   k8s-master1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line">daemonset-nginx-sslpl   1/1     Running   0          6s    10.244.224.22    k8s-master2   &lt;none&gt;           &lt;none&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#k8s集群中每个节点都会运行一个pod</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-Job"><a href="#2-2-Job" class="headerlink" title="2.2 Job"></a>2.2 Job</h2><h3 id="2-2-1-Job介绍"><a href="#2-2-1-Job介绍" class="headerlink" title="2.2.1 Job介绍"></a>2.2.1 Job介绍</h3><ul>
+<li>对于ReplicaSet而言，它希望pod保持预期数目、持久运行下去，除非用户明确删除，否则这些对象一直存在，它们针对的是耐久性任务，如web服务等。</li>
+<li>对于非耐久性任务，比如压缩文件，任务完成后，pod需要结束运行，不需要pod继续保持在系统中，这个时候就要用到Job。</li>
+<li>Job负责批量处理短暂的一次性任务 (short lived one-off tasks)，即仅执行一次的任务，它保证批处理任务的一个或多个Pod成功结束。</li>
+</ul>
+<h3 id="2-2-2-Job应用案例"><a href="#2-2-2-Job应用案例" class="headerlink" title="2.2.2 Job应用案例"></a>2.2.2 Job应用案例</h3><h4 id="2-2-2-1-计算圆周率2000位"><a href="#2-2-2-1-计算圆周率2000位" class="headerlink" title="2.2.2.1 计算圆周率2000位"></a>2.2.2.1 计算圆周率2000位</h4><p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># vim job1.yml</span></span><br><span class="line">apiVersion: batch/v1</span><br><span class="line">kind: Job</span><br><span class="line">metadata:</span><br><span class="line">  name: pi			<span class="comment"># job名</span></span><br><span class="line">spec:</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      name: pi		<span class="comment"># pod名</span></span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: pi	   <span class="comment"># 容器名</span></span><br><span class="line">        image: perl	   <span class="comment"># 此镜像有800多M,可提前导入到所有节点,也可能指定导入到某一节点然后指定调度到此节点</span></span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        <span class="built_in">command</span>: [<span class="string">"perl"</span>,  <span class="string">"-Mbignum=bpi"</span>, <span class="string">"-wle"</span>, <span class="string">"print bpi(2000)"</span>]</span><br><span class="line">      restartPolicy: Never   <span class="comment"># 执行完后不再重启</span></span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件创建job</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl apply -f job1.yml</span></span><br><span class="line">job.batch/pi created</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get jobs</span></span><br><span class="line">NAME   COMPLETIONS   DURATION   AGE</span><br><span class="line">pi     1/1           11s        18s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                         READY   STATUS             RESTARTS   AGE</span><br><span class="line">pi-tjq9b                     0/1     Completed          0         27s</span><br><span class="line"></span><br><span class="line"><span class="comment">#Completed状态,也不再是ready状态</span></span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl logs pi-tjq9b</span></span><br><span class="line">3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989380952572010654858632788659361533818279682303019520353018529689957736225994138912497217752834791315155748572424541506959508295331168617278558890750983817546374649393192550604009277016711390098488240128583616035637076601047101819429555961989467678374494482553797747268471040475346462080466842590694912933136770289891521047521620569660240580381501935112533824300355876402474964732639141992726042699227967823547816360093417216412199245863150302861829745557067498385054945885869269956909272107975093029553211653449872027559602364806654991198818347977535663698074265425278625518184175746728909777727938000816470600161452491921732172147723501414419735685481613611573525521334757418494684385233239073941433345477624168625189835694855620992192221842725502542568876717904946016534668049886272327917860857843838279679766814541009538837863609506800642251252051173929848960841284886269456042419652850222106611863067442786220391949450471237137869609563643719172874677646575739624138908658326459958133904780275901</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-2-2-创建固定次数job"><a href="#2-2-2-2-创建固定次数job" class="headerlink" title="2.2.2.2  创建固定次数job"></a>2.2.2.2  创建固定次数job</h4><p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># vim job2.yml</span></span><br><span class="line">apiVersion: batch/v1</span><br><span class="line">kind: Job</span><br><span class="line">metadata:</span><br><span class="line">  name: busybox-job</span><br><span class="line">spec:</span><br><span class="line">  completions: 10                                               <span class="comment"># 执行job的次数</span></span><br><span class="line">  parallelism: 1                                                <span class="comment"># 执行job的并发数</span></span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      name: busybox-job-pod</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: busybox</span><br><span class="line">        image: busybox</span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        <span class="built_in">command</span>: [<span class="string">"echo"</span>, <span class="string">"hello"</span>]</span><br><span class="line">      restartPolicy: Never</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件创建job</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f job2.yml</span></span><br><span class="line">job.batch/busybox-job created</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get job</span></span><br><span class="line">NAME          COMPLETIONS   DURATION   AGE</span><br><span class="line">busybox-job   2/10          9s         9s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get job</span></span><br><span class="line">NAME          COMPLETIONS   DURATION   AGE</span><br><span class="line">busybox-job   3/10          12s        12s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get job</span></span><br><span class="line">NAME          COMPLETIONS   DURATION   AGE</span><br><span class="line">busybox-job   4/10          15s        15s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get job</span></span><br><span class="line">NAME          COMPLETIONS   DURATION   AGE</span><br><span class="line">busybox-job   10/10         34s        48s</span><br><span class="line"></span><br><span class="line"><span class="comment">#34秒左右结束</span></span><br><span class="line"></span><br><span class="line">[root@master ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                         READY   STATUS             RESTARTS   AGE</span><br><span class="line">busybox-job-5zn6l            0/1     Completed          0          34s</span><br><span class="line">busybox-job-cm9kw            0/1     Completed          0          29s</span><br><span class="line">busybox-job-fmpgt            0/1     Completed          0          38s</span><br><span class="line">busybox-job-gjjvh            0/1     Completed          0          45s</span><br><span class="line">busybox-job-krxpd            0/1     Completed          0          25s</span><br><span class="line">busybox-job-m2vcq            0/1     Completed          0          41s</span><br><span class="line">busybox-job-ncg78            0/1     Completed          0          47s</span><br><span class="line">busybox-job-tbzz8            0/1     Completed          0          51s</span><br><span class="line">busybox-job-vb99r            0/1     Completed          0          21s</span><br><span class="line">busybox-job-wnch7            0/1     Completed          0          32s</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-2-3-一次性备份MySQL数据库"><a href="#2-2-2-3-一次性备份MySQL数据库" class="headerlink" title="2.2.2.3 一次性备份MySQL数据库"></a>2.2.2.3 一次性备份MySQL数据库</h4><blockquote>
+<p> 通过Job控制器创建应用备份MySQL数据库</p>
+</blockquote>
+<h5 id="2-2-2-3-1-MySQL数据库准备"><a href="#2-2-2-3-1-MySQL数据库准备" class="headerlink" title="2.2.2.3.1  MySQL数据库准备"></a>2.2.2.3.1  MySQL数据库准备</h5><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">[root@nginx jobcontroller]<span class="comment"># cat 00_mysql.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: mysql-test</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - port: 3306</span><br><span class="line">    name: mysql</span><br><span class="line">  clusterIP: None</span><br><span class="line">  selector:</span><br><span class="line">    app: mysql-dump</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: db</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: mysql-dump</span><br><span class="line">  serviceName: <span class="string">"mysql-test"</span></span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: mysql-dump</span><br><span class="line">    spec:</span><br><span class="line">      nodeName: k8s-master3</span><br><span class="line">      containers:</span><br><span class="line">      - name: mysql</span><br><span class="line">        image: mysql:5.7</span><br><span class="line">        env:</span><br><span class="line">        - name: MYSQL_ROOT_PASSWORD</span><br><span class="line">          value: <span class="string">"abc123"</span></span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 3306</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - mountPath: <span class="string">"/var/lib/mysql"</span></span><br><span class="line">          name: mysql-data</span><br><span class="line">      volumes:</span><br><span class="line">      - name: mysql-data</span><br><span class="line">        hostPath:</span><br><span class="line">          path: /opt/mysqldata</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-2-3-2-创建用于实现任务的资源清单文件"><a href="#2-2-2-3-2-创建用于实现任务的资源清单文件" class="headerlink" title="2.2.2.3.2  创建用于实现任务的资源清单文件"></a>2.2.2.3.2  创建用于实现任务的资源清单文件</h5><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@nginx jobcontroller]<span class="comment"># cat 03_job.yaml</span></span><br><span class="line">apiVersion: batch/v1</span><br><span class="line">kind: Job</span><br><span class="line">metadata:</span><br><span class="line">  name: mysql-dump</span><br><span class="line">spec:</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      name: mysql-dump</span><br><span class="line">    spec:</span><br><span class="line">      nodeName: k8s-master2</span><br><span class="line">      containers:</span><br><span class="line">      - name: mysql-dump</span><br><span class="line">        image: mysql:5.7</span><br><span class="line">        <span class="built_in">command</span>: [<span class="string">"/bin/sh"</span>,<span class="string">"-c"</span>,<span class="string">"mysqldump --host=mysql-test -uroot -pabc123 --databases mysql &gt; /root/mysql2022.sql"</span>]</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - mountPath: <span class="string">"/root"</span></span><br><span class="line">          name: mysql-data</span><br><span class="line">      restartPolicy: Never</span><br><span class="line">      volumes:</span><br><span class="line">      - name: mysql-data</span><br><span class="line">        hostPath:</span><br><span class="line">          path: /opt/mysqldump</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="2-3-CronJob"><a href="#2-3-CronJob" class="headerlink" title="2.3 CronJob"></a>2.3 CronJob</h2><p>执行周期性任务</p>
+<h3 id="2-3-1-CronJob介绍"><a href="#2-3-1-CronJob介绍" class="headerlink" title="2.3.1 CronJob介绍"></a>2.3.1 CronJob介绍</h3><ul>
+<li>类似于Linux系统的crontab，在指定的时间周期运行相关的任务</li>
+<li>时间格式：分时日月周</li>
+</ul>
+<h3 id="2-3-2-CronJob应用案例"><a href="#2-3-2-CronJob应用案例" class="headerlink" title="2.3.2 CronJob应用案例"></a>2.3.2 CronJob应用案例</h3><h4 id="2-3-2-1-周期性输出字符"><a href="#2-3-2-1-周期性输出字符" class="headerlink" title="2.3.2.1 周期性输出字符"></a>2.3.2.1 周期性输出字符</h4><p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim cronjob.yml</span></span><br><span class="line">apiVersion: batch/v1beta1</span><br><span class="line">kind: CronJob</span><br><span class="line">metadata:</span><br><span class="line">  name: cronjob1</span><br><span class="line">spec:</span><br><span class="line">  schedule: <span class="string">"* * * * *"</span>                 <span class="comment"># 分时日月周</span></span><br><span class="line">  jobTemplate:</span><br><span class="line">    spec:</span><br><span class="line">      template:</span><br><span class="line">        spec:</span><br><span class="line">          containers:</span><br><span class="line">          - name: hello</span><br><span class="line">            image: busybox</span><br><span class="line">            args:</span><br><span class="line">            - /bin/sh</span><br><span class="line">            - -c</span><br><span class="line">            - date; <span class="built_in">echo</span> hello kubernetes</span><br><span class="line">            imagePullPolicy: IfNotPresent</span><br><span class="line">          restartPolicy: OnFailure</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件创建cronjob</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f cronjob.yml</span></span><br><span class="line">cronjob.batch/cronjob1 created</span><br></pre></td></tr></table></figure>
+
+<p>查看验证</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get cronjob</span></span><br><span class="line">NAME       SCHEDULE    SUSPEND   ACTIVE   LAST SCHEDULE   AGE</span><br><span class="line">cronjob1   * * * * *   False     0        &lt;none&gt;          21s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                         READY   STATUS             RESTARTS   AGE</span><br><span class="line">cronjob-1564993080-qlbgv     0/1     Completed          0          2m10s</span><br><span class="line">cronjob-1564993140-zbv7f     0/1     Completed          0          70s</span><br><span class="line">cronjob-1564993200-gx5xz     0/1     Completed          0          10s</span><br><span class="line"></span><br><span class="line"><span class="comment">#看AGE时间,每分钟整点执行一次</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-2-2-周期性备份MySQL数据库"><a href="#2-3-2-2-周期性备份MySQL数据库" class="headerlink" title="2.3.2.2 周期性备份MySQL数据库"></a>2.3.2.2 周期性备份MySQL数据库</h4><h5 id="2-3-2-2-1-MySQL数据库准备"><a href="#2-3-2-2-1-MySQL数据库准备" class="headerlink" title="2.3.2.2.1 MySQL数据库准备"></a>2.3.2.2.1 MySQL数据库准备</h5><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">[root@nginx jobcontroller]<span class="comment"># cat 00_mysql.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: mysql-test</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - port: 3306</span><br><span class="line">    name: mysql</span><br><span class="line">  clusterIP: None</span><br><span class="line">  selector:</span><br><span class="line">    app: mysql-dump</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: db</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: mysql-dump</span><br><span class="line">  serviceName: <span class="string">"mysql-test"</span></span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: mysql-dump</span><br><span class="line">    spec:</span><br><span class="line">      nodeName: worker03</span><br><span class="line">      containers:</span><br><span class="line">      - name: mysql</span><br><span class="line">        image: mysql:5.7</span><br><span class="line">        env:</span><br><span class="line">        - name: MYSQL_ROOT_PASSWORD</span><br><span class="line">          value: <span class="string">"abc123"</span></span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 3306</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - mountPath: <span class="string">"/var/lib/mysql"</span></span><br><span class="line">          name: mysql-data</span><br><span class="line">      volumes:</span><br><span class="line">      - name: mysql-data</span><br><span class="line">        hostPath:</span><br><span class="line">          path: /opt/mysqldata</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-3-2-2-2-Cronjob控制器类型应用资源清单文件"><a href="#2-3-2-2-2-Cronjob控制器类型应用资源清单文件" class="headerlink" title="2.3.2.2.2 Cronjob控制器类型应用资源清单文件"></a>2.3.2.2.2 Cronjob控制器类型应用资源清单文件</h5><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@nginx jobcontroller]<span class="comment"># cat 05_cronjob.yaml</span></span><br><span class="line">apiVersion: batch/v1beta1</span><br><span class="line">kind: CronJob</span><br><span class="line">metadata:</span><br><span class="line">  name: mysql-dump</span><br><span class="line">spec:</span><br><span class="line">  schedule: <span class="string">"*/1 * * * *"</span></span><br><span class="line">  jobTemplate:</span><br><span class="line">    spec:</span><br><span class="line">      template:</span><br><span class="line">        spec:</span><br><span class="line">          nodeName: worker02</span><br><span class="line">          containers:</span><br><span class="line">          - name: c1</span><br><span class="line">            image: mysql:5.7</span><br><span class="line">            <span class="built_in">command</span>: [<span class="string">"/bin/sh"</span>,<span class="string">"-c"</span>,<span class="string">"mysqldump --host=mysql-test -uroot -pabc123 --databases mysql &gt; /root/mysql`date +%Y%m%d%H%M`.sql"</span>]</span><br><span class="line">            volumeMounts:</span><br><span class="line">              - name: mysql-data</span><br><span class="line">                mountPath: <span class="string">"/root"</span></span><br><span class="line">          restartPolicy: Never</span><br><span class="line">          volumes:</span><br><span class="line">            - name: mysql-data</span><br><span class="line">              hostPath:</span><br><span class="line">                path: /opt/mysqldump</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/K8s/" rel="tag"># K8s</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/15/k8s-service/" rel="prev" title="K8s-service">
+      <i class="fa fa-chevron-left"></i> K8s-service
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、pod控制器controller"><span class="nav-text">一、pod控制器controller</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-Controller作用及分类"><span class="nav-text">1.1 Controller作用及分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-Deployment"><span class="nav-text">1.2 Deployment</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-Replicaset控制器的功能"><span class="nav-text">1.2.1 Replicaset控制器的功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-Deployment控制器的功能"><span class="nav-text">1.2.2 Deployment控制器的功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-3-Deployment用于部署无状态应用"><span class="nav-text">1.2.3 Deployment用于部署无状态应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-4-创建deployment类型应用"><span class="nav-text">1.2.4 创建deployment类型应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-5-访问deployment"><span class="nav-text">1.2.5 访问deployment</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-6-删除deployment中的pod"><span class="nav-text">1.2.6 删除deployment中的pod</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-7-pod版本升级"><span class="nav-text">1.2.7 pod版本升级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-8-pod版本回退"><span class="nav-text">1.2.8 pod版本回退</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-9-副本扩容"><span class="nav-text">1.2.9 副本扩容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-10-副本裁减"><span class="nav-text">1.2.10 副本裁减</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-11-多副本滚动更新"><span class="nav-text">1.2.11 多副本滚动更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-12-删除deployment"><span class="nav-text">1.2.12 删除deployment</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-Replicaset"><span class="nav-text">1.3 Replicaset</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-StatefulSet控制器作用"><span class="nav-text">1.4 StatefulSet控制器作用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-1-无状态应用与有状态应用"><span class="nav-text">1.4.1 无状态应用与有状态应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-1-1-无状态应用"><span class="nav-text">1.4.1.1 无状态应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-1-1-有状态应用"><span class="nav-text">1.4.1.1 有状态应用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-2-StatefulSet的特点"><span class="nav-text">1.4.2 StatefulSet的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-3-StatefulSet的YAML组成"><span class="nav-text">1.4.3 StatefulSet的YAML组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-4-创建StatefulSet应用"><span class="nav-text">1.4.4 创建StatefulSet应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-4-1-编辑YAML资源清单文件"><span class="nav-text">1.4.4.1  编辑YAML资源清单文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-4-2-应用部署后验证"><span class="nav-text">1.4.4.2 应用部署后验证</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-5-已部署应用滚动更新-含金丝雀发布"><span class="nav-text">1.4.5 已部署应用滚动更新(含金丝雀发布)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-6-已部署应用扩容与缩容"><span class="nav-text">1.4.6 已部署应用扩容与缩容</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、pod控制器Controller进阶"><span class="nav-text">二、pod控制器Controller进阶</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-DaemonSet"><span class="nav-text">2.1 DaemonSet</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-DaemonSet介绍"><span class="nav-text">2.1.1 DaemonSet介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2-DaemonSet应用案例"><span class="nav-text">2.1.2 DaemonSet应用案例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-Job"><span class="nav-text">2.2 Job</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-Job介绍"><span class="nav-text">2.2.1 Job介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-Job应用案例"><span class="nav-text">2.2.2 Job应用案例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-1-计算圆周率2000位"><span class="nav-text">2.2.2.1 计算圆周率2000位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-2-创建固定次数job"><span class="nav-text">2.2.2.2  创建固定次数job</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-3-一次性备份MySQL数据库"><span class="nav-text">2.2.2.3 一次性备份MySQL数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-3-1-MySQL数据库准备"><span class="nav-text">2.2.2.3.1  MySQL数据库准备</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-3-2-创建用于实现任务的资源清单文件"><span class="nav-text">2.2.2.3.2  创建用于实现任务的资源清单文件</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-CronJob"><span class="nav-text">2.3 CronJob</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-CronJob介绍"><span class="nav-text">2.3.1 CronJob介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-CronJob应用案例"><span class="nav-text">2.3.2 CronJob应用案例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-1-周期性输出字符"><span class="nav-text">2.3.2.1 周期性输出字符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-2-周期性备份MySQL数据库"><span class="nav-text">2.3.2.2 周期性备份MySQL数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-2-2-1-MySQL数据库准备"><span class="nav-text">2.3.2.2.1 MySQL数据库准备</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-2-2-2-Cronjob控制器类型应用资源清单文件"><span class="nav-text">2.3.2.2.2 Cronjob控制器类型应用资源清单文件</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">47</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
