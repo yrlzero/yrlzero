@@ -8645,10 +8645,10 @@
 
 <h2 id="设置标签"><a href="#设置标签" class="headerlink" title="设置标签"></a><strong>设置标签</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#指定为某个node添加标签</span></span><br><span class="line">kubectl label node k8s-node02 key1=value1</span><br></pre></td></tr></table></figure>
 
-<p><img src="images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE12.png" alt="截图12"></p>
+<p><img src="/images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE12.png" alt="截图12"></p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#指定为某个node添加多个标签</span></span><br><span class="line"> kubectl label node k8s-node01 key1=value1 key2=value2</span><br></pre></td></tr></table></figure>
 
-<p><img src="images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE13.png" alt="截图13"></p>
+<p><img src="/images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE13.png" alt="截图13"></p>
 <h2 id="指定标签查询node"><a href="#指定标签查询node" class="headerlink" title="指定标签查询node"></a><strong>指定标签查询node</strong></h2><p>注意-L和-l大小写区别</p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h   v1.21.0</span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 91m   v1.21.0</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 90m   v1.21.0</span><br><span class="line">======================================================================</span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -L key2</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION   KEY2</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h   v1.21.0   </span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 98m   v1.21.0   value2</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 98m   v1.21.0 </span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -l key2</span></span><br><span class="line">NAME         STATUS   ROLES    AGE    VERSION</span><br><span class="line">k8s-node01   Ready    &lt;none&gt;   100m   v1.21.0</span><br><span class="line">======================================================================</span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -L key1,key2</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION   KEY1     KEY2</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h   v1.21.0            </span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 98m   v1.21.0   value1   value2</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 97m   v1.21.0   value1 </span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -l key1,key2</span></span><br><span class="line">NAME         STATUS   ROLES    AGE    VERSION</span><br><span class="line">k8s-node01   Ready    &lt;none&gt;   101m   v1.21.0</span><br><span class="line">================================================================================</span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -L key1</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE    VERSION   KEY1</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h    v1.21.0   </span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 101m   v1.21.0   value1</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 101m   v1.21.0   value1</span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -l key1</span></span><br><span class="line">NAME         STATUS   ROLES    AGE    VERSION</span><br><span class="line">k8s-node01   Ready    &lt;none&gt;   102m   v1.21.0</span><br><span class="line">k8s-node02   Ready    &lt;none&gt;   101m   v1.21.0</span><br></pre></td></tr></table></figure>
 
@@ -8658,13 +8658,13 @@
 <h2 id="删除标签"><a href="#删除标签" class="headerlink" title="删除标签"></a><strong>删除标签</strong></h2><p>使用key加一个减号的写法来取消标签</p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">kubectl label node k8s-node02 key1-</span><br></pre></td></tr></table></figure>
 
-<p><img src="images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE14.png" alt="截图14"></p>
+<p><img src="/images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE14.png" alt="截图14"></p>
 <h2 id="标签选择器"><a href="#标签选择器" class="headerlink" title="标签选择器"></a><strong>标签选择器</strong></h2><p>标签选择器主要有2类:</p>
 <ul>
 <li>等值关系: =, !=</li>
 <li>集合关系: KEY in (VALUE1, VALUE2……)</li>
 </ul>
-<p><img src="images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE15.png" alt="截图15"></p>
+<p><img src="/images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE15.png" alt="截图15"></p>
 <h1 id="通过标签操作pod"><a href="#通过标签操作pod" class="headerlink" title="通过标签操作pod"></a>通过标签操作pod</h1><ul>
 <li>为pod设置label,用于控制器通过label与pod关联</li>
 <li>语法与前面学的node标签几乎一致</li>
