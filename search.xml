@@ -9293,7 +9293,7 @@
     <url>/2022/11/15/k8s-controller/</url>
     <content><![CDATA[<h1 id="一、pod控制器controller"><a href="#一、pod控制器controller" class="headerlink" title="一、pod控制器controller"></a>一、pod控制器controller</h1><h2 id="1-1-Controller作用及分类"><a href="#1-1-Controller作用及分类" class="headerlink" title="1.1 Controller作用及分类"></a>1.1 Controller作用及分类</h2><p>controller用于控制pod</p>
 <p>参考: <a href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/concepts/workloads/controllers/</a></p>
-<p><img src="images/k8s-controller/%E6%88%AA%E5%9B%BE18.png" alt="截图18"></p>
+<p><img src="/images/k8s-controller/%E6%88%AA%E5%9B%BE18.png" alt="截图18"></p>
 <a id="more"></a>
 
 <p>控制器主要分为:</p>
