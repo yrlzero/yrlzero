@@ -8065,6 +8065,7 @@
 <blockquote>
 <p>liveness主要用来确定何时重启容器。liveness探测的结果会存储在livenessManager中。<br>kubelet在syncPod时，发现该容器的liveness探针检测失败时，会将其加入待启动的容器列表中，在之后的操作中会重新创建该容器。</p>
 <p>readiness主要来确定容器是否已经就绪。只有当Pod中的容器都处于就绪状态，也就是pod的condition里的Ready为true时，kubelet才会认定该Pod处于就绪状态。而pod是否处于就绪状态的作用是控制哪些Pod应该作为service的后端。如果Pod处于非就绪状态，那么它们将会被从service的endpoint中移除。</p>
+<p>liveness和readiness除了最终的作用不同，另外一个很大的区别是它们的初始值不同。liveness的初始值为成功，而readiness的初始值为失败。</p>
 </blockquote>
 <h3 id="5-2-2-Probe探测方式"><a href="#5-2-2-Probe探测方式" class="headerlink" title="5.2.2 Probe探测方式"></a><strong>5.2.2 Probe探测方式</strong></h3><table>
 <thead>
