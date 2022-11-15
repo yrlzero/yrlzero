@@ -7989,7 +7989,7 @@
 </li>
 </ul>
 <h3 id="4-2-1-nodeName"><a href="#4-2-1-nodeName" class="headerlink" title="4.2.1  nodeName"></a><strong>4.2.1  nodeName</strong></h3><p>编写YAML文件</p>
-<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-nodename.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-nodename</span><br><span class="line">spec:</span><br><span class="line">  nodeName: k8s-worker1                    <span class="comment"># 通过nodeName调度到k8s-worker1节点</span></span><br><span class="line">  containers:</span><br><span class="line">  - name: nginx</span><br><span class="line">    image: nginx:1.15-alpine</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-nodename.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-nodename</span><br><span class="line">spec:</span><br><span class="line">  nodeName: k8s-worker1 <span class="comment"># 通过nodeName调度到k8s-worker1节点</span></span><br><span class="line">  containers:</span><br><span class="line">  - name: nginx</span><br><span class="line">    image: nginx:1.15-alpine</span><br></pre></td></tr></table></figure>
 
 <p>应用YAML文件创建pod</p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-nodename.yml</span></span><br><span class="line">pod/pod-nodename created</span><br></pre></td></tr></table></figure>
@@ -8001,7 +8001,7 @@
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl label nodes k8s-worker1 bussiness=game</span></span><br><span class="line">node/k8s-worker1 labeled</span><br></pre></td></tr></table></figure>
 
 <p>编写YAML文件</p>
-<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-nodeselector.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-nodeselect</span><br><span class="line">spec:</span><br><span class="line">  nodeSelector:                         <span class="comment"># nodeSelector节点选择器</span></span><br><span class="line">    bussiness: game                     <span class="comment"># 指定调度到标签为bussiness=game的节点</span></span><br><span class="line">  containers:</span><br><span class="line">  - name: nginx</span><br><span class="line">    image: nginx:1.15-alpine</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-nodeselector.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-nodeselect</span><br><span class="line">spec:</span><br><span class="line">  nodeSelector:    <span class="comment"># nodeSelector节点选择器</span></span><br><span class="line">    bussiness: game   <span class="comment"># 指定调度到标签为bussiness=game的节点</span></span><br><span class="line">  containers:</span><br><span class="line">  - name: nginx</span><br><span class="line">    image: nginx:1.15-alpine</span><br></pre></td></tr></table></figure>
 
 <p>应用YAML文件创建pod</p>
 <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-nodeselector.yml</span></span><br><span class="line">pod/pod-nodeselect created</span><br></pre></td></tr></table></figure>
@@ -8014,20 +8014,17 @@
 <li>也有些pod(比如执行计算任务)，任务计算完后就会自动终止</li>
 </ul>
 <p>上面两种场景中,pod从创建到终止的过程就是pod的生命周期。</p>
-<p><img src="images/k8s-pod/%E6%88%AA%E5%9B%BE17.png" alt="截图17"></p>
+<p><img src="/images/k8s-pod/%E6%88%AA%E5%9B%BE17.png" alt="截图17"></p>
 <h3 id="5-1-1-容器启动"><a href="#5-1-1-容器启动" class="headerlink" title="5.1.1 容器启动"></a>5.1.1 容器启动</h3><ol>
-<li>pod中的容器在创建前,有初始化容器(init container)来进行初始化环境</li>
+<li>pod中的容器在创建前,由初始化容器(init container)来进行初始化环境</li>
 <li>初化完后,主容器(main container)开始启动</li>
 <li>主容器启动后,有一个<strong>post start</strong>的操作(启动后的触发型操作,或者叫启动后钩子)</li>
-<li>post start后,就开始做健康检查</li>
-</ol>
-<ul>
-<li><ul>
+<li>post start后,就开始做健康检查<ul>
 <li>第一个健康检查叫存活状态检查(liveness probe )，用来检查主容器存活状态的</li>
 <li>第二个健康检查叫准备就绪检查(readiness probe)，用来检查主容器是否启动就绪</li>
 </ul>
 </li>
-</ul>
+</ol>
 <h3 id="5-1-2-容器终止"><a href="#5-1-2-容器终止" class="headerlink" title="5.1.2 容器终止"></a><strong>5.1.2 容器终止</strong></h3><ol>
 <li>可以在容器终止前设置<strong>pre stop</strong>操作(终止前的触发型操作,或者叫终止前钩子)</li>
 <li>当出现特殊情况不能正常销毁pod时,大概等待30秒会强制终止</li>
