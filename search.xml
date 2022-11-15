@@ -8597,49 +8597,20 @@
 <a id="more"></a>
 
 <h1 id="组件"><a href="#组件" class="headerlink" title="组件"></a>组件</h1><h2 id="master组件"><a href="#master组件" class="headerlink" title="master组件"></a>master组件</h2><ul>
-<li><p>kube-apiserver</p>
-</li>
-<li><ul>
-<li>用于暴露kubernests API，任何的资源请求/调用都是通过kube-apiserver提供的接口进行</li>
-</ul>
-</li>
-<li><p>kube-controller-manager</p>
-</li>
-<li><ul>
-<li>控制器管理器，用于对控制器进行管理，是集群中处理常规任务的后台线程</li>
-</ul>
-</li>
-<li><p>kube-scheduler</p>
-</li>
-<li><ul>
-<li>监视新创建没有分配到node的pod，为pod选择一个node运行</li>
-</ul>
-</li>
-<li><p>etcd</p>
-</li>
-<li><ul>
-<li>是k8s提供的默认存储系统，保存所有集群数据</li>
-</ul>
-</li>
+<li>kube-apiserver：用于暴露kubernests API，任何的资源请求/调用都是通过kube-apiserver提供的接口进行</li>
+<li>kube-controller-manager：控制器管理器，用于对控制器进行管理，是集群中处理常规任务的后台线程</li>
+<li>kube-scheduler：监视新创建没有分配到node的pod，为pod选择一个node运行</li>
+<li>etcd：是k8s提供的默认存储系统，保存所有集群数据</li>
 </ul>
 <h2 id="node组件"><a href="#node组件" class="headerlink" title="node组件"></a>node组件</h2><p>用于运行以及维护pod，管理volume（CVI）和网络（CNI），维护pod及service等信息</p>
 <ul>
-<li><p>kubelet</p>
-</li>
-<li><ul>
-<li>负责维护容器的生命周期（创建pod，销毁pod），同时也负责volume（CVI）和网络（CNI）管理</li>
-</ul>
-</li>
-<li><p>kube-proxy</p>
-</li>
-<li><ul>
+<li>kubelet：负责维护容器的生命周期（创建pod，销毁pod），同时也负责volume（CVI）和网络（CNI）管理</li>
+<li>kube-proxy<ul>
 <li>通过在主机上维护网络规则并执行连续转发来实现service（iptables/ipvs）</li>
 <li>随时与apiserver通信，把service或pod改变提交给apiserver，保存至etcd中，负责service实现从内部pod到service、从外部node到service的访问</li>
 </ul>
 </li>
-<li><p>container-runtime</p>
-</li>
-<li><ul>
+<li>container-runtime<ul>
 <li>容器运行时（container runtime）</li>
 <li>负责镜像管理以及pod和容器的真正运行</li>
 <li>支持docker、container、Rkt、pouch、kata等多种运行时</li>
