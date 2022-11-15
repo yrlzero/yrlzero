@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、命名空间(namespace)作用 Namespace是对一组资源和对象的抽象集合. 常见的 pod, service, deployment 等都是属于某一个namespace的（默认是 default） 不是所有资源都属于namespace，如nodes, persistent volume，namespace 等资源则不属于任何 namespace  二、查看namespace12345">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8s-命名空间">
+<meta property="og:url" content="http://yrlzero.github.io/2022/11/15/k8s%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="一、命名空间(namespace)作用 Namespace是对一组资源和对象的抽象集合. 常见的 pod, service, deployment 等都是属于某一个namespace的（默认是 default） 不是所有资源都属于namespace，如nodes, persistent volume，namespace 等资源则不属于任何 namespace  二、查看namespace12345">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-15T07:16:47.890Z">
+<meta property="article:modified_time" content="2022-11-15T07:24:44.616Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="K8s">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/11/15/k8s%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>K8s-命名空间 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/15/k8s%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          K8s-命名空间
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-15 15:16:47 / 修改时间：15:24:44" itemprop="dateCreated datePublished" datetime="2022-11-15T15:16:47+08:00">2022-11-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/" itemprop="url" rel="index"><span itemprop="name">devops</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/K8s/" itemprop="url" rel="index"><span itemprop="name">K8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、命名空间-namespace-作用"><a href="#一、命名空间-namespace-作用" class="headerlink" title="一、命名空间(namespace)作用"></a><strong>一、命名空间(namespace)作用</strong></h1><ul>
+<li>Namespace是对一组资源和对象的抽象集合.</li>
+<li>常见的 pod, service, deployment 等都是属于某一个namespace的（默认是 default）</li>
+<li>不是所有资源都属于namespace，如nodes, persistent volume，namespace 等资源则不属于任何 namespace</li>
+</ul>
+<h1 id="二、查看namespace"><a href="#二、查看namespace" class="headerlink" title="二、查看namespace"></a><strong>二、查看namespace</strong></h1><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get namespaces       # namespaces可以简写为namespace或ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   130m         <span class="comment"># 所有未指定Namespace的对象都会被默认分配在default命名空间</span></span><br><span class="line">kube-node-lease   Active   130m         </span><br><span class="line">kube-public       Active   130m         <span class="comment"># 此命名空间下的资源可以被所有人访问</span></span><br><span class="line">kube-system       Active   130m         <span class="comment"># 所有由Kubernetes系统创建的资源都处于这个命名空间</span></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h1 id="三、查看namespace里的资源"><a href="#三、查看namespace里的资源" class="headerlink" title="三、查看namespace里的资源"></a><strong>三、查看namespace里的资源</strong></h1><p>使用<code>kubectl get all --namespace=命名空间名称</code>可以查看此命名空间下的所有资源</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get all --namespace=kube-system</span></span><br><span class="line">NAME                                             READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod/calico-kube-controllers-7fdc86d8ff-cskfq     1/1     Running   3          5d1h</span><br><span class="line">pod/calico-node-9dpc9                            1/1     Running   2          5d1h</span><br><span class="line">pod/calico-node-jdmxw                            1/1     Running   3          5d1h</span><br><span class="line">pod/calico-node-krwps                            1/1     Running   2          5d1h</span><br><span class="line">pod/calico-node-tttlr                            1/1     Running   2          5d1h</span><br><span class="line">pod/coredns-65dbdb44db-mm7cr                     1/1     Running   2          5d1h</span><br><span class="line">pod/dashboard-metrics-scraper-545bbb8767-q66bc   1/1     Running   2          5d1h</span><br><span class="line">pod/kubernetes-dashboard-65665f84db-nll6k        1/1     Running   4          5d1h</span><br><span class="line">pod/metrics-server-869ffc99cd-8f4jd              1/1     Running   3          5d1h</span><br><span class="line"></span><br><span class="line">NAME                                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE</span><br><span class="line">service/dashboard-metrics-scraper   ClusterIP   10.2.246.128   &lt;none&gt;        8000/TCP                 5d1h</span><br><span class="line">service/kube-dns                    ClusterIP   10.2.0.2       &lt;none&gt;        53/UDP,53/TCP,9153/TCP   5d1h</span><br><span class="line">service/kubernetes-dashboard        NodePort    10.2.213.30    &lt;none&gt;        443:21351/TCP            5d1h</span><br><span class="line">service/metrics-server              ClusterIP   10.2.232.121   &lt;none&gt;        443/TCP                  5d1h</span><br><span class="line"></span><br><span class="line">NAME                         DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE</span><br><span class="line">daemonset.apps/calico-node   4         4         4       4            4           beta.kubernetes.io/os=linux   5d1h</span><br><span class="line"></span><br><span class="line">NAME                                        READY   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">deployment.apps/calico-kube-controllers     1/1     1            1           5d1h</span><br><span class="line">deployment.apps/coredns                     1/1     1            1           5d1h</span><br><span class="line">deployment.apps/dashboard-metrics-scraper   1/1     1            1           5d1h</span><br><span class="line">deployment.apps/kubernetes-dashboard        1/1     1            1           5d1h</span><br><span class="line">deployment.apps/metrics-server              1/1     1            1           5d1h</span><br><span class="line"></span><br><span class="line">NAME                                                   DESIRED   CURRENT   READY   AGE</span><br><span class="line">replicaset.apps/calico-kube-controllers-7fdc86d8ff     1         1         1       5d1h</span><br><span class="line">replicaset.apps/coredns-65dbdb44db                     1         1         1       5d1h</span><br><span class="line">replicaset.apps/dashboard-metrics-scraper-545bbb8767   1         1         1       5d1h</span><br><span class="line">replicaset.apps/kubernetes-dashboard-65665f84db        1         1         1       5d1h</span><br><span class="line">replicaset.apps/metrics-server-869ffc99cd              1         1         1       5d1h</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>kubectl get 资源类型 --namespace=命名空间名称</code>可以查看此命名空间下的对应的资源</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod --namespace=kube-system</span></span><br><span class="line">NAME                                         READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-7fdc86d8ff-cskfq     1/1     Running   3          5d1h</span><br><span class="line">calico-node-9dpc9                            1/1     Running   2          5d1h</span><br><span class="line">calico-node-jdmxw                            1/1     Running   3          5d1h</span><br><span class="line">calico-node-krwps                            1/1     Running   2          5d1h</span><br><span class="line">calico-node-tttlr                            1/1     Running   2          5d1h</span><br><span class="line">coredns-65dbdb44db-mm7cr                     1/1     Running   2          5d1h</span><br><span class="line">dashboard-metrics-scraper-545bbb8767-q66bc   1/1     Running   2          5d1h</span><br><span class="line">kubernetes-dashboard-65665f84db-nll6k        1/1     Running   4          5d1h</span><br><span class="line">metrics-server-869ffc99cd-8f4jd              1/1     Running   3          5d1h</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>kubectl get 资源类型 -A</code> ，查看所有命名空间的资源</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get pods -A</span></span><br><span class="line">NAMESPACE          NAME                                       READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-apiserver   calico-apiserver-665569779-4wr5l           1/1     Running   0          6h27m</span><br><span class="line">calico-apiserver   calico-apiserver-665569779-r76t6           1/1     Running   0          6h27m</span><br><span class="line">calico-system      calico-kube-controllers-78687bb75f-46l2t   1/1     Running   0          6h29m</span><br><span class="line">calico-system      calico-node-f9gx6                          1/1     Running   0          5h58m</span><br><span class="line">calico-system      calico-node-rsk4w                          1/1     Running   0          5h58m</span><br><span class="line">calico-system      calico-node-xfr2n                          1/1     Running   0          6h29m</span><br><span class="line">calico-system      calico-typha-75444c4b8-4x7pp               1/1     Running   0          5h58m</span><br><span class="line">calico-system      calico-typha-75444c4b8-nmmj5               1/1     Running   0          6h29m</span><br><span class="line">calico-system      csi-node-driver-4l2ts                      2/2     Running   0          5h56m</span><br><span class="line">calico-system      csi-node-driver-92q4k                      2/2     Running   0          6h28m</span><br><span class="line">calico-system      csi-node-driver-kcw5b                      2/2     Running   0          5h57m</span><br><span class="line">kube-system        coredns-558bd4d5db-5j4gq                   1/1     Running   0          16h</span><br><span class="line">kube-system        coredns-558bd4d5db-79qsm                   1/1     Running   0          16h</span><br><span class="line">kube-system        etcd-k8s-master01                          1/1     Running   0          16h</span><br><span class="line">kube-system        kube-apiserver-k8s-master01                1/1     Running   0          16h</span><br><span class="line">kube-system        kube-controller-manager-k8s-master01       1/1     Running   0          16h</span><br><span class="line">kube-system        kube-proxy-v2ltp                           1/1     Running   0          16h</span><br><span class="line">kube-system        kube-proxy-wzxps                           1/1     Running   0          5h58m</span><br><span class="line">kube-system        kube-proxy-zr77d                           1/1     Running   0          5h58m</span><br><span class="line">kube-system        kube-scheduler-k8s-master01                1/1     Running   0          16h</span><br><span class="line">tigera-operator    tigera-operator-6f669b6c4f-qmdbc           1/1     Running   0          6h37m</span><br></pre></td></tr></table></figure>
+
+<h1 id="四、创建namespace"><a href="#四、创建namespace" class="headerlink" title="四、创建namespace"></a><strong>四、创建namespace</strong></h1><h2 id="4-1-命令创建"><a href="#4-1-命令创建" class="headerlink" title="4.1 命令创建"></a><strong>4.1 命令创建</strong></h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl create namespace ns1</span></span><br><span class="line">namespace/ns1 created</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   5d1h</span><br><span class="line">kube-node-lease   Active   5d1h</span><br><span class="line">kube-public       Active   5d1h</span><br><span class="line">kube-system       Active   5d1h</span><br><span class="line">ns1               Active   10s</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-2-YAML文件创建"><a href="#4-2-YAML文件创建" class="headerlink" title="4.2 YAML文件创建"></a><strong>4.2 YAML文件创建</strong></h2><ul>
+<li>k8s中几乎所有的资源都可以通这YAML编排来创建</li>
+</ul>
+<p>编写创建namespace的YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim create_ns2.yml</span></span><br><span class="line">apiVersion: v1                          <span class="comment"># api版本号</span></span><br><span class="line">kind: Namespace                         <span class="comment"># 类型为namespace</span></span><br><span class="line">metadata:                               <span class="comment"># 定义namespace的元数据属性</span></span><br><span class="line">  name: ns2                             <span class="comment"># 定义name属性为ns2</span></span><br></pre></td></tr></table></figure>
+
+<p>使用kubctl apply -f应用YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f create_ns2.yml</span></span><br><span class="line">namespace/ns2 created</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   5d2h</span><br><span class="line">kube-node-lease   Active   5d2h</span><br><span class="line">kube-public       Active   5d2h</span><br><span class="line">kube-system       Active   5d2h</span><br><span class="line">ns1               Active   10m</span><br><span class="line">ns2               Active   46s</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>可以使用 kubectl edit 资源类型 资源名 编辑资源的YAML语法</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl edit namespace ns1</span></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>也可使用 <code>kubectl get 资源类型 资源名 -o yaml</code>来查看</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ns ns1 -o yaml</span></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>还可通过<code>kubectl explain 资源类型</code>来查看语法文档</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain namespace                # 查看namespace相关语法参数</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain namespace.metadata       # 查看namespace下级metadata的相关语法参数</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain namespace.metadata.name  # 查看namespace下级metadata再下级name的相关语法参数</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="五、删除namespace"><a href="#五、删除namespace" class="headerlink" title="五、删除namespace"></a><strong>五、删除namespace</strong></h1><p><strong>注意:</strong> </p>
+<ul>
+<li>删除一个namespace会自动删除所有属于该namespace的资源(类似mysql中drop库会删除库里的所有表一样，请慎重操作)</li>
+<li>default,kube-system,kube-public命名空间不可删除</li>
+</ul>
+<h2 id="5-1-命令删除"><a href="#5-1-命令删除" class="headerlink" title="5.1 命令删除"></a><strong>5.1 命令删除</strong></h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete namespace ns1</span></span><br><span class="line">namespace <span class="string">"ns1"</span> deleted</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-2-YAML文件删除"><a href="#5-2-YAML文件删除" class="headerlink" title="5.2 YAML文件删除"></a><strong>5.2 YAML文件删除</strong></h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete -f create_ns2.yml</span></span><br><span class="line">namespace <span class="string">"ns2"</span> deleted</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   5d2h</span><br><span class="line">kube-node-lease   Active   5d2h</span><br><span class="line">kube-public       Active   5d2h</span><br><span class="line">kube-system       Active   5d2h</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/K8s/" rel="tag"># K8s</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/14/TiDB%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB/" rel="prev" title="TiDB数据迁移">
+      <i class="fa fa-chevron-left"></i> TiDB数据迁移
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/15/k8s-kubectl/" rel="next" title="K8s-kubectl">
+      K8s-kubectl <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、命名空间-namespace-作用"><span class="nav-text">一、命名空间(namespace)作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、查看namespace"><span class="nav-text">二、查看namespace</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、查看namespace里的资源"><span class="nav-text">三、查看namespace里的资源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、创建namespace"><span class="nav-text">四、创建namespace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-命令创建"><span class="nav-text">4.1 命令创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-YAML文件创建"><span class="nav-text">4.2 YAML文件创建</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、删除namespace"><span class="nav-text">五、删除namespace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-命令删除"><span class="nav-text">5.1 命令删除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-YAML文件删除"><span class="nav-text">5.2 YAML文件删除</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">93</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">47</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>

@@ -7772,4 +7772,1148 @@
         <tag>queue</tag>
       </tags>
   </entry>
+  <entry>
+    <title>K8s-Pod</title>
+    <url>/2022/11/15/k8s-pod/</url>
+    <content><![CDATA[<h1 id="一、工作负载-workloads"><a href="#一、工作负载-workloads" class="headerlink" title="一、工作负载(workloads)"></a><strong>一、工作负载(workloads)</strong></h1><p>参考链接：<a href="https://kubernetes.io/zh/docs/concepts/workloads/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/concepts/workloads/</a></p>
+<p>工作负载（workload）是在kubernetes集群中运行的应用程序。</p>
+<p>无论你的工作负载是单一服务还是多个一同工作的服务构成，在kubernetes中都可以使用pod来运行它。</p>
+<p>在 Kubernetes 中，Pod 代表的是集群上处于运行状态的一组 <a href="https://kubernetes.io/zh-cn/docs/concepts/overview/what-is-kubernetes/#why-containers" target="_blank" rel="noopener">容器</a> 的集合。</p>
+<a id="more"></a>
+
+<p>workloads分为pod与controllers</p>
+<ul>
+<li>pod通过控制器实现应用的运行，如何伸缩，升级等</li>
+<li>controllers 在集群中管理pod</li>
+<li>pod与控制器之间通过label-selector相关联，是唯一的关联方式</li>
+</ul>
+<p>在pod的YAML里指定pod标签</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">定义标签</span><br><span class="line">  labels: </span><br><span class="line">    app: nginx</span><br></pre></td></tr></table></figure>
+
+<p>在控制器的YAML里指定标签选择器匹配标签</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">通过标签选择器选择对应的pod</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br></pre></td></tr></table></figure>
+
+<h1 id="二、pod介绍"><a href="#二、pod介绍" class="headerlink" title="二、pod介绍"></a><strong>二、pod介绍</strong></h1><h2 id="2-1-pod定义与分类"><a href="#2-1-pod定义与分类" class="headerlink" title="2.1 pod定义与分类"></a><strong>2.1 pod定义与分类</strong></h2><p>参考链接: <a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/concepts/workloads/pods/</a></p>
+<h3 id="2-1-1-Pod定义"><a href="#2-1-1-Pod定义" class="headerlink" title="2.1.1 Pod定义"></a><strong>2.1.1 Pod定义</strong></h3><ul>
+<li>Pod(豌豆荚) 是Kubernetes集群管理（创建、部署）与调度的最小计算单元，表示处于运行状态的一组容器。</li>
+<li>Pod不是进程，而是容器运行的环境。</li>
+<li>一个Pod可以封装</li>
+</ul>
+<p><strong>一个容器或多个容器(主容器或sidecar边车容器)</strong></p>
+<ul>
+<li>一个pod内的多个容器之间共享部分命名空间，例如：Net Namespace,UTS Namespace,IPC Namespace及存储资源</li>
+<li>用户pod默认会被调度运行在node节点之上(不运行在master节点上，但也有例外情况)</li>
+<li>pod内的IP不是固定的，集群外不能直接访问pod</li>
+</ul>
+<h3 id="2-1-2-Pod分类"><a href="#2-1-2-Pod分类" class="headerlink" title="2.1.2 Pod分类"></a><strong>2.1.2 Pod分类</strong></h3><ul>
+<li>静态Pod</li>
+</ul>
+<p>​    也称之为“无控制器管理的自主式pod”，直接由特定节点上的 kubelet 守护进程管理， 不需要API 服务器看到它们，尽管大多数 Pod 都是通过控制面（例如，Deployment） 来管理的，对于静态 Pod 而言，kubelet 直接监控每个 Pod，并在其失效时重启之。</p>
+<ul>
+<li><p>控制器管理的pod</p>
+<p> 控制器可以控制pod的副本数，扩容与裁剪，版本更新与回滚等</p>
+</li>
+</ul>
+<h2 id="2-2-查看pod方法"><a href="#2-2-查看pod方法" class="headerlink" title="2.2 查看pod方法"></a><strong>2.2 查看pod方法</strong></h2><p>pod是一种计算资源，可以通过kubectl get pod来查看</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod       # pod或pods都可以，不指定namespace,默认是名为default的namespace</span></span><br><span class="line">    </span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod -n kube-system</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-pod的YAML资源清单格式"><a href="#2-3-pod的YAML资源清单格式" class="headerlink" title="2.3 pod的YAML资源清单格式"></a><strong>2.3 pod的YAML资源清单格式</strong></h2><p>先看一个yaml格式的pod定义文件解释</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment"># yaml格式的pod定义文件完整内容：</span></span><br><span class="line">apiVersion: v1       <span class="comment">#必选，api版本号，例如v1</span></span><br><span class="line">kind: Pod           <span class="comment">#必选，Pod</span></span><br><span class="line">metadata:           <span class="comment">#必选，元数据</span></span><br><span class="line">  name: string       <span class="comment">#必选，Pod名称</span></span><br><span class="line">  namespace: string    <span class="comment">#Pod所属的命名空间,默认在default的namespace</span></span><br><span class="line">  labels:            <span class="comment"># 自定义标签</span></span><br><span class="line">    name: string     <span class="comment">#自定义标签名字，key和value分别限制最长63个字符</span></span><br><span class="line">  annotations:        <span class="comment">#自定义注释列表</span></span><br><span class="line">    name: string</span><br><span class="line">spec:         <span class="comment">#必选，Pod中容器的详细定义(期望)</span></span><br><span class="line">  containers:      <span class="comment">#必选，Pod中容器列表</span></span><br><span class="line">  - name: string     <span class="comment">#必选，容器名称</span></span><br><span class="line">    image: string    <span class="comment">#必选，容器的镜像名称</span></span><br><span class="line">    imagePullPolicy: [Always | Never | IfNotPresent] <span class="comment">#获取镜像的策略 Alawys表示下载镜像 IfnotPresent表示优先使用本地镜像，否则下载镜像，Nerver表示仅使用本地镜像</span></span><br><span class="line">    <span class="built_in">command</span>: [string]    <span class="comment">#容器的启动命令列表，如不指定，使用打包时使用的启动命令</span></span><br><span class="line">    args: [string]     <span class="comment">#容器的启动命令参数列表</span></span><br><span class="line">    workingDir: string     <span class="comment">#容器的工作目录</span></span><br><span class="line">    volumeMounts:    <span class="comment">#挂载到容器内部的存储卷配置</span></span><br><span class="line">    - name: string     <span class="comment">#引用pod定义的共享存储卷的名称，需用volumes[]部分定义的的卷名</span></span><br><span class="line">      mountPath: string    <span class="comment">#存储卷在容器内mount的绝对路径，应少于512字符</span></span><br><span class="line">      readOnly: boolean    <span class="comment">#是否为只读模式</span></span><br><span class="line">    ports:       <span class="comment">#需要暴露的端口库号列表</span></span><br><span class="line">    - name: string     <span class="comment">#端口号名称</span></span><br><span class="line">      containerPort: int   <span class="comment">#容器需要监听的端口号</span></span><br><span class="line">      hostPort: int    <span class="comment">#容器所在主机需要监听的端口号，默认与Container相同</span></span><br><span class="line">      protocol: string     <span class="comment">#端口协议，支持TCP和UDP，默认TCP</span></span><br><span class="line">    env:       <span class="comment">#容器运行前需设置的环境变量列表</span></span><br><span class="line">    - name: string     <span class="comment">#环境变量名称</span></span><br><span class="line">      value: string    <span class="comment">#环境变量的值</span></span><br><span class="line">    resources:       <span class="comment">#资源限制和请求的设置</span></span><br><span class="line">      limits:      <span class="comment">#资源限制的设置</span></span><br><span class="line">        cpu: string    <span class="comment">#Cpu的限制，单位为core数，将用于docker run --cpu-shares参数</span></span><br><span class="line">        memory: string     <span class="comment">#内存限制，单位可以为Mib/Gib，将用于docker run --memory参数</span></span><br><span class="line">      requests:      <span class="comment">#资源请求的设置</span></span><br><span class="line">        cpu: string    <span class="comment">#Cpu请求，容器启动的初始可用数量</span></span><br><span class="line">        memory: string     <span class="comment">#内存清求，容器启动的初始可用数量</span></span><br><span class="line">    livenessProbe:     <span class="comment">#对Pod内个容器健康检查的设置，当探测无响应几次后将自动重启该容器，检查方法有exec、httpGet和tcpSocket，对一个容器只需设置其中一种方法即可</span></span><br><span class="line">      <span class="built_in">exec</span>:      <span class="comment">#对Pod容器内检查方式设置为exec方式</span></span><br><span class="line">        <span class="built_in">command</span>: [string]  <span class="comment">#exec方式需要制定的命令或脚本</span></span><br><span class="line">      httpGet:       <span class="comment">#对Pod内个容器健康检查方法设置为HttpGet，需要制定Path、port</span></span><br><span class="line">        path: string</span><br><span class="line">        port: number</span><br><span class="line">        host: string</span><br><span class="line">        scheme: string</span><br><span class="line">        HttpHeaders:</span><br><span class="line">        - name: string</span><br><span class="line">          value: string</span><br><span class="line">      tcpSocket:     <span class="comment">#对Pod内个容器健康检查方式设置为tcpSocket方式</span></span><br><span class="line">         port: number</span><br><span class="line">       initialDelaySeconds: 0  <span class="comment">#容器启动完成后首次探测的时间，单位为秒</span></span><br><span class="line">       timeoutSeconds: 0   <span class="comment">#对容器健康检查探测等待响应的超时时间，单位秒，默认1秒</span></span><br><span class="line">       periodSeconds: 0    <span class="comment">#对容器监控检查的定期探测时间设置，单位秒，默认10秒一次</span></span><br><span class="line">       successThreshold: 0</span><br><span class="line">       failureThreshold: 0</span><br><span class="line">       securityContext:</span><br><span class="line">         privileged:<span class="literal">false</span></span><br><span class="line">    restartPolicy: [Always | Never | OnFailure] <span class="comment"># Pod的重启策略，Always表示一旦不管以何种方式终止运行，kubelet都将重启，OnFailure表示只有Pod以非0退出码退出才重启，Nerver表示不再重启该Pod</span></span><br><span class="line">    nodeSelector: obeject  <span class="comment"># 设置NodeSelector表示将该Pod调度到包含这个label的node上，以key：value的格式指定</span></span><br><span class="line">    imagePullSecrets:    <span class="comment">#Pull镜像时使用的secret名称，以key：secretkey格式指定</span></span><br><span class="line">    - name: string</span><br><span class="line">    hostNetwork: <span class="literal">false</span>     <span class="comment">#是否使用主机网络模式，默认为false，如果设置为true，表示使用宿主机网络</span></span><br><span class="line">    volumes:       <span class="comment">#在该pod上定义共享存储卷列表</span></span><br><span class="line">    - name: string     <span class="comment">#共享存储卷名称 （volumes类型有很多种）</span></span><br><span class="line">      emptyDir: &#123;&#125;     <span class="comment">#类型为emtyDir的存储卷，与Pod同生命周期的一个临时目录。为空值</span></span><br><span class="line">      hostPath: string     <span class="comment">#类型为hostPath的存储卷，表示挂载Pod所在宿主机的目录</span></span><br><span class="line">        path: string     <span class="comment">#Pod所在宿主机的目录，将被用于同期中mount的目录</span></span><br><span class="line">      secret:      <span class="comment">#类型为secret的存储卷，挂载集群与定义的secret对象到容器内部</span></span><br><span class="line">        scretname: string  </span><br><span class="line">        items:     </span><br><span class="line">        - key: string</span><br><span class="line">          path: string</span><br><span class="line">      configMap:     <span class="comment">#类型为configMap的存储卷，挂载预定义的configMap对象到容器内部</span></span><br><span class="line">        name: string</span><br><span class="line">        items:</span><br><span class="line">        - key: string</span><br><span class="line">          path: string</span><br></pre></td></tr></table></figure>
+
+<p>YAML格式查找帮助方法</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain namespace</span></span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain pod</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain pod.spec</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain pod.spec.containers</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="三、pod创建与验证"><a href="#三、pod创建与验证" class="headerlink" title="三、pod创建与验证"></a><strong>三、pod创建与验证</strong></h1><h2 id="3-1-命令创建pod-v1-18变化"><a href="#3-1-命令创建pod-v1-18变化" class="headerlink" title="3.1 命令创建pod(v1.18变化)"></a><strong>3.1 命令创建pod(v1.18变化)</strong></h2><ul>
+<li>k8s之前版本中, kubectl run命令用于创建deployment控制器</li>
+<li>在v1.18版本中, kubectl run命令改为创建pod</li>
+</ul>
+<h3 id="3-1-1-创建一个名为pod-nginx的pod"><a href="#3-1-1-创建一个名为pod-nginx的pod" class="headerlink" title="3.1.1 创建一个名为pod-nginx的pod"></a><strong>3.1.1 创建一个名为pod-nginx的pod</strong></h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl run nginx1 --image=nginx:1.15-alpine</span></span><br><span class="line">pod/nginx1 created</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-1-2-验证"><a href="#3-1-2-验证" class="headerlink" title="3.1.2 验证"></a><strong>3.1.2 验证</strong></h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME             READY   STATUS    RESTARTS   AGE</span><br><span class="line">nginx1           1/1     Running   0          41s</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-YAML创建pod"><a href="#3-2-YAML创建pod" class="headerlink" title="3.2 YAML创建pod"></a><strong>3.2 YAML创建pod</strong></h2><h3 id="3-2-1-准备yaml文件"><a href="#3-2-1-准备yaml文件" class="headerlink" title="3.2.1 准备yaml文件"></a><strong>3.2.1 准备yaml文件</strong></h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod1.yml</span></span><br><span class="line">apiVersion: v1                  <span class="comment"># api版本</span></span><br><span class="line">kind: Pod                       <span class="comment"># 资源类型为Pod</span></span><br><span class="line">metadata:                       </span><br><span class="line">  name: pod-stress              <span class="comment"># 自定义pod的名称</span></span><br><span class="line">spec:</span><br><span class="line">  containers:                   <span class="comment"># 定义pod里包含的容器</span></span><br><span class="line">  - name: c1                    <span class="comment"># 自定义pod中的容器名</span></span><br><span class="line">    image: polinux/stress       <span class="comment"># 启动容器的镜像名</span></span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"stress"</span>]         <span class="comment"># 自定义启动容器时要执行的命令(类似dockerfile里的CMD)</span></span><br><span class="line">    args: [<span class="string">"--vm"</span>, <span class="string">"1"</span>, <span class="string">"--vm-bytes"</span>, <span class="string">"150M"</span>, <span class="string">"--vm-hang"</span>, <span class="string">"1"</span>] <span class="comment"># 自定义启动容器执行命令的参数</span></span><br><span class="line">    </span><br><span class="line"><span class="comment"># polinux/stress这个镜像用于压力测试,在启动容器时传命令与参数就是相当于分配容器运行时需要的压力</span></span><br></pre></td></tr></table></figure>
+
+<p>通过yaml文件创建pod</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod1.yml</span></span><br><span class="line">pod/pod-stress created</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-2-查看pod信息"><a href="#3-2-2-查看pod信息" class="headerlink" title="3.2.2 查看pod信息"></a><strong>3.2.2 查看pod信息</strong></h3><p>查看pod信息</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod</span></span><br><span class="line">NAME          READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod-stress    1/1     Running   0          45s</span><br></pre></td></tr></table></figure>
+
+<p>查看pod详细信息</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -o wide</span></span><br><span class="line">NAME         READY   STATUS    RESTARTS   AGE   IP              NODE          NOMINATED NODE   READINESS GATES</span><br><span class="line">pod-stress   1/1     Running   0          71s   10.244.194.72   k8s-worker1   &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<p>描述pod详细信息</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod pod-stress </span></span><br><span class="line">......</span><br><span class="line">Events:</span><br><span class="line">  Type    Reason     Age   From               Message</span><br><span class="line">  ----    ------     ----  ----               -------</span><br><span class="line">  Normal  Scheduled  102s  default-scheduler  Successfully assigned default/pod-stress to k8s-worker1</span><br><span class="line">  Normal  Pulling    102s  kubelet            Pulling image <span class="string">"polinux/stress"</span></span><br><span class="line">  Normal  Pulled     83s   kubelet            Successfully pulled image <span class="string">"polinux/stress"</span> <span class="keyword">in</span> 18.944533343s</span><br><span class="line">  Normal  Created    83s   kubelet            Created container c1</span><br><span class="line">  Normal  Started    82s   kubelet            Started container c1</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-删除pod"><a href="#3-3-删除pod" class="headerlink" title="3.3 删除pod"></a><strong>3.3 删除pod</strong></h2><h3 id="3-3-1-单个pod删除"><a href="#3-3-1-单个pod删除" class="headerlink" title="3.3.1 单个pod删除"></a><strong>3.3.1 单个pod删除</strong></h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#方法1</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete pod pod-stress</span></span><br><span class="line">pod <span class="string">"pod-stress"</span> deleted</span><br><span class="line"><span class="comment">#方法2</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete -f pod1.yml</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-2-多个pod删除"><a href="#3-3-2-多个pod删除" class="headerlink" title="3.3.2 多个pod删除"></a><strong>3.3.2 多个pod删除</strong></h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#方法1: 后接多个pod名</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete pod pod名1 pod名2 pod名3 ......</span></span><br><span class="line"><span class="comment">#方法2: 通过awk截取要删除的pod名称，然后管道给xargs</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods |awk 'NR&gt;1 &#123;print $1&#125;' |xargs kubectl  delete pod</span></span><br><span class="line"><span class="comment">#方法3: 如果要删除的pod都在同一个非default的命名空间，则可直接删除命名空间</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete ns xxxx</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-4-镜像拉取策略"><a href="#3-4-镜像拉取策略" class="headerlink" title="3.4 镜像拉取策略"></a><strong>3.4 镜像拉取策略</strong></h2><p>由imagePullPolicy参数控制</p>
+<ul>
+<li><p>Always : 不管本地有没有镜像，都要从仓库中下载镜像</p>
+</li>
+<li><p>Never : 从来不从仓库下载镜像, 只用本地镜像,本地没有就算了</p>
+</li>
+<li><p>IfNotPresent: 如果本地存在就直接使用, 不存在才从仓库下载</p>
+</li>
+</ul>
+<p>默认的策略是：</p>
+<ul>
+<li><p>当镜像标签版本是latest，默认策略就是Always</p>
+</li>
+<li><p>如果指定特定版本默认拉取策略就是IfNotPresent。</p>
+</li>
+</ul>
+<p>1, 将上面的pod删除再创建，使用下面命令查看信息</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod1.yml</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete -f pod1.yml</span></span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod pod-stress</span></span><br><span class="line">......</span><br><span class="line">Events:</span><br><span class="line">  Type    Reason     Age   From               Message</span><br><span class="line">  ----    ------     ----  ----               -------</span><br><span class="line">  Normal  Scheduled  102s  default-scheduler  Successfully assigned default/pod-stress to k8s-worker1</span><br><span class="line">  Normal  Pulling    102s  kubelet            Pulling image <span class="string">"polinux/stress"</span></span><br><span class="line">  Normal  Pulled     83s   kubelet            Successfully pulled image <span class="string">"polinux/stress"</span> <span class="keyword">in</span> 18.944533343s</span><br><span class="line">  Normal  Created    83s   kubelet            Created container c1</span><br><span class="line">  Normal  Started    82s   kubelet            Started container c1</span><br></pre></td></tr></table></figure>
+
+<p>说明: 可以看到第二行信息还是通过<code>pulling image</code>下载镜像</p>
+<p>2, 修改YAML</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod1.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-stress</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: c1</span><br><span class="line">    image: polinux/stress</span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"stress"</span>]</span><br><span class="line">    args: [<span class="string">"--vm"</span>, <span class="string">"1"</span>, <span class="string">"--vm-bytes"</span>, <span class="string">"150M"</span>, <span class="string">"--vm-hang"</span>, <span class="string">"1"</span>]</span><br><span class="line">    imagePullPolicy: IfNotPresent <span class="comment">#增加了这一句,如果本地存在就直接使用, 不存在才从仓库下载</span></span><br></pre></td></tr></table></figure>
+
+<p>3，再次删除再创建</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod pod-stress</span></span><br><span class="line">......</span><br><span class="line">Events:</span><br><span class="line">  Type    Reason     Age   From               Message</span><br><span class="line">  ----    ------     ----  ----               -------</span><br><span class="line">  Normal  Scheduled  17s   default-scheduler  Successfully assigned default/pod-stress to k8s-worker1</span><br><span class="line">  Normal  Pulled     17s   kubelet            Container image <span class="string">"polinux/stress"</span> already present on machine</span><br><span class="line">  Normal  Created    17s   kubelet            Created container c1</span><br><span class="line">  Normal  Started    17s   kubelet            Started container c1</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明: 第二行信息是说镜像已经存在，直接使用了</strong></p>
+<h2 id="3-5-pod的标签"><a href="#3-5-pod的标签" class="headerlink" title="3.5 pod的标签"></a><strong>3.5 pod的标签</strong></h2><ul>
+<li>为pod设置label,用于控制器通过label与pod关联</li>
+<li>语法与前面学的node标签几乎一致</li>
+</ul>
+<h3 id="3-5-1-通过命令管理Pod标签"><a href="#3-5-1-通过命令管理Pod标签" class="headerlink" title="3.5.1 通过命令管理Pod标签"></a><strong>3.5.1 通过命令管理Pod标签</strong></h3><p>查看pod的标签</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods --show-labels</span></span><br><span class="line">NAME          READY   STATUS    RESTARTS   AGE   LABELS</span><br><span class="line">pod-stress     1/1    Running   0          7m25s   &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<p>打标签</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl label pod pod-stress region=huanai zone=A env=test bussiness=game</span></span><br><span class="line">pod/pod-stress labeled</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods --show-labels</span></span><br><span class="line">NAME          READY   STATUS    RESTARTS   AGE     LABELS</span><br><span class="line">pod-stress    1/1     Running   0          8m54s   bussiness=game,env=<span class="built_in">test</span>,region=huanai,zone=A</span><br></pre></td></tr></table></figure>
+
+<p>通过等值关系标签查询</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -l zone=A</span></span><br><span class="line">NAME         READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod-stress   1/1     Running   0          9m22s</span><br></pre></td></tr></table></figure>
+
+<p>通过集合关系标签查询</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -l "zone in (A,B,C)"</span></span><br><span class="line">NAME         READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod-stress   1/1     Running   0          9m55s</span><br></pre></td></tr></table></figure>
+
+<p>删除标签后再验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl label pod pod-stress region- zone- env- bussiness-</span></span><br><span class="line">pod/pod-stress labeled</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods --show-labels</span></span><br><span class="line">NAME          READY   STATUS    RESTARTS   AGE   LABELS</span><br><span class="line">pod-stress    1/1     Running   0          16m     &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>小结</strong></p>
+<ul>
+<li>pod的label与node的label操作方式几乎相同</li>
+<li>node的label用于pod调度到指定label的node节点</li>
+<li>pod的label用于controller关联控制的pod</li>
+</ul>
+<h3 id="3-5-2-通过YAML创建Pod时添加标签"><a href="#3-5-2-通过YAML创建Pod时添加标签" class="headerlink" title="3.5.2 通过YAML创建Pod时添加标签"></a><strong>3.5.2 通过YAML创建Pod时添加标签</strong></h3><h4 id="修改yaml"><a href="#修改yaml" class="headerlink" title="修改yaml"></a>修改yaml</h4><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod1.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-stress</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    env: dev</span><br><span class="line">    app: nginx<span class="comment"># 直接在原来的yaml里加上多个标签</span></span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: c1</span><br><span class="line">    image: polinux/stress</span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"stress"</span>]</span><br><span class="line">    args: [<span class="string">"--vm"</span>, <span class="string">"1"</span>, <span class="string">"--vm-bytes"</span>, <span class="string">"150M"</span>, <span class="string">"--vm-hang"</span>, <span class="string">"1"</span>]</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br></pre></td></tr></table></figure>
+
+<h4 id="直接apply应用"><a href="#直接apply应用" class="headerlink" title="直接apply应用"></a>直接apply应用</h4><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod1.yaml</span></span><br><span class="line">pod/pod-stress1 configured  <span class="comment"># 这里是configured,表示修改了</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods --show-labels</span></span><br><span class="line">NAME          READY   STATUS             RESTARTS   AGE     LABELS</span><br><span class="line">pod-stress   1/1     Running            0          3m5s    app=nginx,env=dev <span class="comment"># 标签有了</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-6-pod资源限制"><a href="#3-6-pod资源限制" class="headerlink" title="3.6 pod资源限制"></a><strong>3.6 pod资源限制</strong></h2><p>准备2个不同限制方式的创建pod的yaml文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod2.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Namespace</span><br><span class="line">metadata:</span><br><span class="line">  name: namespace1</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-stress2</span><br><span class="line">  namespace: namespace1</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: c1</span><br><span class="line">    image: polinux/stress</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    resources:</span><br><span class="line">      limits:</span><br><span class="line">        memory: <span class="string">"200Mi"</span></span><br><span class="line">      requests:</span><br><span class="line">        memory: <span class="string">"100Mi"</span></span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"stress"</span>]    <span class="comment"># 启动容器时执行的命令</span></span><br><span class="line">    args: [<span class="string">"--vm"</span>, <span class="string">"1"</span>, <span class="string">"--vm-bytes"</span>, <span class="string">"150M"</span>, <span class="string">"--vm-hang"</span>, <span class="string">"1"</span>]  <span class="comment"># 产生1个进程分配150M内存1秒后释放</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod3.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Namespace</span><br><span class="line">metadata:</span><br><span class="line">  name: namespace1</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-stress3</span><br><span class="line">  namespace: namespace1</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: c1</span><br><span class="line">    image: polinux/stress</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    resources:</span><br><span class="line">      limits:</span><br><span class="line">        memory: <span class="string">"200Mi"</span></span><br><span class="line">      requests:</span><br><span class="line">        memory: <span class="string">"150Mi"</span></span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"stress"</span>]</span><br><span class="line">    args: [<span class="string">"--vm"</span>, <span class="string">"1"</span>, <span class="string">"--vm-bytes"</span>, <span class="string">"250M"</span>, <span class="string">"--vm-hang"</span>, <span class="string">"1"</span>]</span><br></pre></td></tr></table></figure>
+
+<p>创建pod</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod2.yml</span></span><br><span class="line">namespace/namespace1 created</span><br><span class="line">pod/pod-stress2 created</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod3.yml</span></span><br><span class="line">namespace/namespace1 unchanged</span><br><span class="line">pod/pod-stress3 created</span><br></pre></td></tr></table></figure>
+
+<p>查看</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get namespace  |grep namespace1</span></span><br><span class="line">namespace1        Active   1m28s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod -n namespace1</span></span><br><span class="line">NAME          READY   STATUS      RESTARTS   AGE</span><br><span class="line">pod-stress2   1/1     Running     0          2m2s</span><br><span class="line">pod-stress3   0/1     OOMKilled   4          115s</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看会发现pod-stress3这个pod状态变为OOMKilled，因为它是内存不足所以显示Container被杀死</span></span><br></pre></td></tr></table></figure>
+
+<p>说明:  一旦pod中的容器挂了，容器会有重启策略， 如下：</p>
+<ul>
+<li>Always：表示容器挂了总是重启，这是默认策略 </li>
+<li>OnFailures：表容器状态为错误时才重启，也就是容器正常终止时才重启 </li>
+<li>Never：表示容器挂了不予重启 </li>
+<li>对于Always这种策略，容器只要挂了，就会立即重启，这样是很耗费资源的。所以Always重启策略是这么做的：第一次容器挂了立即重启，如果再挂了就要延时10s重启，第三次挂了就等20s重启…… 依次类推 </li>
+</ul>
+<h2 id="3-7-pod包含多个容器"><a href="#3-7-pod包含多个容器" class="headerlink" title="3.7 pod包含多个容器"></a>3.7 pod包含多个容器</h2><p>准备yml文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod4.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-stress4</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: c1</span><br><span class="line">    image: polinux/stress</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    resources:</span><br><span class="line">      limits:</span><br><span class="line">        memory: <span class="string">"200Mi"</span></span><br><span class="line">      requests:</span><br><span class="line">        memory: <span class="string">"100Mi"</span></span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"stress"</span>]</span><br><span class="line">    args: [<span class="string">"--vm"</span>, <span class="string">"1"</span>, <span class="string">"--vm-bytes"</span>, <span class="string">"150M"</span>, <span class="string">"--vm-hang"</span>, <span class="string">"1"</span>]</span><br><span class="line">    </span><br><span class="line">  - name: c2</span><br><span class="line">    image: polinux/stress</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    resources:</span><br><span class="line">      limits:</span><br><span class="line">        memory: <span class="string">"200Mi"</span></span><br><span class="line">      requests:</span><br><span class="line">        memory: <span class="string">"100Mi"</span></span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"stress"</span>]</span><br><span class="line">    args: [<span class="string">"--vm"</span>, <span class="string">"1"</span>, <span class="string">"--vm-bytes"</span>, <span class="string">"150M"</span>, <span class="string">"--vm-hang"</span>, <span class="string">"1"</span>]</span><br></pre></td></tr></table></figure>
+
+<p>应用yml文件创建pod</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod4.yml</span></span><br><span class="line">pod/pod-stress4 created</span><br></pre></td></tr></table></figure>
+
+<p>查看pod在哪个节点</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods  -o wide</span></span><br><span class="line">NAME          READY   STATUS    RESTARTS   AGE     IP               NODE          NOMINATED NODE   READINESS GATES</span><br><span class="line">pod-stress4   2/2     Running   0          70s     10.244.159.136   k8s-master1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line"><span class="comment">#可以看到有2个容器,运行在k8s-master1节点</span></span><br></pre></td></tr></table></figure>
+
+<p>在k8s-master1上验证,确实产生了2个容器</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># docker ps -a |grep stress</span></span><br><span class="line">d7827a963f9d        df58d15b053d              <span class="string">"stress --vm 1 --vm-…"</span>   2 hours ago         Up 2 hours                                      k8s_c2_pod-stress4_default_a534bce1-3ffe-45f5-8128-34657e289b44_0</span><br><span class="line">ae8e8f8d095b        df58d15b053d              <span class="string">"stress --vm 1 --vm-…"</span>   2 hours ago         Up 2 hours                                      k8s_c1_pod-stress4_default_a534bce1-3ffe-45f5-8128-34657e289b44_0</span><br><span class="line">e66461900426        easzlab/pause-amd64:3.2   <span class="string">"/pause"</span>                 2 hours ago         Up 2 hours                                      k8s_POD_pod-stress4_default_a534bce1-3ffe-45f5-8128-34657e289b44_0</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-8-对pod里的容器进行操作"><a href="#3-8-对pod里的容器进行操作" class="headerlink" title="3.8 对pod里的容器进行操作"></a><strong>3.8 对pod里的容器进行操作</strong></h2><h3 id="3-8-1-命令帮助"><a href="#3-8-1-命令帮助" class="headerlink" title="3.8.1 命令帮助"></a><strong>3.8.1 命令帮助</strong></h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -h</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-8-2-不用交互直接执行命令"><a href="#3-8-2-不用交互直接执行命令" class="headerlink" title="3.8.2 不用交互直接执行命令"></a><strong>3.8.2 不用交互直接执行命令</strong></h3><p>格式为: kubectl exec pod名 -c 容器名 – 命令</p>
+<p><strong>注意:</strong> </p>
+<ul>
+<li><p>-c 容器名为可选项,如果是1个pod中1个容器,则不用指定;</p>
+</li>
+<li><p>如果是1个pod中多个容器,不指定默认为第1个。</p>
+</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec pod-stress4 -c c2  -- touch /111</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec pod-stress4 -c c2  -- ls /111</span></span><br><span class="line">/111</span><br></pre></td></tr></table></figure>
+
+<p>不指定容器名,则默认为pod里的第1个容器</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec  pod-stress4  -- touch /222</span></span><br><span class="line">Defaulting container name to c1.</span><br><span class="line">Use <span class="string">'kubectl describe pod/pod-stress4 -n default'</span> to see all of the containers <span class="keyword">in</span> this pod.</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-8-3-和容器交互操作"><a href="#3-8-3-和容器交互操作" class="headerlink" title="3.8.3 和容器交互操作"></a><strong>3.8.3 和容器交互操作</strong></h3><p>和docker exec几乎一样</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -it pod-stress4 -c c1 -- /bin/bash</span></span><br><span class="line">bash-5.0<span class="comment"># touch /333</span></span><br><span class="line">bash-5.0<span class="comment"># ls</span></span><br><span class="line">222    bin    etc    lib    mnt    proc   run    srv    tmp    var</span><br><span class="line">333    dev    home   media  opt    root   sbin   sys    usr</span><br><span class="line">bash-5.0<span class="comment"># exit</span></span><br><span class="line"><span class="built_in">exit</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-9-验证pod中多个容器网络共享"><a href="#3-9-验证pod中多个容器网络共享" class="headerlink" title="3.9 验证pod中多个容器网络共享"></a><strong>3.9 验证pod中多个容器网络共享</strong></h2><p> 编写YAML</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-nginx.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: nginx2</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: c1</span><br><span class="line">    image: nginx:1.15-alpine</span><br><span class="line"></span><br><span class="line">  - name: c2</span><br><span class="line">    image: nginx:1.15-alpine</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-nginx.yaml</span></span><br><span class="line">pod/nginx2 created</span><br></pre></td></tr></table></figure>
+
+<p>查看pod信息与状态</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod nginx2</span></span><br><span class="line">......</span><br><span class="line">......</span><br><span class="line">Events:</span><br><span class="line">  Type    Reason     Age              From               Message</span><br><span class="line">  ----    ------     ----             ----               -------</span><br><span class="line">  Normal  Scheduled  25s              default-scheduler  Successfully assigned default/nginx2 to k8s-worker1</span><br><span class="line">  Normal  Pulling    24s              kubelet            Pulling image <span class="string">"nginx:1.15-alpine"</span></span><br><span class="line">  Normal  Pulled     5s               kubelet            Successfully pulled image <span class="string">"nginx:1.15-alpine"</span> <span class="keyword">in</span> 18.928009025s</span><br><span class="line">  Normal  Created    5s               kubelet            Created container c1</span><br><span class="line">  Normal  Started    5s               kubelet            Started container c1</span><br><span class="line">  Normal  Pulled     2s (x2 over 5s)  kubelet            Container image <span class="string">"nginx:1.15-alpine"</span> already present on machine</span><br><span class="line">  Normal  Created    2s (x2 over 5s)  kubelet            Created container c2</span><br><span class="line">  Normal  Started    2s (x2 over 5s)  kubelet            Started container c2</span><br><span class="line">  </span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods |grep nginx2</span></span><br><span class="line">nginx2   1/2     CrashLoopBackOff   3          2m40s</span><br><span class="line"><span class="comment">#有一个启不来，因为一个容器中两个pod是共用网络的，所以不能两个都占用80端口</span></span><br></pre></td></tr></table></figure>
+
+<p>有一个启不来，因为一个pod中两个容器是共用网络的，所以不能两个都占用80端口</p>
+<p>通过查找k8s-worker1上面的容器，然后docker logs或crictl logs containerID查看，得到如下的报错，说明是端口被占用</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-worker1 ~]<span class="comment"># docker logs k8s_c2_nginx2_default_51fd8e81-1c4b-4557-9498-9b25ed8a4c99_4</span></span><br><span class="line">2020/11/21 04:29:12 [emerg] 1<span class="comment">#1: bind() to 0.0.0.0:80 failed (98: Address in use)</span></span><br><span class="line">nginx: [emerg] <span class="built_in">bind</span>() to 0.0.0.0:80 failed (98: Address <span class="keyword">in</span> use)</span><br><span class="line">2020/11/21 04:29:12 [emerg] 1<span class="comment">#1: bind() to 0.0.0.0:80 failed (98: Address in use)</span></span><br><span class="line">nginx: [emerg] <span class="built_in">bind</span>() to 0.0.0.0:80 failed (98: Address <span class="keyword">in</span> use)</span><br><span class="line">2020/11/21 04:29:12 [emerg] 1<span class="comment">#1: bind() to 0.0.0.0:80 failed (98: Address in use)</span></span><br><span class="line">nginx: [emerg] <span class="built_in">bind</span>() to 0.0.0.0:80 failed (98: Address <span class="keyword">in</span> use)</span><br><span class="line">2020/11/21 04:29:12 [emerg] 1<span class="comment">#1: bind() to 0.0.0.0:80 failed (98: Address in use)</span></span><br><span class="line">nginx: [emerg] <span class="built_in">bind</span>() to 0.0.0.0:80 failed (98: Address <span class="keyword">in</span> use)</span><br><span class="line">2020/11/21 04:29:12 [emerg] 1<span class="comment">#1: bind() to 0.0.0.0:80 failed (98: Address in use)</span></span><br><span class="line">nginx: [emerg] <span class="built_in">bind</span>() to 0.0.0.0:80 failed (98: Address <span class="keyword">in</span> use)</span><br><span class="line">2020/11/21 04:29:12 [emerg] 1<span class="comment">#1: still could not bind()</span></span><br><span class="line">nginx: [emerg] still could not <span class="built_in">bind</span>()</span><br></pre></td></tr></table></figure>
+
+<h1 id="四、pod调度"><a href="#四、pod调度" class="headerlink" title="四、pod调度"></a><strong>四、pod调度</strong></h1><h2 id="4-1-pod调度流程"><a href="#4-1-pod调度流程" class="headerlink" title="4.1 pod调度流程"></a><strong>4.1 pod调度流程</strong></h2><p><img src="images/k8s-pod/%E6%88%AA%E5%9B%BE16.png" alt="截图16">``</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">Step1</span><br><span class="line">通过kubectl命令应用资源清单文件（yaml格式）向api server 发起一个create pod 请求</span><br><span class="line"></span><br><span class="line">Step2</span><br><span class="line">api server接收到pod创建请求后，生成一个包含创建信息资源清单文件</span><br><span class="line"></span><br><span class="line">Step3</span><br><span class="line">apiserver 将资源清单文件中信息写入etcd数据库</span><br><span class="line"></span><br><span class="line">Step4</span><br><span class="line">Scheduler启动后会一直watch API Server，获取 podSpec.NodeName为空的Pod,即判断pod.spec.Node == null? 若为null，表示这个Pod请求是新的，需要创建，因此先进行调度计算（共计2步：1、过滤不满足条件的，2、选择优先级高的），找到合适的node，然后将信息在etcd数据库中更新分配结果：pod.spec.Node = nodeA (设置一个具体的节点)</span><br><span class="line"></span><br><span class="line">Step5</span><br><span class="line">kubelet 通过watch etcd数据库(即不停地看etcd中的记录)，发现有新的Node出现，如果这条记录中的Node与所在节点编号相同，即这个Pod由scheduler分配给自己，则调用node中的Container Runtime，进而创建container，并将创建后的结果返回到给api server用于更新etcd数据库中数据状态。</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-2-调度约束方法"><a href="#4-2-调度约束方法" class="headerlink" title="4.2 调度约束方法"></a><strong>4.2 调度约束方法</strong></h2><p>我们为了实现容器主机资源平衡使用, 可以使用约束把pod调度到指定的node节点</p>
+<ul>
+<li><p>nodeName 用于将pod调度到指定的node名称上</p>
+</li>
+<li><p>nodeSelector 用于将pod调度到匹配Label的node上</p>
+</li>
+</ul>
+<h3 id="4-2-1-nodeName"><a href="#4-2-1-nodeName" class="headerlink" title="4.2.1  nodeName"></a><strong>4.2.1  nodeName</strong></h3><p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-nodename.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-nodename</span><br><span class="line">spec:</span><br><span class="line">  nodeName: k8s-worker1                    <span class="comment"># 通过nodeName调度到k8s-worker1节点</span></span><br><span class="line">  containers:</span><br><span class="line">  - name: nginx</span><br><span class="line">    image: nginx:1.15-alpine</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件创建pod</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-nodename.yml</span></span><br><span class="line">pod/pod-nodename created</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod pod-nodename |tail -6</span></span><br><span class="line">Events:</span><br><span class="line">  Type    Reason   Age    From     Message</span><br><span class="line">  ----    ------   ----   ----     -------</span><br><span class="line">  Normal  Pulled   2m47s  kubelet  Container image <span class="string">"nginx:1.15-alpine"</span> already present on machine</span><br><span class="line">  Normal  Created  2m47s  kubelet  Created container nginx</span><br><span class="line">  Normal  Started  2m47s  kubelet  Started container nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">#倒数第3行没有使用scheduler,而是直接给运行了,说明nodeName约束生效</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-2-nodeSelector"><a href="#4-2-2-nodeSelector" class="headerlink" title="4.2.2 nodeSelector"></a><strong>4.2.2 nodeSelector</strong></h3><p>为k8s-worker1打标签</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl label nodes k8s-worker1 bussiness=game</span></span><br><span class="line">node/k8s-worker1 labeled</span><br></pre></td></tr></table></figure>
+
+<p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-nodeselector.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-nodeselect</span><br><span class="line">spec:</span><br><span class="line">  nodeSelector:                         <span class="comment"># nodeSelector节点选择器</span></span><br><span class="line">    bussiness: game                     <span class="comment"># 指定调度到标签为bussiness=game的节点</span></span><br><span class="line">  containers:</span><br><span class="line">  - name: nginx</span><br><span class="line">    image: nginx:1.15-alpine</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件创建pod</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-nodeselector.yml</span></span><br><span class="line">pod/pod-nodeselect created</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod pod-nodeselect |tail -6</span></span><br><span class="line"> Type    Reason     Age   From               Message</span><br><span class="line">  ----    ------     ----  ----               -------</span><br><span class="line">  Normal  Scheduled  20s   default-scheduler  Successfully assigned default/pod-nodeselect to k8s-worker1</span><br><span class="line">  Normal  Pulled     19s   kubelet            Container image <span class="string">"nginx:1.15-alpine"</span> already present on machine</span><br><span class="line">  Normal  Created    19s   kubelet            Created container nginx</span><br><span class="line">  Normal  Started    19s   kubelet            Started container nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">#仍然经过了scheduler,但确实分配到了 k8s-worker1上</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="五、pod的生命周期"><a href="#五、pod的生命周期" class="headerlink" title="五、pod的生命周期"></a><strong>五、pod的生命周期</strong></h1><h2 id="5-1-Pod生命周期"><a href="#5-1-Pod生命周期" class="headerlink" title="5.1 Pod生命周期"></a><strong>5.1 Pod生命周期</strong></h2><ul>
+<li>有些pod(比如运行httpd服务),正常情况下会一直运行中,但如果手动删除它,此pod会终止</li>
+<li>也有些pod(比如执行计算任务)，任务计算完后就会自动终止</li>
+</ul>
+<p>上面两种场景中,pod从创建到终止的过程就是pod的生命周期。</p>
+<p><img src="images/k8s-pod/%E6%88%AA%E5%9B%BE17.png" alt="截图17"></p>
+<h3 id="5-1-1-容器启动"><a href="#5-1-1-容器启动" class="headerlink" title="5.1.1 容器启动"></a>5.1.1 容器启动</h3><ol>
+<li>pod中的容器在创建前,有初始化容器(init container)来进行初始化环境</li>
+<li>初化完后,主容器(main container)开始启动</li>
+<li>主容器启动后,有一个<strong>post start</strong>的操作(启动后的触发型操作,或者叫启动后钩子)</li>
+<li>post start后,就开始做健康检查</li>
+</ol>
+<ul>
+<li><ul>
+<li>第一个健康检查叫存活状态检查(liveness probe )，用来检查主容器存活状态的</li>
+<li>第二个健康检查叫准备就绪检查(readiness probe)，用来检查主容器是否启动就绪</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-1-2-容器终止"><a href="#5-1-2-容器终止" class="headerlink" title="5.1.2 容器终止"></a><strong>5.1.2 容器终止</strong></h3><ol>
+<li>可以在容器终止前设置<strong>pre stop</strong>操作(终止前的触发型操作,或者叫终止前钩子)</li>
+<li>当出现特殊情况不能正常销毁pod时,大概等待30秒会强制终止</li>
+<li>终止容器后还可能会重启容器(视容器重启策略而定)。</li>
+</ol>
+<h3 id="5-1-3-容器重启策略"><a href="#5-1-3-容器重启策略" class="headerlink" title="5.1.3 容器重启策略"></a><strong>5.1.3 容器重启策略</strong></h3><ul>
+<li><p>Always：表示容器挂了总是重启，这是默认策略 </p>
+</li>
+<li><p>OnFailures：表示容器状态为错误时才重启，也就是容器正常终止时不重启 </p>
+</li>
+<li><p>Never：表示容器挂了不予重启 </p>
+</li>
+<li><p>对于Always这种策略，容器只要挂了，就会立即重启，这样是很耗费资源的。所以Always重启策略是这么做的：第一次容器挂了立即重启，如果再挂了就要延时10s重启，第三次挂了就等20s重启…… 依次类推 </p>
+</li>
+</ul>
+<h2 id="5-2-HealthCheck健康检查"><a href="#5-2-HealthCheck健康检查" class="headerlink" title="5.2 HealthCheck健康检查"></a><strong>5.2 HealthCheck健康检查</strong></h2><p>当Pod启动时，容器可能会因为某种错误(服务未启动或端口不正确)而无法访问等。</p>
+<h3 id="5-2-1-Health-Check方式"><a href="#5-2-1-Health-Check方式" class="headerlink" title="5.2.1 Health Check方式"></a><strong>5.2.1 Health Check方式</strong></h3><p>kubelet拥有两个检测器，它们分别对应不同的触发器(根据触发器的结构执行进一步的动作)</p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Liveness Probe(存活状态探测)</td>
+<td>指示容器是否正在运行。如果存活态探测失败，则 kubelet 会杀死容器， 并且容器将根据其<a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy" target="_blank" rel="noopener">重启策略</a>决定未来。如果容器不提供存活探针， 则默认状态为 Success。</td>
+</tr>
+<tr>
+<td>readiness Probe(就绪型探测)</td>
+<td>指示容器是否准备好为请求提供服务。如果就绪态探测失败， 端点控制器将从与 Pod 匹配的所有服务的端点列表中删除该 Pod 的 IP 地址。 初始延迟之前的就绪态的状态值默认为 Failure。 如果容器不提供就绪态探针，则默认状态为 Success。注：检查后不健康，将容器设置为Notready;如果使用service来访问,流量不会转发给此种状态的pod</td>
+</tr>
+<tr>
+<td>startup Probe</td>
+<td>指示容器中的应用是否已经启动。如果提供了启动探针，则所有其他探针都会被 禁用，直到此探针成功为止。如果启动探测失败，kubelet 将杀死容器，而容器依其 <a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy" target="_blank" rel="noopener">重启策略</a>进行重启。 如果容器没有提供启动探测，则默认状态为 Success。</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-2-Probe探测方式"><a href="#5-2-2-Probe探测方式" class="headerlink" title="5.2.2 Probe探测方式"></a><strong>5.2.2 Probe探测方式</strong></h3><table>
+<thead>
+<tr>
+<th>方式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Exec</td>
+<td>执行命令</td>
+</tr>
+<tr>
+<td>HTTPGet</td>
+<td>http请求某一个URL路径</td>
+</tr>
+<tr>
+<td>TCP</td>
+<td>tcp连接某一个端口</td>
+</tr>
+<tr>
+<td>gRPC</td>
+<td>使用 <a href="https://grpc.io/" target="_blank" rel="noopener">gRPC</a> 执行一个远程过程调用。 目标应该实现 <a href="https://grpc.io/grpc/core/md_doc_health-checking.html" target="_blank" rel="noopener">gRPC健康检查</a>。 如果响应的状态是 “SERVING”，则认为诊断成功。 gRPC 探针是一个 alpha 特性，只有在你启用了 “GRPCContainerProbe” <a href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/feature-gate/" target="_blank" rel="noopener">特性门控</a>时才能使用。</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-3-liveness-exec案例"><a href="#5-2-3-liveness-exec案例" class="headerlink" title="5.2.3 liveness-exec案例"></a><strong>5.2.3 liveness-exec案例</strong></h3><p>准备YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-liveness-exec.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: liveness-exec</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: liveness</span><br><span class="line">    image: busybox</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    args:</span><br><span class="line">    - /bin/sh</span><br><span class="line">    - -c</span><br><span class="line">    - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600</span><br><span class="line">    livenessProbe:</span><br><span class="line">      <span class="built_in">exec</span>:</span><br><span class="line">        <span class="built_in">command</span>:</span><br><span class="line">        - cat</span><br><span class="line">        - /tmp/healthy</span><br><span class="line">      initialDelaySeconds: 5 <span class="comment"># pod启动延迟5秒后探测</span></span><br><span class="line">      periodSeconds: 5 <span class="comment"># 每5秒探测1次</span></span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-liveness-exec.yml</span></span><br></pre></td></tr></table></figure>
+
+<p>通过下面的命令观察</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod liveness-exec</span></span><br><span class="line">......</span><br><span class="line">Events:</span><br><span class="line">  Type     Reason     Age   From               Message</span><br><span class="line">  ----     ------     ----  ----               -------</span><br><span class="line">  Normal   Scheduled  40s   default-scheduler  Successfully assigned default/liveness-exec to k8s-worker1</span><br><span class="line">  Normal   Pulled     38s   kubelet    Container image <span class="string">"busybox"</span> already present on machine</span><br><span class="line">  Normal   Created    37s   kubelet     Created container liveness</span><br><span class="line">  Normal   Started    37s   kubelet     Started container liveness</span><br><span class="line">  Warning  Unhealthy  3s    kubelet     Liveness probe failed: cat: can<span class="string">'t open '</span>/tmp/healthy<span class="string">': No such file or directory</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#看到40s前被调度以k8s-worker1节点,3s前健康检查出问题</span></span><br></pre></td></tr></table></figure>
+
+<p>过几分钟再观察</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl describe pod liveness-exec</span></span><br><span class="line">......</span><br><span class="line">Events:</span><br><span class="line">  Type     Reason     Age                  From               Message</span><br><span class="line">  ----     ------     ----                 ----               -------</span><br><span class="line">  Normal   Scheduled  3m42s                default-scheduler  Successfully assigned default/liveness-exec to k8s-worker1</span><br><span class="line">  Normal   Pulled     70s (x3 over 3m40s)  kubelet     Container image <span class="string">"busybox"</span> already present on machine</span><br><span class="line">  Normal   Created    70s (x3 over 3m39s)  kubelet     Created container liveness</span><br><span class="line">  Normal   Started    69s (x3 over 3m39s)  kubelet     Started container liveness</span><br><span class="line">  Warning  Unhealthy  26s (x9 over 3m5s)   kubelet     Liveness probe failed: cat: can<span class="string">'t open '</span>/tmp/healthy<span class="string">': No such file or directory</span></span><br><span class="line"><span class="string">  Normal   Killing    26s (x3 over 2m55s)  kubelet     Container liveness failed liveness probe, will be restarted</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">[root@k8s-master1 ~]# kubectl get pod</span></span><br><span class="line"><span class="string">NAME            READY   STATUS    RESTARTS   AGE</span></span><br><span class="line"><span class="string">liveness-exec   1/1     Running   3          4m12s</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#看到重启3次,慢慢地重启间隔时间会越来越长</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>拓展: 容器重启策略验证</strong></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: liveness-exec</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  restartPolicy: Never<span class="comment"># 把容器重启策略由默认的always改为Never</span></span><br><span class="line">  containers:</span><br><span class="line">  - name: liveness</span><br><span class="line">    image: busybox</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    args:</span><br><span class="line">    - /bin/sh</span><br><span class="line">    - -c</span><br><span class="line">    - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600</span><br><span class="line">    livenessProbe:</span><br><span class="line">      <span class="built_in">exec</span>:</span><br><span class="line">        <span class="built_in">command</span>:</span><br><span class="line">        - cat</span><br><span class="line">        - /tmp/healthy</span><br><span class="line">      initialDelaySeconds: 5                         </span><br><span class="line">      periodSeconds: 5     </span><br><span class="line"> <span class="comment">#容器健康检查出现问题后，不再重启，也不会继续sleep 600秒，而是直接关闭了</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-4-liveness-httpget案例"><a href="#5-2-4-liveness-httpget案例" class="headerlink" title="5.2.4  liveness-httpget案例"></a><strong>5.2.4  liveness-httpget案例</strong></h3><p>编写YMAL文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-liveness-httpget.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: liveness-httpget</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: liveness</span><br><span class="line">    image: nginx:1.15-alpine</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    ports:    <span class="comment"># 指定容器端口，这一段不写也行，端口由镜像决定 </span></span><br><span class="line">    - name: http<span class="comment"># 自定义名称，不需要与下面的port: http对应</span></span><br><span class="line">      containerPort: 80<span class="comment"># 类似dockerfile里的expose 80</span></span><br><span class="line">    livenessProbe:</span><br><span class="line">      httpGet:                          <span class="comment"># 使用httpGet方式</span></span><br><span class="line">        port: http                      <span class="comment"># http协议,也可以直接写80端口</span></span><br><span class="line">        path: /index.html               <span class="comment"># 探测家目录下的index.html</span></span><br><span class="line">      initialDelaySeconds: 3            <span class="comment"># 延迟3秒开始探测</span></span><br><span class="line">      periodSeconds: 5                  <span class="comment"># 每隔5s钟探测一次</span></span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-liveness-httpget.yml</span></span><br></pre></td></tr></table></figure>
+
+<p>验证查看</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME               READY   STATUS             RESTARTS   AGE</span><br><span class="line">liveness-httpget   1/1     Running            0          9s</span><br></pre></td></tr></table></figure>
+
+<p>交互删除nginx里的主页文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -it liveness-httpget -- rm -rf /usr/share/nginx/html/index.html</span></span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod</span></span><br><span class="line">NAME               READY   STATUS    RESTARTS   AGE</span><br><span class="line">liveness-httpget   1/1     Running   1          11m</span><br><span class="line"></span><br><span class="line">只restart一次</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-5-liveness-tcp案例"><a href="#5-2-5-liveness-tcp案例" class="headerlink" title="5.2.5  liveness-tcp案例"></a><strong>5.2.5  liveness-tcp案例</strong></h3><p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-liveness-tcp.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: liveness-tcp</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: liveness</span><br><span class="line">    image: nginx:1.15-alpine</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    ports:</span><br><span class="line">    - name: http</span><br><span class="line">      containerPort: 80</span><br><span class="line">    livenessProbe:</span><br><span class="line">      tcpSocket:                        <span class="comment"># 使用tcp连接方式</span></span><br><span class="line">        port: 80                        <span class="comment"># 连接80端口进行探测</span></span><br><span class="line">      initialDelaySeconds: 3</span><br><span class="line">      periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件创建pod</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-liveness-tcp.yml</span></span><br><span class="line">pod/liveness-tcp created</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod</span></span><br><span class="line">NAME               READY   STATUS             RESTARTS   AGE</span><br><span class="line">liveness-tcp       1/1     Running            0          14s</span><br></pre></td></tr></table></figure>
+
+<p>交互关闭nginx</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -it liveness-tcp -- /usr/sbin/nginx -s stop</span></span><br></pre></td></tr></table></figure>
+
+<p>再次验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod</span></span><br><span class="line">NAME               READY   STATUS    RESTARTS   AGE</span><br><span class="line">liveness-tcp       1/1     Running   1          5m13s</span><br><span class="line"></span><br><span class="line"><span class="comment">#也只重启1次,重启后重新初始化了</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>5.2.6 readiness案例</strong></p>
+<p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-readiness-httpget.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: readiness-httpget</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: readiness</span><br><span class="line">    image: nginx:1.15-alpine</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    ports:</span><br><span class="line">    - name: http</span><br><span class="line">      containerPort: 80</span><br><span class="line">    readinessProbe:                     <span class="comment"># 这里由liveness换成了readiness</span></span><br><span class="line">      httpGet:</span><br><span class="line">        port: http</span><br><span class="line">        path: /index.html</span><br><span class="line">      initialDelaySeconds: 3</span><br><span class="line">      periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-readiness-httpget.yml</span></span><br><span class="line">pod/readiness-httpget created</span><br></pre></td></tr></table></figure>
+
+<p>验证查看</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod</span></span><br><span class="line">NAME                READY   STATUS             RESTARTS   AGE</span><br><span class="line">readiness-httpget   1/1     Running            0          10s</span><br></pre></td></tr></table></figure>
+
+<p>交互删除nginx主页</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -it readiness-httpget -- rm -rf /usr/share/nginx/html/index.html</span></span><br></pre></td></tr></table></figure>
+
+<p>再次验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod</span></span><br><span class="line">NAME                READY   STATUS    RESTARTS   AGE</span><br><span class="line">readiness-httpget   0/1     Running   0          2m49s</span><br><span class="line"></span><br><span class="line">READY状态为0/1</span><br></pre></td></tr></table></figure>
+
+<p>交互创建nginx主页文件再验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -it readiness-httpget -- touch /usr/share/nginx/html/index.html</span></span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod</span></span><br><span class="line">NAME                READY   STATUS             RESTARTS   AGE</span><br><span class="line">readiness-httpget   1/1     Running            0          3m10s</span><br><span class="line"></span><br><span class="line"><span class="comment">#READY状态又为1/1了</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-7-readiness-liveness综合案例"><a href="#5-2-7-readiness-liveness综合案例" class="headerlink" title="5.2.7 readiness+liveness综合案例"></a><strong>5.2.7 readiness+liveness综合案例</strong></h3><p> 编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-readiness-liveiness.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: readiness-liveness-httpget</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: readiness-liveness</span><br><span class="line">    image: nginx:1.15-alpine</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    ports:</span><br><span class="line">    - name: http</span><br><span class="line">      containerPort: 80</span><br><span class="line">    livenessProbe:</span><br><span class="line">      httpGet:</span><br><span class="line">        port: http</span><br><span class="line">        path: /index.html</span><br><span class="line">      initialDelaySeconds: 1</span><br><span class="line">      periodSeconds: 3</span><br><span class="line">    readinessProbe:</span><br><span class="line">      httpGet:</span><br><span class="line">        port: http</span><br><span class="line">        path: /index.html</span><br><span class="line">      initialDelaySeconds: 5</span><br><span class="line">      periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<p>应用YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-readiness-liveiness.yml</span></span><br><span class="line">pod/readiness-liveness-httpget created</span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod |grep readiness-liveness-httpget</span></span><br><span class="line">NAME                         READY   STATUS             RESTARTS   AGE</span><br><span class="line">readiness-liveness-httpget   0/1     Running            0          6s</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-3-post-start"><a href="#5-3-post-start" class="headerlink" title="5.3 post-start"></a><strong>5.3 post-start</strong></h2><p> 编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim pod-poststart.yml</span></span><br><span class="line"></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: poststart</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: poststart</span><br><span class="line">    image: nginx:1.15-alpine</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    lifecycle:                                       <span class="comment"># 生命周期事件</span></span><br><span class="line">      postStart:</span><br><span class="line">        <span class="built_in">exec</span>:</span><br><span class="line">          <span class="built_in">command</span>: [<span class="string">"mkdir"</span>,<span class="string">"-p"</span>,<span class="string">"/usr/share/nginx/html/haha"</span>]</span><br></pre></td></tr></table></figure>
+
+<p>应用YMAL文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f pod-poststart.yml</span></span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                         READY   STATUS             RESTARTS   AGE</span><br><span class="line">poststart                    1/1     Running            0          25s</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl exec -it poststart -- ls /usr/share/nginx/html -l</span></span><br><span class="line">total 8</span><br><span class="line">-rw-r--r-- 1 root root 494 Apr 16 13:08 50x.html</span><br><span class="line">drwxr-xr-x 2 root root   6 Aug  5 05:33 haha有创建此目录</span><br><span class="line">-rw-r--r-- 1 root root 612 Apr 16 13:08 index.html</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-4-pre-stop"><a href="#5-4-pre-stop" class="headerlink" title="5.4 pre-stop"></a><strong>5.4 pre-stop</strong></h2><p>容器终止前执行的命令</p>
+<p>编写YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim prestop.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: prestop</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: prestop</span><br><span class="line">    image: nginx:1.15-alpine</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    lifecycle:                                       <span class="comment"># 生命周期事件</span></span><br><span class="line">      preStop:                                       <span class="comment"># preStop</span></span><br><span class="line">        <span class="built_in">exec</span>:</span><br><span class="line">          <span class="built_in">command</span>: [<span class="string">"/bin/sh"</span>,<span class="string">"-c"</span>,<span class="string">"sleep 60000000"</span>]     <span class="comment"># 容器终止前sleep 60000000秒</span></span><br></pre></td></tr></table></figure>
+
+<p> 应用YAML文件创建pod</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f prestop.yml</span></span><br><span class="line">pod/prestop created</span><br></pre></td></tr></table></figure>
+
+<p>删除pod验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete -f prestop.yml</span></span><br><span class="line">pod <span class="string">"prestop"</span> deleted会在这一步等待一定的时间(大概30s-60s左右)才能删除,说明验证成功</span><br></pre></td></tr></table></figure>
+
+<p><strong>结论:</strong> 当出现特殊情况不能正常销毁pod时,大概等待30秒会强制终止</p>
+<h2 id="5-5-pod故障排除"><a href="#5-5-pod故障排除" class="headerlink" title="5.5 pod故障排除"></a><strong>5.5 pod故障排除</strong></h2><table>
+<thead>
+<tr>
+<th>状态</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pending（悬决）</td>
+<td>Pod 已被 Kubernetes 系统接受，但有一个或者多个容器尚未创建亦未运行。此阶段包括等待 Pod 被调度的时间和通过网络下载镜像的时间。</td>
+</tr>
+<tr>
+<td>Running（运行中）</td>
+<td>pod已经绑定到一个节点，并且已经创建了所有容器。至少有一个容器正在运行中，或正在启动或重新启动。</td>
+</tr>
+<tr>
+<td>completed（完成）</td>
+<td>Pod中的所有容器都已成功终止，不会重新启动。</td>
+</tr>
+<tr>
+<td>Failed（失败）</td>
+<td>Pod的所有容器均已终止，且至少有一个容器已在故障中终止。也就是说，容器要么以非零状态退出，要么被系统终止。</td>
+</tr>
+<tr>
+<td>Unknown（未知）</td>
+<td>由于某种原因apiserver无法获得Pod的状态，通常是由于Master与Pod所在主机kubelet通信时出错。</td>
+</tr>
+<tr>
+<td>CrashLoopBackOff</td>
+<td>多见于CMD语句错误或者找不到container入口语句导致了快速退出,可以用kubectl logs 查看日志进行排错</td>
+</tr>
+</tbody></table>
+<ul>
+<li><code>kubectl describe pod  pod名</code></li>
+<li><code>kubectl logs pod  [-c CONTAINER]</code></li>
+<li><code>kubectl exec POD [-c CONTAINER] --COMMAND [args...]</code></li>
+</ul>
+<h1 id="六、自动水平拉伸pod"><a href="#六、自动水平拉伸pod" class="headerlink" title="六、自动水平拉伸pod"></a><strong>六、自动水平拉伸pod</strong></h1><p>deployment可以实现自动伸缩，使其pod的数量介于指定范围之间，CPU使用维持在指定比例</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">kubectl autoscale deployment my-nginx --min&#x3D;4 --max&#x3D;15 --cpu-percent&#x3D;80 -n mynamespace</span><br><span class="line">kubectl -n mynamespace set resources deployment&#x2F;my-ngiinx --limit&#x3D;cpu&#x3D;200m.memory&#x3D;512Mi</span><br><span class="line"></span><br><span class="line">#移除自动伸缩</span><br><span class="line">kubectl delete horizontalpodautoscalers.autoscaling -n mynamespace my-nginx</span><br><span class="line">#修改副本数量</span><br><span class="line">kubectl edit horizontalpodautoscalers.autoscaling -n mynamespace my-nginx</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>K8s</category>
+      </categories>
+      <tags>
+        <tag>K8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K8s-YAML</title>
+    <url>/2022/11/15/k8s-yaml/</url>
+    <content><![CDATA[<h1 id="一、YAML介绍"><a href="#一、YAML介绍" class="headerlink" title="一、YAML介绍"></a><strong>一、YAML介绍</strong></h1><p>  YAML 的意思是：仍是一种标记语言，但为了强调这种语言以数据做为中心，而不是以标记语言为重点。是一个可读性高，用来表达数据序列的格式。</p>
+<h1 id="二、基本语法"><a href="#二、基本语法" class="headerlink" title="二、基本语法"></a><strong>二、基本语法</strong></h1><p>1.低版本缩进时不允许使用Tab键，只允许使用空格 </p>
+<p>2.缩进的空格数目不重要，只要相同层级的元素左侧对齐即可</p>
+<p>3.# 标识注释，从这个字符一直到行尾，都会被解释器忽略</p>
+<a id="more"></a>
+
+<h1 id="三、YAML-支持的数据结构"><a href="#三、YAML-支持的数据结构" class="headerlink" title="三、YAML  支持的数据结构"></a><strong>三、YAML  支持的数据结构</strong></h1><ul>
+<li>对象：键值对的集合，又称为映射（mapping）/ 哈希（hashes） / 字典（dictionary）</li>
+<li>数组：一组按次序排列的值，又称为序列（sequence） / 列表 （list）</li>
+<li>纯量（scalars）：单个的、不可再分的值  </li>
+</ul>
+<h2 id="对象类型"><a href="#对象类型" class="headerlink" title="对象类型"></a>对象类型</h2><p>对象的一组键值对，使用冒号结构表示</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">name: Steve</span><br><span class="line">age: 18</span><br></pre></td></tr></table></figure>
+
+<p>Yaml 也允许另一种写法，将所有键值对写成一个行内对象</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hash: &#123; name: Steve, age: 18 &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="数组类型"><a href="#数组类型" class="headerlink" title="数组类型"></a>数组类型</h2><p>一组连词线开头的行，构成一个数组</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">animal</span><br><span class="line">- Cat</span><br><span class="line">- Dog</span><br></pre></td></tr></table></figure>
+
+<p>数组也可以采用行内表示法  </p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">animal: [Cat, Dog]</span><br></pre></td></tr></table></figure>
+
+<h2 id="复合结构"><a href="#复合结构" class="headerlink" title="复合结构"></a>复合结构</h2><p>对象和数组可以结合使用，形成复合结构</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">languages:</span><br><span class="line">- Ruby </span><br><span class="line">- Perl </span><br><span class="line">- Python</span><br><span class="line">websites:</span><br><span class="line">YAML: yaml.org </span><br><span class="line">Ruby: ruby-lang.org </span><br><span class="line">Python: python.org </span><br><span class="line">Perl: use.perl.org</span><br></pre></td></tr></table></figure>
+
+<h2 id="纯量"><a href="#纯量" class="headerlink" title="纯量"></a>纯量</h2><p>纯量是最基本的、不可再分的值。以下数据类型都属于纯量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">字符串  布尔值  整数 浮点数 Null </span><br><span class="line">时间  日期</span><br><span class="line"></span><br><span class="line">数值直接以字面量的形式表示</span><br><span class="line">number: 12.30</span><br><span class="line"></span><br><span class="line">布尔值用true和false表示</span><br><span class="line">isSet: true</span><br><span class="line"></span><br><span class="line">null用 ~ 表示</span><br><span class="line">parent: ~</span><br><span class="line"></span><br><span class="line">时间采用 ISO8601 格式</span><br><span class="line">iso8601: 2001-12-14t21:59:43.10-05:00</span><br><span class="line"></span><br><span class="line">日期采用复合 iso8601 格式的年、月、日表示</span><br><span class="line">date: 1976-07-31</span><br><span class="line"></span><br><span class="line">YAML 允许使用两个感叹号，强制转换数据类型</span><br><span class="line">e: !!str 123</span><br><span class="line">f: !!str true</span><br></pre></td></tr></table></figure>
+
+<h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><p>字符串默认不使用引号表示</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">str: 这是一行字符串</span><br></pre></td></tr></table></figure>
+
+<p>如果字符串之中包含空格或特殊字符，需要放在引号之中</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">str: &#39;内容：  字符串&#39;</span><br></pre></td></tr></table></figure>
+
+<p>单引号和双引号都可以使用，双引号不会对特殊字符转义</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">s1: &#39;内容\n字符串&#39;</span><br><span class="line">s2: &quot;内容\n字符串&quot;</span><br></pre></td></tr></table></figure>
+
+<p>单引号之中如果还有单引号，必须连续使用两个单引号转义</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">str: &#39;labor&#39;&#39;s day&#39;</span><br></pre></td></tr></table></figure>
+
+<p>字符串可以写成多行，从第二行开始，必须有一个单空格缩进。换行符会被转为 空格</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">str: 这是一段</span><br><span class="line"> 多行</span><br><span class="line"> 字符串</span><br></pre></td></tr></table></figure>
+
+<p>多行字符串可以使用|保留换行符，也可以使用&gt;折叠换行</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">this: |</span><br><span class="line">Foo</span><br><span class="line">Bar</span><br><span class="line">that</span><br><span class="line">Foo</span><br><span class="line">Bar</span><br></pre></td></tr></table></figure>
+
+<h1 id="四、Kubernetes集群中资源对象描述方法"><a href="#四、Kubernetes集群中资源对象描述方法" class="headerlink" title="四、Kubernetes集群中资源对象描述方法"></a><strong>四、Kubernetes集群中资源对象描述方法</strong></h1><p>在kubernetes中，一般使用ymal格式的文件来创建符合我们预期期望的pod,这样的yaml文件称为资源清单文件。</p>
+<h2 id="4-1-常用字段"><a href="#4-1-常用字段" class="headerlink" title="4.1 常用字段"></a><strong>4.1 常用字段</strong></h2><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>字段类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>version</td>
+<td>String</td>
+<td>这里是指的是K8S API的版本，目前基本上是v1，可以用 kubectl api-versions命令查询</td>
+</tr>
+<tr>
+<td>kind</td>
+<td>String</td>
+<td>这里指的是yam文件定义的资源类型和角色，比如:Pod</td>
+</tr>
+<tr>
+<td>metadata</td>
+<td>Object</td>
+<td>元数据对象，固定值就写 metadata</td>
+</tr>
+<tr>
+<td>metadata.name</td>
+<td>String</td>
+<td>元数据对象的名字，这里由我们编写，比如命名Pod的名字</td>
+</tr>
+<tr>
+<td>metadata.namespace</td>
+<td>String</td>
+<td>元数据对象的命名空间，由我们自身定义</td>
+</tr>
+<tr>
+<td>Spec</td>
+<td>Object</td>
+<td>详细定义对象，固定值就写Spec</td>
+</tr>
+<tr>
+<td>spec. containers[]</td>
+<td>list</td>
+<td>这里是Spec对象的容器列表定义，是个列表</td>
+</tr>
+<tr>
+<td>spec containers [].name</td>
+<td>String</td>
+<td>这里定义容器的名字</td>
+</tr>
+<tr>
+<td>spec.containers [].image</td>
+<td>String</td>
+<td>这里定义要用到的镜像名称</td>
+</tr>
+<tr>
+<td>spec.containers [].imagePullPolicy</td>
+<td>String</td>
+<td>定义镜像拉取策路，有 Always、 Never、Ifnotpresent三个值可选：(1) Always:意思是每次都尝试重新拉取镜像；(2) Never:表示仅使用本地镜像；(3) IfNotPresent:如果本地有镜像就使用本地镜像，没有就拉取在线镜像。上面三个值都没设置的话，默认是 Always。</td>
+</tr>
+<tr>
+<td>spec containers [].command[]</td>
+<td>List</td>
+<td>指定容器启动命令，因为是数组可以指定多个。不指定则使用镜像打包时使用的启动命令。</td>
+</tr>
+<tr>
+<td>spec.containers [].args</td>
+<td>List</td>
+<td>指定容器启动命令参数，因为是数组可以指定多个.</td>
+</tr>
+<tr>
+<td>spec.containers [].workDir</td>
+<td>String</td>
+<td>指定容器的工作目录</td>
+</tr>
+<tr>
+<td>spec.containers[]. volumeMounts[]</td>
+<td>List</td>
+<td>指定容器内部的存储卷配置</td>
+</tr>
+<tr>
+<td>spec.containers[]. volumeMounts[].name</td>
+<td>String</td>
+<td>指定可以被容器挂载的存储卷的名称</td>
+</tr>
+<tr>
+<td>spec.containers[]. volumeMounts[].mountPath</td>
+<td>String</td>
+<td>指定可以被容器挂载的存储卷的路径</td>
+</tr>
+<tr>
+<td>spec.containers[]. volumeMounts[].readOnly</td>
+<td>String</td>
+<td>设置存储卷路径的读写模式，ture或者 false，默认为读写模式</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[]</td>
+<td>String</td>
+<td>指容器需要用到的端口列表</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[].name</td>
+<td>String</td>
+<td>指定端口名称</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[].containerPort</td>
+<td>String</td>
+<td>指定容器需要监听的端口号</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[].hostPort</td>
+<td>String</td>
+<td>指定容器所在主机需要监听的端口号，默认跟上面 containerPort相同，注意设置了 hostPort同一台主机无法启动该容器的相同副本(因为主机的端口号不能相同，这样会冲突)</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[].protocol</td>
+<td>String</td>
+<td>指定端口协议，支持TCP和UDP，默认值为TCP</td>
+</tr>
+<tr>
+<td>spec.containers [].env[]</td>
+<td>List</td>
+<td>指定容器运行前需设的环境变量列表</td>
+</tr>
+<tr>
+<td>spec.containers [].env[].name</td>
+<td>String</td>
+<td>指定环境变量名称</td>
+</tr>
+<tr>
+<td>spec.containers [].env[].value</td>
+<td>String</td>
+<td>指定环境变量值</td>
+</tr>
+<tr>
+<td>spec.containers[].resources</td>
+<td>Object</td>
+<td>指定资源 限制和资源请求的值（这里开始就是设置容器的资源上限）</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.limits</td>
+<td>Object</td>
+<td>指定设置容器运行时资源的运行上限</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.limits.cpu</td>
+<td>String</td>
+<td>指定CPU限制，单位为core数，将用于docker run – cpu-shares参数</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.limits.memory</td>
+<td>String</td>
+<td>指定MEM内存的限制，单位为MiB、GiB</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.requests</td>
+<td>Object</td>
+<td>指定容器启动和调度时的限制设置</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.requests.cpu</td>
+<td>String</td>
+<td>CPU请求，单位为core数，容器启动时初始化可用数量</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.requests.memory</td>
+<td>String</td>
+<td>内存请求，单位为MiB、GiB，容器启动时初始化可用数量</td>
+</tr>
+<tr>
+<td>sepc.restartPolicy</td>
+<td>String</td>
+<td>定义Pod的重启策略，可选值为Always、OnFailure,默认值为Always。1.Always:Pod一旦终止运行，则无论容器时如何终止的，kubelet服务都将重启它。2.OnFailure:只有Pod以非零退出码终止时，kubelet才会重启该容器。如果容器正常结束（退出码为0），则kubelet将不会重启它。3.Never:Pod终止后，kubelet将退出码报告给Master,不会重启该Pod。</td>
+</tr>
+<tr>
+<td>spec.nodeSelector</td>
+<td>Object</td>
+<td>定义Node的Label过滤标签，以key:value格式指定。</td>
+</tr>
+<tr>
+<td>spec.imagePullSecrets</td>
+<td>Object</td>
+<td>定义pull镜像时使用secret名称，以name:secretkey格式指定。</td>
+</tr>
+<tr>
+<td>spec.hostNetwork</td>
+<td>Boolean</td>
+<td>定义是否使用主机网络模式，默认值为false。设置true表示使用宿主机网络，不使用docker网桥，同时设置了true将无法在同一台宿主机上启动第二个副本。</td>
+</tr>
+</tbody></table>
+<h2 id="4-2-举例说明"><a href="#4-2-举例说明" class="headerlink" title="4.2 举例说明"></a><strong>4.2 举例说明</strong></h2><h3 id="4-2-1-使用声明式文件YAML创建namespace"><a href="#4-2-1-使用声明式文件YAML创建namespace" class="headerlink" title="4.2.1 使用声明式文件YAML创建namespace"></a><strong>4.2.1 使用声明式文件YAML创建namespace</strong></h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Namespace</span><br><span class="line">metadata:</span><br><span class="line">  name: test</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-2-2-使用声明式文件YAML创建pod"><a href="#4-2-2-使用声明式文件YAML创建pod" class="headerlink" title="4.2.2 使用声明式文件YAML创建pod"></a><strong>4.2.2 使用声明式文件YAML创建pod</strong></h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod1</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: k8sonline1</span><br><span class="line">    image: nginx:latest</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>K8s</category>
+      </categories>
+      <tags>
+        <tag>K8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K8s-命名空间</title>
+    <url>/2022/11/15/k8s%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/</url>
+    <content><![CDATA[<h1 id="一、命名空间-namespace-作用"><a href="#一、命名空间-namespace-作用" class="headerlink" title="一、命名空间(namespace)作用"></a><strong>一、命名空间(namespace)作用</strong></h1><ul>
+<li>Namespace是对一组资源和对象的抽象集合.</li>
+<li>常见的 pod, service, deployment 等都是属于某一个namespace的（默认是 default）</li>
+<li>不是所有资源都属于namespace，如nodes, persistent volume，namespace 等资源则不属于任何 namespace</li>
+</ul>
+<h1 id="二、查看namespace"><a href="#二、查看namespace" class="headerlink" title="二、查看namespace"></a><strong>二、查看namespace</strong></h1><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get namespaces       # namespaces可以简写为namespace或ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   130m         <span class="comment"># 所有未指定Namespace的对象都会被默认分配在default命名空间</span></span><br><span class="line">kube-node-lease   Active   130m         </span><br><span class="line">kube-public       Active   130m         <span class="comment"># 此命名空间下的资源可以被所有人访问</span></span><br><span class="line">kube-system       Active   130m         <span class="comment"># 所有由Kubernetes系统创建的资源都处于这个命名空间</span></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h1 id="三、查看namespace里的资源"><a href="#三、查看namespace里的资源" class="headerlink" title="三、查看namespace里的资源"></a><strong>三、查看namespace里的资源</strong></h1><p>使用<code>kubectl get all --namespace=命名空间名称</code>可以查看此命名空间下的所有资源</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get all --namespace=kube-system</span></span><br><span class="line">NAME                                             READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod/calico-kube-controllers-7fdc86d8ff-cskfq     1/1     Running   3          5d1h</span><br><span class="line">pod/calico-node-9dpc9                            1/1     Running   2          5d1h</span><br><span class="line">pod/calico-node-jdmxw                            1/1     Running   3          5d1h</span><br><span class="line">pod/calico-node-krwps                            1/1     Running   2          5d1h</span><br><span class="line">pod/calico-node-tttlr                            1/1     Running   2          5d1h</span><br><span class="line">pod/coredns-65dbdb44db-mm7cr                     1/1     Running   2          5d1h</span><br><span class="line">pod/dashboard-metrics-scraper-545bbb8767-q66bc   1/1     Running   2          5d1h</span><br><span class="line">pod/kubernetes-dashboard-65665f84db-nll6k        1/1     Running   4          5d1h</span><br><span class="line">pod/metrics-server-869ffc99cd-8f4jd              1/1     Running   3          5d1h</span><br><span class="line"></span><br><span class="line">NAME                                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE</span><br><span class="line">service/dashboard-metrics-scraper   ClusterIP   10.2.246.128   &lt;none&gt;        8000/TCP                 5d1h</span><br><span class="line">service/kube-dns                    ClusterIP   10.2.0.2       &lt;none&gt;        53/UDP,53/TCP,9153/TCP   5d1h</span><br><span class="line">service/kubernetes-dashboard        NodePort    10.2.213.30    &lt;none&gt;        443:21351/TCP            5d1h</span><br><span class="line">service/metrics-server              ClusterIP   10.2.232.121   &lt;none&gt;        443/TCP                  5d1h</span><br><span class="line"></span><br><span class="line">NAME                         DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE</span><br><span class="line">daemonset.apps/calico-node   4         4         4       4            4           beta.kubernetes.io/os=linux   5d1h</span><br><span class="line"></span><br><span class="line">NAME                                        READY   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">deployment.apps/calico-kube-controllers     1/1     1            1           5d1h</span><br><span class="line">deployment.apps/coredns                     1/1     1            1           5d1h</span><br><span class="line">deployment.apps/dashboard-metrics-scraper   1/1     1            1           5d1h</span><br><span class="line">deployment.apps/kubernetes-dashboard        1/1     1            1           5d1h</span><br><span class="line">deployment.apps/metrics-server              1/1     1            1           5d1h</span><br><span class="line"></span><br><span class="line">NAME                                                   DESIRED   CURRENT   READY   AGE</span><br><span class="line">replicaset.apps/calico-kube-controllers-7fdc86d8ff     1         1         1       5d1h</span><br><span class="line">replicaset.apps/coredns-65dbdb44db                     1         1         1       5d1h</span><br><span class="line">replicaset.apps/dashboard-metrics-scraper-545bbb8767   1         1         1       5d1h</span><br><span class="line">replicaset.apps/kubernetes-dashboard-65665f84db        1         1         1       5d1h</span><br><span class="line">replicaset.apps/metrics-server-869ffc99cd              1         1         1       5d1h</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>kubectl get 资源类型 --namespace=命名空间名称</code>可以查看此命名空间下的对应的资源</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pod --namespace=kube-system</span></span><br><span class="line">NAME                                         READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-7fdc86d8ff-cskfq     1/1     Running   3          5d1h</span><br><span class="line">calico-node-9dpc9                            1/1     Running   2          5d1h</span><br><span class="line">calico-node-jdmxw                            1/1     Running   3          5d1h</span><br><span class="line">calico-node-krwps                            1/1     Running   2          5d1h</span><br><span class="line">calico-node-tttlr                            1/1     Running   2          5d1h</span><br><span class="line">coredns-65dbdb44db-mm7cr                     1/1     Running   2          5d1h</span><br><span class="line">dashboard-metrics-scraper-545bbb8767-q66bc   1/1     Running   2          5d1h</span><br><span class="line">kubernetes-dashboard-65665f84db-nll6k        1/1     Running   4          5d1h</span><br><span class="line">metrics-server-869ffc99cd-8f4jd              1/1     Running   3          5d1h</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>kubectl get 资源类型 -A</code> ，查看所有命名空间的资源</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get pods -A</span></span><br><span class="line">NAMESPACE          NAME                                       READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-apiserver   calico-apiserver-665569779-4wr5l           1/1     Running   0          6h27m</span><br><span class="line">calico-apiserver   calico-apiserver-665569779-r76t6           1/1     Running   0          6h27m</span><br><span class="line">calico-system      calico-kube-controllers-78687bb75f-46l2t   1/1     Running   0          6h29m</span><br><span class="line">calico-system      calico-node-f9gx6                          1/1     Running   0          5h58m</span><br><span class="line">calico-system      calico-node-rsk4w                          1/1     Running   0          5h58m</span><br><span class="line">calico-system      calico-node-xfr2n                          1/1     Running   0          6h29m</span><br><span class="line">calico-system      calico-typha-75444c4b8-4x7pp               1/1     Running   0          5h58m</span><br><span class="line">calico-system      calico-typha-75444c4b8-nmmj5               1/1     Running   0          6h29m</span><br><span class="line">calico-system      csi-node-driver-4l2ts                      2/2     Running   0          5h56m</span><br><span class="line">calico-system      csi-node-driver-92q4k                      2/2     Running   0          6h28m</span><br><span class="line">calico-system      csi-node-driver-kcw5b                      2/2     Running   0          5h57m</span><br><span class="line">kube-system        coredns-558bd4d5db-5j4gq                   1/1     Running   0          16h</span><br><span class="line">kube-system        coredns-558bd4d5db-79qsm                   1/1     Running   0          16h</span><br><span class="line">kube-system        etcd-k8s-master01                          1/1     Running   0          16h</span><br><span class="line">kube-system        kube-apiserver-k8s-master01                1/1     Running   0          16h</span><br><span class="line">kube-system        kube-controller-manager-k8s-master01       1/1     Running   0          16h</span><br><span class="line">kube-system        kube-proxy-v2ltp                           1/1     Running   0          16h</span><br><span class="line">kube-system        kube-proxy-wzxps                           1/1     Running   0          5h58m</span><br><span class="line">kube-system        kube-proxy-zr77d                           1/1     Running   0          5h58m</span><br><span class="line">kube-system        kube-scheduler-k8s-master01                1/1     Running   0          16h</span><br><span class="line">tigera-operator    tigera-operator-6f669b6c4f-qmdbc           1/1     Running   0          6h37m</span><br></pre></td></tr></table></figure>
+
+<h1 id="四、创建namespace"><a href="#四、创建namespace" class="headerlink" title="四、创建namespace"></a><strong>四、创建namespace</strong></h1><h2 id="4-1-命令创建"><a href="#4-1-命令创建" class="headerlink" title="4.1 命令创建"></a><strong>4.1 命令创建</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl create namespace ns1</span></span><br><span class="line">namespace/ns1 created</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   5d1h</span><br><span class="line">kube-node-lease   Active   5d1h</span><br><span class="line">kube-public       Active   5d1h</span><br><span class="line">kube-system       Active   5d1h</span><br><span class="line">ns1               Active   10s</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-2-YAML文件创建"><a href="#4-2-YAML文件创建" class="headerlink" title="4.2 YAML文件创建"></a><strong>4.2 YAML文件创建</strong></h2><ul>
+<li>k8s中几乎所有的资源都可以通这YAML编排来创建</li>
+</ul>
+<p>编写创建namespace的YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim create_ns2.yml</span></span><br><span class="line">apiVersion: v1                          <span class="comment"># api版本号</span></span><br><span class="line">kind: Namespace                         <span class="comment"># 类型为namespace</span></span><br><span class="line">metadata:                               <span class="comment"># 定义namespace的元数据属性</span></span><br><span class="line">  name: ns2                             <span class="comment"># 定义name属性为ns2</span></span><br></pre></td></tr></table></figure>
+
+<p>使用kubctl apply -f应用YAML文件</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f create_ns2.yml</span></span><br><span class="line">namespace/ns2 created</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   5d2h</span><br><span class="line">kube-node-lease   Active   5d2h</span><br><span class="line">kube-public       Active   5d2h</span><br><span class="line">kube-system       Active   5d2h</span><br><span class="line">ns1               Active   10m</span><br><span class="line">ns2               Active   46s</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>可以使用 kubectl edit 资源类型 资源名 编辑资源的YAML语法</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl edit namespace ns1</span></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>也可使用 <code>kubectl get 资源类型 资源名 -o yaml</code>来查看</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ns ns1 -o yaml</span></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>还可通过<code>kubectl explain 资源类型</code>来查看语法文档</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain namespace                # 查看namespace相关语法参数</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain namespace.metadata       # 查看namespace下级metadata的相关语法参数</span></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl explain namespace.metadata.name  # 查看namespace下级metadata再下级name的相关语法参数</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="五、删除namespace"><a href="#五、删除namespace" class="headerlink" title="五、删除namespace"></a><strong>五、删除namespace</strong></h1><p><strong>注意:</strong> </p>
+<ul>
+<li>删除一个namespace会自动删除所有属于该namespace的资源(类似mysql中drop库会删除库里的所有表一样，请慎重操作)</li>
+<li>default,kube-system,kube-public命名空间不可删除</li>
+</ul>
+<h2 id="5-1-命令删除"><a href="#5-1-命令删除" class="headerlink" title="5.1 命令删除"></a><strong>5.1 命令删除</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete namespace ns1</span></span><br><span class="line">namespace <span class="string">"ns1"</span> deleted</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-2-YAML文件删除"><a href="#5-2-YAML文件删除" class="headerlink" title="5.2 YAML文件删除"></a><strong>5.2 YAML文件删除</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl delete -f create_ns2.yml</span></span><br><span class="line">namespace <span class="string">"ns2"</span> deleted</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   5d2h</span><br><span class="line">kube-node-lease   Active   5d2h</span><br><span class="line">kube-public       Active   5d2h</span><br><span class="line">kube-system       Active   5d2h</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>devops</category>
+        <category>K8s</category>
+      </categories>
+      <tags>
+        <tag>K8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K8s-node</title>
+    <url>/2022/11/15/k8s-node/</url>
+    <content><![CDATA[<h1 id="查看集群信息"><a href="#查看集群信息" class="headerlink" title="查看集群信息"></a><strong>查看集群信息</strong></h1><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 ~]<span class="comment"># kubectl cluster-info</span></span><br><span class="line">Kubernetes control plane is running at https://192.168.1.19:6443</span><br><span class="line">CoreDNS is running at https://192.168.1.19:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy</span><br><span class="line"></span><br><span class="line">To further debug and diagnose cluster problems, use <span class="string">'kubectl cluster-info dump'</span>.</span><br></pre></td></tr></table></figure>
+
+<h1 id="查看节点信息"><a href="#查看节点信息" class="headerlink" title="查看节点信息"></a><strong>查看节点信息</strong></h1><h2 id="节点信息"><a href="#节点信息" class="headerlink" title="节点信息"></a><strong>节点信息</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 ~]<span class="comment"># kubectl get nodes</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION</span><br><span class="line">k8s-master01   Ready    control-plane,master   11h   v1.21.0</span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 64m   v1.21.0</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 63m   v1.21.0</span><br><span class="line"></span><br><span class="line">[root@k8s-master01 ~]<span class="comment"># kubectl get node</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION</span><br><span class="line">k8s-master01   Ready    control-plane,master   11h   v1.21.0</span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 64m   v1.21.0</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 63m   v1.21.0</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h2 id="节点详情信息"><a href="#节点详情信息" class="headerlink" title="节点详情信息"></a><strong>节点详情信息</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 ~]<span class="comment"># kubectl get nodes -o wide</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION               CONTAINER-RUNTIME</span><br><span class="line">k8s-master01   Ready    control-plane,master   11h   v1.21.0   192.168.1.19   &lt;none&gt;        CentOS Linux 7 (Core)   5.19.8-1.el7.elrepo.x86_64   docker://20.10.9</span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 64m   v1.21.0   192.168.1.16   &lt;none&gt;        CentOS Linux 7 (Core)   5.19.8-1.el7.elrepo.x86_64   docker://20.10.9</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 64m   v1.21.0   192.168.1.17   &lt;none&gt;        CentOS Linux 7 (Core)   5.19.8-1.el7.elrepo.x86_64   docker://20.10.9</span><br></pre></td></tr></table></figure>
+
+<h2 id="节点详细的描述信息"><a href="#节点详细的描述信息" class="headerlink" title="节点详细的描述信息"></a><strong>节点详细的描述信息</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 ~]<span class="comment"># kubectl describe node k8s-master01</span></span><br><span class="line">Name:               k8s-master01</span><br><span class="line">Roles:              control-plane,master</span><br><span class="line">Labels:             beta.kubernetes.io/arch=amd64</span><br><span class="line">                    beta.kubernetes.io/os=linux</span><br><span class="line">                    kubernetes.io/arch=amd64</span><br><span class="line">                    kubernetes.io/hostname=k8s-master01</span><br><span class="line">                    kubernetes.io/os=linux</span><br><span class="line">                    node-role.kubernetes.io/control-plane=</span><br><span class="line">                    node-role.kubernetes.io/master=</span><br><span class="line">                    node.kubernetes.io/exclude-from-external-load-balancers=</span><br><span class="line">Annotations:        csi.volume.kubernetes.io/nodeid: &#123;<span class="string">"csi.tigera.io"</span>:<span class="string">"k8s-master01"</span>&#125;</span><br><span class="line">                    kubeadm.alpha.kubernetes.io/cri-socket: /var/run/dockershim.sock</span><br><span class="line">                    node.alpha.kubernetes.io/ttl: 0</span><br><span class="line">                    projectcalico.org/IPv4Address: 192.168.1.19/24</span><br><span class="line">                    projectcalico.org/IPv4VXLANTunnelAddr: 10.244.32.128</span><br><span class="line">                    volumes.kubernetes.io/controller-managed-attach-detach: <span class="literal">true</span></span><br><span class="line">CreationTimestamp:  Sat, 10 Sep 2022 23:17:35 +0800</span><br><span class="line">Taints:             node-role.kubernetes.io/master:NoSchedule</span><br><span class="line">Unschedulable:      <span class="literal">false</span></span><br><span class="line">Lease:</span><br><span class="line">  HolderIdentity:  k8s-master01</span><br><span class="line">  AcquireTime:     &lt;<span class="built_in">unset</span>&gt;</span><br><span class="line">  RenewTime:       Sun, 11 Sep 2022 11:06:35 +0800</span><br><span class="line">Conditions:</span><br><span class="line">  Type                 Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message</span><br><span class="line">  ----                 ------  -----------------                 ------------------                ------                       -------</span><br><span class="line">  NetworkUnavailable   False   Sun, 11 Sep 2022 09:32:20 +0800   Sun, 11 Sep 2022 09:32:20 +0800   CalicoIsUp                   Calico is running on this node</span><br><span class="line">  MemoryPressure       False   Sun, 11 Sep 2022 11:03:56 +0800   Sat, 10 Sep 2022 23:17:34 +0800   KubeletHasSufficientMemory   kubelet has sufficient memory available</span><br><span class="line">  DiskPressure         False   Sun, 11 Sep 2022 11:03:56 +0800   Sat, 10 Sep 2022 23:17:34 +0800   KubeletHasNoDiskPressure     kubelet has no disk pressure</span><br><span class="line">  PIDPressure          False   Sun, 11 Sep 2022 11:03:56 +0800   Sat, 10 Sep 2022 23:17:34 +0800   KubeletHasSufficientPID      kubelet has sufficient PID available</span><br><span class="line">  Ready                True    Sun, 11 Sep 2022 11:03:56 +0800   Sun, 11 Sep 2022 09:32:07 +0800   KubeletReady                 kubelet is posting ready status</span><br><span class="line">Addresses:</span><br><span class="line">  InternalIP:  192.168.1.19</span><br><span class="line">  Hostname:    k8s-master01</span><br><span class="line">Capacity:</span><br><span class="line">  cpu:                2</span><br><span class="line">  ephemeral-storage:  17394Mi</span><br><span class="line">  hugepages-1Gi:      0</span><br><span class="line">  hugepages-2Mi:      0</span><br><span class="line">  memory:             8117452Ki</span><br><span class="line">  pods:               110</span><br><span class="line">Allocatable:</span><br><span class="line">  cpu:                2</span><br><span class="line">  ephemeral-storage:  16415037823</span><br><span class="line">  hugepages-1Gi:      0</span><br><span class="line">  hugepages-2Mi:      0</span><br><span class="line">  memory:             8015052Ki</span><br><span class="line">  pods:               110</span><br><span class="line">System Info:</span><br><span class="line">  Machine ID:                 4d61410eef834edf9b7843c926bbe691</span><br><span class="line">  System UUID:                75bc4d56-c008-db5f-4848-59f0939491af</span><br><span class="line">  Boot ID:                    1d543183-4871-45f1-a263-92d73fb9ca31</span><br><span class="line">  Kernel Version:             5.19.8-1.el7.elrepo.x86_64</span><br><span class="line">  OS Image:                   CentOS Linux 7 (Core)</span><br><span class="line">  Operating System:           linux</span><br><span class="line">  Architecture:               amd64</span><br><span class="line">  Container Runtime Version:  docker://20.10.9</span><br><span class="line">  Kubelet Version:            v1.21.0</span><br><span class="line">  Kube-Proxy Version:         v1.21.0</span><br><span class="line">PodCIDR:                      10.244.0.0/24</span><br><span class="line">PodCIDRs:                     10.244.0.0/24</span><br><span class="line">Non-terminated Pods:          (14 <span class="keyword">in</span> total)</span><br><span class="line">  Namespace                   Name                                        CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age</span><br><span class="line">  ---------                   ----                                        ------------  ----------  ---------------  -------------  ---</span><br><span class="line">  calico-apiserver            calico-apiserver-665569779-4wr5l            0 (0%)        0 (0%)      0 (0%)           0 (0%)         93m</span><br><span class="line">  calico-apiserver            calico-apiserver-665569779-r76t6            0 (0%)        0 (0%)      0 (0%)           0 (0%)         93m</span><br><span class="line">  calico-system               calico-kube-controllers-78687bb75f-46l2t    0 (0%)        0 (0%)      0 (0%)           0 (0%)         96m</span><br><span class="line">  calico-system               calico-node-xfr2n                           0 (0%)        0 (0%)      0 (0%)           0 (0%)         96m</span><br><span class="line">  calico-system               calico-typha-75444c4b8-nmmj5                0 (0%)        0 (0%)      0 (0%)           0 (0%)         96m</span><br><span class="line">  calico-system               csi-node-driver-92q4k                       0 (0%)        0 (0%)      0 (0%)           0 (0%)         94m</span><br><span class="line">  kube-system                 coredns-558bd4d5db-5j4gq                    100m (5%)     0 (0%)      70Mi (0%)        170Mi (2%)     11h</span><br><span class="line">  kube-system                 coredns-558bd4d5db-79qsm                    100m (5%)     0 (0%)      70Mi (0%)        170Mi (2%)     11h</span><br><span class="line">  kube-system                 etcd-k8s-master01                           100m (5%)     0 (0%)      100Mi (1%)       0 (0%)         11h</span><br><span class="line">  kube-system                 kube-apiserver-k8s-master01                 250m (12%)    0 (0%)      0 (0%)           0 (0%)         11h</span><br><span class="line">  kube-system                 kube-controller-manager-k8s-master01        200m (10%)    0 (0%)      0 (0%)           0 (0%)         11h</span><br><span class="line">  kube-system                 kube-proxy-v2ltp                            0 (0%)        0 (0%)      0 (0%)           0 (0%)         11h</span><br><span class="line">  kube-system                 kube-scheduler-k8s-master01                 100m (5%)     0 (0%)      0 (0%)           0 (0%)         11h</span><br><span class="line">  tigera-operator             tigera-operator-6f669b6c4f-qmdbc            0 (0%)        0 (0%)      0 (0%)           0 (0%)         103m</span><br><span class="line">Allocated resources:</span><br><span class="line">  (Total limits may be over 100 percent, i.e., overcommitted.)</span><br><span class="line">  Resource           Requests    Limits</span><br><span class="line">  --------           --------    ------</span><br><span class="line">  cpu                850m (42%)  0 (0%)</span><br><span class="line">  memory             240Mi (3%)  340Mi (4%)</span><br><span class="line">  ephemeral-storage  100Mi (0%)  0 (0%)</span><br><span class="line">  hugepages-1Gi      0 (0%)      0 (0%)</span><br><span class="line">  hugepages-2Mi      0 (0%)      0 (0%)</span><br><span class="line">Events:              &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<h1 id="删除节点"><a href="#删除节点" class="headerlink" title="删除节点"></a><strong>删除节点</strong></h1><h2 id="平滑删除pod"><a href="#平滑删除pod" class="headerlink" title="平滑删除pod"></a><strong>平滑删除pod</strong></h2><p>移除节点前，需要将节点上的资源，迁移到其他节点上</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">kubectl drain 即将删除节点名称 --delete-local-data --force --ignore-daemonsets</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除node"><a href="#删除node" class="headerlink" title="删除node"></a><strong>删除node</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#删除节点</span></span><br><span class="line">kubectl delete nodes 节点名称</span><br><span class="line"></span><br><span class="line"><span class="comment">#在被删除节点中清空集群信息</span></span><br><span class="line">kubeadm reset -f</span><br><span class="line">system stop kubelet</span><br><span class="line">systemctl stop docker</span><br><span class="line">rm -rf /var/lib/cni/</span><br><span class="line">rm -rf /var/lib/kubelet/*</span><br><span class="line">rm -rf /etc/cni/</span><br><span class="line">ifconfig cni0 down</span><br><span class="line">ifconfig flannel.1 down</span><br><span class="line">ifconfig docker0 down</span><br><span class="line">ip link delete cni0</span><br><span class="line">ip link delete flannel.1</span><br><span class="line">systemctl start docker</span><br><span class="line">iptables -F &amp;&amp; sudo iptables -t nat -F &amp;&amp; sudo iptables =t mangle -F &amp;&amp; sudo iptables -X</span><br><span class="line">ipvsadm -C</span><br></pre></td></tr></table></figure>
+
+<h1 id="添加节点"><a href="#添加节点" class="headerlink" title="添加节点"></a>添加节点</h1><h2 id="创建token加入节点"><a href="#创建token加入节点" class="headerlink" title="创建token加入节点"></a><strong>创建token加入节点</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#在master查看token</span></span><br><span class="line">kubeadm token list</span><br><span class="line"><span class="comment">#通过openssl查看哈希值</span></span><br><span class="line">openssl x509 -pubkey -<span class="keyword">in</span> /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null |openssl dgst -sha256 -hex | sed <span class="string">'s/^.* //'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在集群中创建token，命令后边指定 --ttl 0则token不受时间限制，否则24小时过期</span></span><br><span class="line"></span><br><span class="line">kubeadm token create --<span class="built_in">print</span>-join-command</span><br><span class="line"></span><br><span class="line"><span class="comment">#在节点端执行返回的join命令加入集群</span></span><br><span class="line">kubeadm join host:6443 --token xxxx --discovery-token-ca-cert-hash sha256:xxxxxxxxx</span><br></pre></td></tr></table></figure>
+
+<h1 id="work节点管理集群"><a href="#work节点管理集群" class="headerlink" title="work节点管理集群"></a><strong>work节点管理集群</strong></h1><ul>
+<li><p>如果是kubeasz安装，所有节点(包括master与node)都已经可以对集群进行管理</p>
+</li>
+<li><p>如果是kubeadm安装，在node节点上管理时，即使已经安装了kubectl，仍会报如下错误</p>
+<blockquote>
+<p>[root@k8s-node01 ~]# kubectl get nodes </p>
+<p>The connection to the server localhost:8080 was refused - did you specify the right host or port?</p>
+</blockquote>
+</li>
+</ul>
+<p>只要把master上的管理文件<code>/etc/kubernetes/admin.conf</code>拷贝到node节点的<code>$HOME/.kube/config</code>就可以让node节点也可以实现kubectl命令管理</p>
+<p>1, 在node节点的用户家目录创建.kube目录</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-node01 ~]<span class="comment"># mkdir /root/.kube</span></span><br></pre></td></tr></table></figure>
+
+<p>2, 在master节点做如下操作</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">scp /etc/kubernetes/admin.conf root@k8s-node01:/root/.kube/config</span><br></pre></td></tr></table></figure>
+
+<p>3, 在worker node节点验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-node01 ~]<span class="comment"># kubectl get node</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION</span><br><span class="line">k8s-master01   Ready    control-plane,master   11h   v1.21.0</span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 75m   v1.21.0</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 75m   v1.21.0</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>K8s</category>
+      </categories>
+      <tags>
+        <tag>K8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K8s架构及组件</title>
+    <url>/2022/11/15/k8s%E6%9E%B6%E6%9E%84%E5%8F%8A%E7%BB%84%E4%BB%B6/</url>
+    <content><![CDATA[<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p><img src="/images/k8s%E6%9E%B6%E6%9E%84%E5%8F%8A%E7%BB%84%E4%BB%B6/%E6%88%AA%E5%9B%BE11.png" alt="截图11"></p>
+<p>kubernetes是具有中心节点的分布式架构,存在master节点、node节点</p>
+<p>master是集群管理中心，它的组件可以集群内任意节点上运行，但是为了方便管理，一般是在某一台主机上运行所有的master组件，并且不在该主机是上运行用户容器</p>
+<a id="more"></a>
+
+<h1 id="组件"><a href="#组件" class="headerlink" title="组件"></a>组件</h1><h2 id="master组件"><a href="#master组件" class="headerlink" title="master组件"></a>master组件</h2><ul>
+<li><p>kube-apiserver</p>
+</li>
+<li><ul>
+<li>用于暴露kubernests API，任何的资源请求/调用都是通过kube-apiserver提供的接口进行</li>
+</ul>
+</li>
+<li><p>kube-controller-manager</p>
+</li>
+<li><ul>
+<li>控制器管理器，用于对控制器进行管理，是集群中处理常规任务的后台线程</li>
+</ul>
+</li>
+<li><p>kube-scheduler</p>
+</li>
+<li><ul>
+<li>监视新创建没有分配到node的pod，为pod选择一个node运行</li>
+</ul>
+</li>
+<li><p>etcd</p>
+</li>
+<li><ul>
+<li>是k8s提供的默认存储系统，保存所有集群数据</li>
+</ul>
+</li>
+</ul>
+<h2 id="node组件"><a href="#node组件" class="headerlink" title="node组件"></a>node组件</h2><p>用于运行以及维护pod，管理volume（CVI）和网络（CNI），维护pod及service等信息</p>
+<ul>
+<li><p>kubelet</p>
+</li>
+<li><ul>
+<li>负责维护容器的生命周期（创建pod，销毁pod），同时也负责volume（CVI）和网络（CNI）管理</li>
+</ul>
+</li>
+<li><p>kube-proxy</p>
+</li>
+<li><ul>
+<li>通过在主机上维护网络规则并执行连续转发来实现service（iptables/ipvs）</li>
+<li>随时与apiserver通信，把service或pod改变提交给apiserver，保存至etcd中，负责service实现从内部pod到service、从外部node到service的访问</li>
+</ul>
+</li>
+<li><p>container-runtime</p>
+</li>
+<li><ul>
+<li>容器运行时（container runtime）</li>
+<li>负责镜像管理以及pod和容器的真正运行</li>
+<li>支持docker、container、Rkt、pouch、kata等多种运行时</li>
+</ul>
+</li>
+</ul>
+<h2 id="Add-ons附件"><a href="#Add-ons附件" class="headerlink" title="Add-ons附件"></a>Add-ons附件</h2><p>Add-ons（附件）使功能更加丰富，没有它也不影响实际使用，可以与主体程序很好结合起来使用</p>
+<ul>
+<li>coredns/kube-dns：负责为整个集群提供DNS服务</li>
+<li>Ingress Controller：为服务提供集群外部访问</li>
+<li>Heapster/Metries-server：提供集群资源监控（监控容器可以使用prometheus）</li>
+<li>Dashboard：提供集群GUI</li>
+<li>Federation：提供跨可用区的集群</li>
+<li>Fluentd-elastisearch：提供集群日志采集、存储与查询</li>
+</ul>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>K8s</category>
+      </categories>
+      <tags>
+        <tag>K8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K8s-标签</title>
+    <url>/2022/11/15/k8s%E6%A0%87%E7%AD%BE/</url>
+    <content><![CDATA[<h1 id="标签"><a href="#标签" class="headerlink" title="标签"></a><strong>标签</strong></h1><p>k8s集群如果由大量节点组成，可将节点打上对应的标签，然后通过标签进行筛选及查看,更好的进行资源对象的相关选择与匹配</p>
+<h2 id="查看节点标签信息"><a href="#查看节点标签信息" class="headerlink" title="查看节点标签信息"></a><strong>查看节点标签信息</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes --show-labels</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION   LABELS</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h   v1.21.0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8s-master01,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=,node-role.kubernetes.io/master=,node.kubernetes.io/exclude-from-external-load-balancers=</span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 78m   v1.21.0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8s-node01,kubernetes.io/os=linux</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 77m   v1.21.0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8s-node02,kubernetes.io/os=linux</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h2 id="设置标签"><a href="#设置标签" class="headerlink" title="设置标签"></a><strong>设置标签</strong></h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#指定为某个node添加标签</span></span><br><span class="line">kubectl label node k8s-node02 key1=value1</span><br></pre></td></tr></table></figure>
+
+<p><img src="images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE12.png" alt="截图12"></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#指定为某个node添加多个标签</span></span><br><span class="line"> kubectl label node k8s-node01 key1=value1 key2=value2</span><br></pre></td></tr></table></figure>
+
+<p><img src="images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE13.png" alt="截图13"></p>
+<h2 id="指定标签查询node"><a href="#指定标签查询node" class="headerlink" title="指定标签查询node"></a><strong>指定标签查询node</strong></h2><p>注意-L和-l大小写区别</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h   v1.21.0</span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 91m   v1.21.0</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 90m   v1.21.0</span><br><span class="line">======================================================================</span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -L key2</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION   KEY2</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h   v1.21.0   </span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 98m   v1.21.0   value2</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 98m   v1.21.0 </span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -l key2</span></span><br><span class="line">NAME         STATUS   ROLES    AGE    VERSION</span><br><span class="line">k8s-node01   Ready    &lt;none&gt;   100m   v1.21.0</span><br><span class="line">======================================================================</span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -L key1,key2</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION   KEY1     KEY2</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h   v1.21.0            </span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 98m   v1.21.0   value1   value2</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 97m   v1.21.0   value1 </span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -l key1,key2</span></span><br><span class="line">NAME         STATUS   ROLES    AGE    VERSION</span><br><span class="line">k8s-node01   Ready    &lt;none&gt;   101m   v1.21.0</span><br><span class="line">================================================================================</span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -L key1</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE    VERSION   KEY1</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h    v1.21.0   </span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 101m   v1.21.0   value1</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 101m   v1.21.0   value1</span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -l key1</span></span><br><span class="line">NAME         STATUS   ROLES    AGE    VERSION</span><br><span class="line">k8s-node01   Ready    &lt;none&gt;   102m   v1.21.0</span><br><span class="line">k8s-node02   Ready    &lt;none&gt;   101m   v1.21.0</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改标签"><a href="#修改标签" class="headerlink" title="修改标签"></a><strong>修改标签</strong></h2><p><code>kubectl label node 节点名称 标签key=标签value --overwrite=true</code></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -L key1,key2</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE    VERSION   KEY1     KEY2</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h    v1.21.0            </span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 103m   v1.21.0   value1   value2</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 102m   v1.21.0   value1   </span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl label node k8s-node02 key1=v2 --overwrite=true</span></span><br><span class="line">node/k8s-node02 labeled</span><br><span class="line"></span><br><span class="line">[root@k8s-master01 kubernetes]<span class="comment"># kubectl get nodes -L key1,key2                        </span></span><br><span class="line">NAME           STATUS   ROLES                  AGE    VERSION   KEY1     KEY2</span><br><span class="line">k8s-master01   Ready    control-plane,master   12h    v1.21.0            </span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 104m   v1.21.0   value1   value2</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 103m   v1.21.0   v2</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除标签"><a href="#删除标签" class="headerlink" title="删除标签"></a><strong>删除标签</strong></h2><p>使用key加一个减号的写法来取消标签</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">kubectl label node k8s-node02 key1-</span><br></pre></td></tr></table></figure>
+
+<p><img src="images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE14.png" alt="截图14"></p>
+<h2 id="标签选择器"><a href="#标签选择器" class="headerlink" title="标签选择器"></a><strong>标签选择器</strong></h2><p>标签选择器主要有2类:</p>
+<ul>
+<li>等值关系: =, !=</li>
+<li>集合关系: KEY in (VALUE1, VALUE2……)</li>
+</ul>
+<p><img src="images/k8s%E6%A0%87%E7%AD%BE/%E6%88%AA%E5%9B%BE15.png" alt="截图15"></p>
+<h1 id="通过标签操作pod"><a href="#通过标签操作pod" class="headerlink" title="通过标签操作pod"></a>通过标签操作pod</h1><ul>
+<li>为pod设置label,用于控制器通过label与pod关联</li>
+<li>语法与前面学的node标签几乎一致</li>
+</ul>
+<p>查看pod的标签</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods --show-labels</span></span><br><span class="line">NAME          READY   STATUS    RESTARTS   AGE   LABELS</span><br><span class="line">pod-stress     1/1    Running   0          7m25s   &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<p>打标签</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl label pod pod-stress region=huanai zone=A env=test bussiness=game</span></span><br><span class="line">pod/pod-stress labeled</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods --show-labels</span></span><br><span class="line">NAME          READY   STATUS    RESTARTS   AGE     LABELS</span><br><span class="line">pod-stress    1/1     Running   0          8m54s   bussiness=game,env=<span class="built_in">test</span>,region=huanai,zone=A</span><br></pre></td></tr></table></figure>
+
+<p>通过等值关系标签查询</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -l zone=A</span></span><br><span class="line">NAME         READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod-stress   1/1     Running   0          9m22s</span><br></pre></td></tr></table></figure>
+
+<p>通过集合关系标签查询</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods -l "zone in (A,B,C)"</span></span><br><span class="line">NAME         READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod-stress   1/1     Running   0          9m55s</span><br></pre></td></tr></table></figure>
+
+<p>删除标签后再验证</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl label pod pod-stress region- zone- env- bussiness-</span></span><br><span class="line">pod/pod-stress labeled</span><br><span class="line"></span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods --show-labels</span></span><br><span class="line">NAME          READY   STATUS    RESTARTS   AGE   LABELS</span><br><span class="line">pod-stress    1/1     Running   0          16m     &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>小结:</strong></p>
+<ul>
+<li>pod的label与node的label操作方式几乎相同</li>
+<li>node的label用于pod调度到指定label的node节点</li>
+<li>pod的label用于controller关联控制的pod</li>
+</ul>
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>K8s</category>
+      </categories>
+      <tags>
+        <tag>K8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K8s-部署安装</title>
+    <url>/2022/11/15/k8s%E9%83%A8%E7%BD%B2%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<h1 id="虚拟机环境准备"><a href="#虚拟机环境准备" class="headerlink" title="虚拟机环境准备"></a>虚拟机环境准备</h1><h2 id="主机准备"><a href="#主机准备" class="headerlink" title="主机准备"></a>主机准备</h2><table>
+<thead>
+<tr>
+<th>虚拟机主机名</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>k8s-master01</td>
+<td>master</td>
+</tr>
+<tr>
+<td>k8s-node01</td>
+<td>node</td>
+</tr>
+<tr>
+<td>k8s-node02</td>
+<td>node</td>
+</tr>
+</tbody></table>
+<h2 id="修改主机名称"><a href="#修改主机名称" class="headerlink" title="修改主机名称"></a>修改主机名称</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#修改主机名称</span></span><br><span class="line">hostnamectl <span class="built_in">set</span>-hostname 修改之后的主机名</span><br><span class="line"><span class="comment">#重启生效</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h2 id="修改ip地址"><a href="#修改ip地址" class="headerlink" title="修改ip地址"></a>修改ip地址</h2><p><code>vim /etc/sysconfig/network-scripts/ifcfg-ens33</code>，添加主机ip和网关ip</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">TYPE=Ethernet</span><br><span class="line">PROXY_METHOD=none</span><br><span class="line">BROWSER_ONLY=no</span><br><span class="line">BOOTPROTO=dhcp</span><br><span class="line">DEFROUTE=yes</span><br><span class="line">IPV4_FAILURE_FATAL=no</span><br><span class="line">IPV6INIT=yes</span><br><span class="line">IPV6_AUTOCONF=yes</span><br><span class="line">IPV6_DEFROUTE=yes</span><br><span class="line">IPV6_FAILURE_FATAL=no</span><br><span class="line">IPV6_ADDR_GEN_MODE=stable-privacy</span><br><span class="line">NAME=ens33</span><br><span class="line">UUID=eb71b764-a576-4cd4-8513-975a5cb1c5c5</span><br><span class="line">DEVICE=ens33</span><br><span class="line">ONBOOT=yes</span><br><span class="line">IPV6_PRIVACY=no</span><br><span class="line">IPADDR=<span class="string">"192.168.1.19"</span></span><br><span class="line">GATEWAY=<span class="string">"192.168.1.1"</span></span><br><span class="line">DNS1=8.8.8.8</span><br><span class="line">DNS2=4.2.2.2</span><br></pre></td></tr></table></figure>
+
+<p>重启网关 <code>service network restart</code></p>
+<h2 id="关闭防火墙"><a href="#关闭防火墙" class="headerlink" title="关闭防火墙"></a>关闭防火墙</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#关闭防火墙开机自启</span></span><br><span class="line">systemctl <span class="built_in">disable</span> firewalld</span><br><span class="line"><span class="comment">#停止防火墙</span></span><br><span class="line">systemctl stop firewalld</span><br><span class="line"><span class="comment">#查看防火墙是否启动，此时应该是not running</span></span><br><span class="line">firewall-cmd --state</span><br></pre></td></tr></table></figure>
+
+<h2 id="SELINUX配置"><a href="#SELINUX配置" class="headerlink" title="SELINUX配置"></a>SELINUX配置</h2><p>将/etc/selinux/config文件SELINUX参数修改为disabled</p>
+<p><code>sed -ri &#39;s/SELINUX=enforcing/SELINUX=disabled/&#39; /etc/selinux/config</code></p>
+<img src="/images/k8s部署安装/截图.png" alt="截图" style="zoom:67%;" />
+
+<h2 id="主机时间同步"><a href="#主机时间同步" class="headerlink" title="主机时间同步"></a>主机时间同步</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">yum install ntpdate</span><br><span class="line">ntpdate ntp1.aliyun.com</span><br></pre></td></tr></table></figure>
+
+<h2 id="升级操作系统内核"><a href="#升级操作系统内核" class="headerlink" title="升级操作系统内核"></a>升级操作系统内核</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#1、导入elrepo gpg key</span></span><br><span class="line">rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、安装elrepo YUM源仓库</span></span><br><span class="line">yum -y install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm</span><br><span class="line"></span><br><span class="line"><span class="comment">#3、安装kernel-ml版本，ml为长期稳定版本，lt为长期维护版本</span></span><br><span class="line">yum --enablerepo=<span class="string">"elrepo-kernel"</span> -y install kernel-ml.x86_64</span><br><span class="line"></span><br><span class="line"><span class="comment">#4、设置grub2默认引导为0</span></span><br><span class="line">grub2-set-default 0</span><br><span class="line"></span><br><span class="line"><span class="comment">#5、重新生成grub2引导文件</span></span><br><span class="line">grub2-mkconfig -o /boot/grub2/grub.cfg</span><br><span class="line"></span><br><span class="line"><span class="comment">#6、更新后，需要重启，使用升级的内核生效。</span></span><br><span class="line">reboot</span><br><span class="line"></span><br><span class="line"><span class="comment">#重启后，需要验证内核是否为更新对应的版本</span></span><br><span class="line">uname -r</span><br></pre></td></tr></table></figure>
+
+<p>升级前后内核对比</p>
+<img src="/images/k8s部署安装/截图2.png" alt="截图2"  />
+
+<h2 id="配置内核转发及网桥过滤"><a href="#配置内核转发及网桥过滤" class="headerlink" title="配置内核转发及网桥过滤"></a>配置内核转发及网桥过滤</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#1、添加网桥过滤及内核转发配置文件</span></span><br><span class="line">vim /etc/sysctl.d/k8s.conf</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="line">net.ipv4.ip_forward = 1</span><br><span class="line">vm.swappiness = 0</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、加载br_netfilter模块</span></span><br><span class="line">modprobe br_netfilter</span><br><span class="line"></span><br><span class="line"><span class="comment">#3、查看是否加载</span></span><br><span class="line">lsmod | grep br_netfilter</span><br><span class="line"></span><br><span class="line"><span class="comment">#4、加载网桥过滤及内核转发配置文件</span></span><br><span class="line">sysctl -p /etc/sysctl.d/k8s.conf</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装ipset及ipvsadm"><a href="#安装ipset及ipvsadm" class="headerlink" title="安装ipset及ipvsadm"></a>安装ipset及ipvsadm</h2><p>主要用于实现service转发</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#1、安装ipset及ipvsadm</span></span><br><span class="line">yum -y install ipset ipvsadm</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、配置ipvsadm模块加载方式</span></span><br><span class="line"><span class="comment">#添加需要加载的模块</span></span><br><span class="line">cat &gt; /etc/sysconfig/modules/ipvs.modules &lt;&lt;EOF</span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">modprobe -- ip_vs</span><br><span class="line">modprobe -- ip_vs_rr</span><br><span class="line">modprobe -- ip_vs_wrr</span><br><span class="line">modprobe -- ip_vs_sh</span><br><span class="line">modprobe -- nf_conntrack</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment">#3、授权、运行、检查是否加载</span></span><br><span class="line">chmod 755 /etc/sysconfig/modules/ipvs.modules &amp;&amp; bash /etc/sysconfig/modules/ipvs.modules &amp;&amp; lsmod | grep -e ip_vs -e nf_conntrack</span><br></pre></td></tr></table></figure>
+
+<h2 id="关闭SWAP分区"><a href="#关闭SWAP分区" class="headerlink" title="关闭SWAP分区"></a>关闭SWAP分区</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#永远关闭swap分区，需要重启操作系统</span></span><br><span class="line">vim /etc/fstab</span><br><span class="line"></span><br><span class="line"><span class="comment">#注释掉下面语句</span></span><br><span class="line"><span class="comment">#/dev/mapper/centos-swap swap                    swap    defaults        0 0</span></span><br></pre></td></tr></table></figure>
+
+<p>修改完成后需要重启操作系统，如不重启，可临时关闭，命令为<code>swapoff -a</code></p>
+<h1 id="docker准备"><a href="#docker准备" class="headerlink" title="docker准备"></a>docker准备</h1><h2 id="获取YUM源"><a href="#获取YUM源" class="headerlink" title="获取YUM源"></a>获取YUM源</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看可安装版本"><a href="#查看可安装版本" class="headerlink" title="查看可安装版本"></a>查看可安装版本</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">yum list docker-ce.x86_64 --showduplicates | sort -r</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装指定版本并设置启动及开机自启动"><a href="#安装指定版本并设置启动及开机自启动" class="headerlink" title="安装指定版本并设置启动及开机自启动"></a>安装指定版本并设置启动及开机自启动</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">yum -y install --<span class="built_in">setopt</span>=obsoletes=0 docker-ce-20.10.9-3.el7</span><br><span class="line">systemctl <span class="built_in">enable</span> docker</span><br><span class="line">systemctl start docker</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改cgroup方式"><a href="#修改cgroup方式" class="headerlink" title="修改cgroup方式"></a>修改cgroup方式</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#在/etc/docker/daemon.json添加如下内容</span></span><br><span class="line"></span><br><span class="line">vim /etc/docker/daemon.json</span><br><span class="line">&#123;</span><br><span class="line">        <span class="string">"exec-opts"</span>: [<span class="string">"native.cgroupdriver=systemd"</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#重启docker</span></span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<h1 id="kubernetes-安装"><a href="#kubernetes-安装" class="headerlink" title="kubernetes 安装"></a>kubernetes 安装</h1><h2 id="添加K8S的YUM源"><a href="#添加K8S的YUM源" class="headerlink" title="添加K8S的YUM源"></a>添加K8S的YUM源</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#二选一将谷歌YUM源或者阿里云YUM源，内容添加进文件中</span></span><br><span class="line">vim /etc/yum.repos.d/k8s.repo</span><br><span class="line"></span><br><span class="line"><span class="comment">#谷歌YUM源</span></span><br><span class="line">[kubernetes]</span><br><span class="line">name=Kubernetes</span><br><span class="line">baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=1</span><br><span class="line">repo_gpgcheck=1</span><br><span class="line">gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg</span><br><span class="line">https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg</span><br><span class="line"></span><br><span class="line"><span class="comment">#阿里云YUM源</span></span><br><span class="line">[kubernetes]</span><br><span class="line">name=Kubernetes</span><br><span class="line">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=1</span><br><span class="line">repo_gpgcheck=1</span><br><span class="line">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br></pre></td></tr></table></figure>
+
+<p>查看yum源：<code>yum repolist</code></p>
+<p>发现加载出错，解决方法，修改/etc/yum.repos.d/k8s.repo文件中的repo_gpgcheck=0跳过验证</p>
+<blockquote>
+<p>已加载插件：fastestmirror, langpacks</p>
+<p>kubernetes/signature                                                                                                                                  |  844 B  00:00:00</p>
+<p>从 <a href="https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg" target="_blank" rel="noopener">https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg</a> 检索密钥</p>
+<p>从 <a href="https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg" target="_blank" rel="noopener">https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</a> 检索密钥</p>
+<p>kubernetes/signature                                                                                                                                  | 1.4 kB  00:00:00 !!!</p>
+<p><a href="https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/repodata/repomd.xml" target="_blank" rel="noopener">https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/repodata/repomd.xml</a>: [Errno -1] repomd.xml signature could not be verified for kubernetes</p>
+<p>正在尝试其它镜像。</p>
+<p>One of the configured repositories failed (Kubernetes),</p>
+<p>and yum doesn’t have enough cached data to continue. At this point the only</p>
+<p>safe thing yum can do is fail. There are a few ways to work “fix” this:</p>
+</blockquote>
+<p>此时yum源拉取正常</p>
+<p><img src="/images/k8s%E9%83%A8%E7%BD%B2%E5%AE%89%E8%A3%85/%E6%88%AA%E5%9B%BE3.png" alt="截图3"></p>
+<h2 id="集群安装"><a href="#集群安装" class="headerlink" title="集群安装"></a>集群安装</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#查看指定版本</span></span><br><span class="line">yum list kubeadm.x86_64 --showduplicates | sort -r</span><br><span class="line">yum list kubelet.x86_64 --showduplicates | sort -r</span><br><span class="line">yum list kubectl.x86_64 --showduplicates | sort -r</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装指定版本的kubeadm、kubelet、kubectl</span></span><br><span class="line">yum -y install --<span class="built_in">setopt</span>=obsoletes=0 kubeadm-1.21.0-0  kubelet-1.21.0-0 kubectl-1.21.0-0</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>已安装:</p>
+<p>kubeadm.x86_64 0:1.21.0-0           kubectl.x86_64 0:1.21.0-0           kubelet.x86_64 0:1.21.0-0</p>
+<p>作为依赖被安装:</p>
+<p>conntrack-tools.x86_64 0:1.4.4-7.el7                   cri-tools.x86_64 0:1.24.2-0</p>
+<p>kubernetes-cni.x86_64 0:0.8.7-0                        libnetfilter_cthelper.x86_64 0:1.0.0-11.el7</p>
+<p>libnetfilter_cttimeout.x86_64 0:1.0.0-7.el7            libnetfilter_queue.x86_64 0:1.0.2-2.el7_2</p>
+<p>socat.x86_64 0:1.7.3.2-2.el7</p>
+<p>完毕！</p>
+</blockquote>
+<h2 id="配置kubelet"><a href="#配置kubelet" class="headerlink" title="配置kubelet"></a>配置kubelet</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#为了实现docker使用的cgroupdriver与kubelet使用的cgroup的一致性，建议修改如下文件内容。</span></span><br><span class="line">vim /etc/sysconfig/kubelet</span><br><span class="line">KUBELET_EXTRA_ARGS=<span class="string">"--cgroup-driver=systemd"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置kubelet为开机自启动即可，由于没有生成配置文件，集群初始化后自动启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> kubelet</span><br></pre></td></tr></table></figure>
+
+<h2 id="集群镜像准备"><a href="#集群镜像准备" class="headerlink" title="集群镜像准备"></a>集群镜像准备</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#查看镜像版本，添加--kubernetes-version=v1.21.0查看指定版本</span></span><br><span class="line">kubeadm config images list --kubernetes-version=v1.21.0</span><br><span class="line">k8s.gcr.io/kube-apiserver:v1.21.0</span><br><span class="line">k8s.gcr.io/kube-controller-manager:v1.21.0</span><br><span class="line">k8s.gcr.io/kube-scheduler:v1.21.0</span><br><span class="line">k8s.gcr.io/kube-proxy:v1.21.0</span><br><span class="line">k8s.gcr.io/pause:3.4.1</span><br><span class="line">k8s.gcr.io/etcd:3.4.13-0</span><br><span class="line">k8s.gcr.io/coredns/coredns:v1.8.0</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建镜像下载脚本，执行后拉取镜像，并将镜像保存为tar包，由于国内可能没办法拉取镜像，可以通过vpn，或者将k8s.gcr.io替换成mirrorgcrio拉取docker</span></span><br><span class="line"><span class="comment">#替换镜像源，k8s.gcr.io =&gt; registry.cn-hangzhou.aliyuncs.com/google_containers</span></span><br><span class="line">vim image_download.sh</span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">images_list=<span class="string">'</span></span><br><span class="line"><span class="string">k8s.gcr.io/kube-apiserver:v1.21.0</span></span><br><span class="line"><span class="string">k8s.gcr.io/kube-controller-manager:v1.21.0</span></span><br><span class="line"><span class="string">k8s.gcr.io/kube-scheduler:v1.21.0</span></span><br><span class="line"><span class="string">k8s.gcr.io/kube-proxy:v1.21.0</span></span><br><span class="line"><span class="string">k8s.gcr.io/pause:3.4.1</span></span><br><span class="line"><span class="string">k8s.gcr.io/etcd:3.4.13-0</span></span><br><span class="line"><span class="string">k8s.gcr.io/coredns/coredns:v1.8.0'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="variable">$images_list</span></span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">        docker pull <span class="variable">$i</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line">docker save -o k8s-1-21-0.tar <span class="variable">$images_list</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#执行脚本</span></span><br><span class="line">sh image_download.sh</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>解决 k8s.gcr.io相关镜像无法拉取问题</p>
+<p>docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver:v1.21.0</p>
+<p>docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-controller-manager:v1.21.0</p>
+<p>docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler:v1.21.0</p>
+<p>docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy:v1.21.0</p>
+<p>docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.4.1</p>
+<p>docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.4.13-0</p>
+<p>docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:v1.8.0</p>
+<p>#记得重新打tag，否则kubeadm init 时会重新拉取镜像</p>
+<p>docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver:v1.21.0 k8s.gcr.io/kube-apiserver:v1.21.0</p>
+<p>docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-controller-manager:v1.21.0 k8s.gcr.io/kube-controller-manager:v1.21.0</p>
+<p>docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler:v1.21.0 k8s.gcr.io/kube-scheduler:v1.21.0</p>
+<p>docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy:v1.21.0 k8s.gcr.io/kube-proxy:v1.21.0</p>
+<p>docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.4.1 k8s.gcr.io/pause:3.4.1</p>
+<p>docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.4.13-0 k8s.gcr.io/etcd:3.4.13-0</p>
+<p>docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:v1.8.0 k8s.gcr.io/coredns:v1.8.0</p>
+</blockquote>
+<h2 id="集群初始化"><a href="#集群初始化" class="headerlink" title="集群初始化"></a>集群初始化</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#在k8s-master01主机执行初始化命令</span></span><br><span class="line"><span class="comment">#执行init命令的主机将成为master</span></span><br><span class="line">kubeadm init --kubernetes-version=v1.21.0 --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.1.19</span><br></pre></td></tr></table></figure>
+
+<p>输出内容记得保存</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 ~]<span class="comment"># kubeadm init --kubernetes-version=v1.21.0 --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.1.19</span></span><br><span class="line">[init] Using Kubernetes version: v1.21.0</span><br><span class="line">[preflight] Running pre-flight checks</span><br><span class="line">[preflight] Pulling images required <span class="keyword">for</span> setting up a Kubernetes cluster</span><br><span class="line">[preflight] This might take a minute or two, depending on the speed of your internet connection</span><br><span class="line">[preflight] You can also perform this action <span class="keyword">in</span> beforehand using <span class="string">'kubeadm config images pull'</span></span><br><span class="line">[certs] Using certificateDir folder <span class="string">"/etc/kubernetes/pki"</span></span><br><span class="line">[certs] Generating <span class="string">"ca"</span> certificate and key</span><br><span class="line">[certs] Generating <span class="string">"apiserver"</span> certificate and key</span><br><span class="line">[certs] apiserver serving cert is signed <span class="keyword">for</span> DNS names [k8s-master01 kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.96.0.1 192.168.1.19]</span><br><span class="line">[certs] Generating <span class="string">"apiserver-kubelet-client"</span> certificate and key</span><br><span class="line">[certs] Generating <span class="string">"front-proxy-ca"</span> certificate and key</span><br><span class="line">[certs] Generating <span class="string">"front-proxy-client"</span> certificate and key</span><br><span class="line">[certs] Generating <span class="string">"etcd/ca"</span> certificate and key</span><br><span class="line">[certs] Generating <span class="string">"etcd/server"</span> certificate and key</span><br><span class="line">[certs] etcd/server serving cert is signed <span class="keyword">for</span> DNS names [k8s-master01 localhost] and IPs [192.168.1.19 127.0.0.1 ::1]</span><br><span class="line">[certs] Generating <span class="string">"etcd/peer"</span> certificate and key</span><br><span class="line">[certs] etcd/peer serving cert is signed <span class="keyword">for</span> DNS names [k8s-master01 localhost] and IPs [192.168.1.19 127.0.0.1 ::1]</span><br><span class="line">[certs] Generating <span class="string">"etcd/healthcheck-client"</span> certificate and key</span><br><span class="line">[certs] Generating <span class="string">"apiserver-etcd-client"</span> certificate and key</span><br><span class="line">[certs] Generating <span class="string">"sa"</span> key and public key</span><br><span class="line">[kubeconfig] Using kubeconfig folder <span class="string">"/etc/kubernetes"</span></span><br><span class="line">[kubeconfig] Writing <span class="string">"admin.conf"</span> kubeconfig file</span><br><span class="line">[kubeconfig] Writing <span class="string">"kubelet.conf"</span> kubeconfig file</span><br><span class="line">[kubeconfig] Writing <span class="string">"controller-manager.conf"</span> kubeconfig file</span><br><span class="line">[kubeconfig] Writing <span class="string">"scheduler.conf"</span> kubeconfig file</span><br><span class="line">[kubelet-start] Writing kubelet environment file with flags to file <span class="string">"/var/lib/kubelet/kubeadm-flags.env"</span></span><br><span class="line">[kubelet-start] Writing kubelet configuration to file <span class="string">"/var/lib/kubelet/config.yaml"</span></span><br><span class="line">[kubelet-start] Starting the kubelet</span><br><span class="line">[control-plane] Using manifest folder <span class="string">"/etc/kubernetes/manifests"</span></span><br><span class="line">[control-plane] Creating static Pod manifest <span class="keyword">for</span> <span class="string">"kube-apiserver"</span></span><br><span class="line">[control-plane] Creating static Pod manifest <span class="keyword">for</span> <span class="string">"kube-controller-manager"</span></span><br><span class="line">[control-plane] Creating static Pod manifest <span class="keyword">for</span> <span class="string">"kube-scheduler"</span></span><br><span class="line">[etcd] Creating static Pod manifest <span class="keyword">for</span> <span class="built_in">local</span> etcd <span class="keyword">in</span> <span class="string">"/etc/kubernetes/manifests"</span></span><br><span class="line">[<span class="built_in">wait</span>-control-plane] Waiting <span class="keyword">for</span> the kubelet to boot up the control plane as static Pods from directory <span class="string">"/etc/kubernetes/manifests"</span>. This can take up to 4m0s</span><br><span class="line">[kubelet-check] Initial timeout of 40s passed.</span><br><span class="line">[apiclient] All control plane components are healthy after 62.001527 seconds</span><br><span class="line">[upload-config] Storing the configuration used <span class="keyword">in</span> ConfigMap <span class="string">"kubeadm-config"</span> <span class="keyword">in</span> the <span class="string">"kube-system"</span> Namespace</span><br><span class="line">[kubelet] Creating a ConfigMap <span class="string">"kubelet-config-1.21"</span> <span class="keyword">in</span> namespace kube-system with the configuration <span class="keyword">for</span> the kubelets <span class="keyword">in</span> the cluster</span><br><span class="line">[upload-certs] Skipping phase. Please see --upload-certs</span><br><span class="line">[mark-control-plane] Marking the node k8s-master01 as control-plane by adding the labels: [node-role.kubernetes.io/master(deprecated) node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]</span><br><span class="line">[mark-control-plane] Marking the node k8s-master01 as control-plane by adding the taints [node-role.kubernetes.io/master:NoSchedule]</span><br><span class="line">[bootstrap-token] Using token: 37exic.msprw2ejmhr9sgnm</span><br><span class="line">[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to get nodes</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to post CSRs <span class="keyword">in</span> order <span class="keyword">for</span> nodes to get long term certificate credentials</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow certificate rotation <span class="keyword">for</span> all node client certificates <span class="keyword">in</span> the cluster</span><br><span class="line">[bootstrap-token] Creating the <span class="string">"cluster-info"</span> ConfigMap <span class="keyword">in</span> the <span class="string">"kube-public"</span> namespace</span><br><span class="line">[kubelet-finalize] Updating <span class="string">"/etc/kubernetes/kubelet.conf"</span> to point to a rotatable kubelet client certificate and key</span><br><span class="line">[addons] Applied essential addon: CoreDNS</span><br><span class="line">[addons] Applied essential addon: kube-proxy</span><br><span class="line"></span><br><span class="line">Your Kubernetes control-plane has initialized successfully!</span><br><span class="line"></span><br><span class="line">To start using your cluster, you need to run the following as a regular user:</span><br><span class="line"></span><br><span class="line">  mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">  sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">  sudo chown $(id -u):$(id -g) <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"></span><br><span class="line">Alternatively, <span class="keyword">if</span> you are the root user, you can run:</span><br><span class="line"></span><br><span class="line">  <span class="built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf</span><br><span class="line"></span><br><span class="line">You should now deploy a pod network to the cluster.</span><br><span class="line">Run <span class="string">"kubectl apply -f [podnetwork].yaml"</span> with one of the options listed at:</span><br><span class="line">  https://kubernetes.io/docs/concepts/cluster-administration/addons/</span><br><span class="line"></span><br><span class="line">Then you can join any number of worker nodes by running the following on each as root:</span><br><span class="line"></span><br><span class="line">kubeadm join 192.168.1.19:6443 --token 37exic.msprw2ejmhr9sgnm \</span><br><span class="line">        --discovery-token-ca-cert-hash sha256:55753d0edf239649301c3463300e1e5777340926b0c1f1bbc1cf86034bac4c4e</span><br></pre></td></tr></table></figure>
+
+<h2 id="集群应用客户端管理集群文件准备"><a href="#集群应用客户端管理集群文件准备" class="headerlink" title="集群应用客户端管理集群文件准备"></a>集群应用客户端管理集群文件准备</h2><p>从初始化脚本执行后的控制台可以得到以下信息</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#要开始使用集群</span></span><br><span class="line"><span class="comment">#普通用户的身份,则运行以下命令</span></span><br><span class="line">mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">sudo chown $(id -u):$(id -g) <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#或者，如果是root用户，您可以运行</span></span><br><span class="line"><span class="built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf</span><br></pre></td></tr></table></figure>
+
+<p>以上命令执行之后，可以使用kubectl命令</p>
+<img src="/images/k8s部署安装/截图4.png" alt="截图4" style="zoom:80%;" />
+
+<p>因为缺少网络设施，coredns处于pending状态</p>
+<h2 id="集群网络准备"><a href="#集群网络准备" class="headerlink" title="集群网络准备"></a>集群网络准备</h2><p><a href="https://projectcalico.docs.tigera.io/about/about-calico" target="_blank" rel="noopener">https://projectcalico.docs.tigera.io/about/about-calico</a></p>
+<p>calico可以为k8s集群提供基础的网络设施</p>
+<img src="/images/k8s部署安装/截图5.png" alt="截图5" style="zoom:67%;" />
+
+<h3 id="calico安装"><a href="#calico安装" class="headerlink" title="calico安装"></a>calico安装</h3><p>1、安装 Tigera Calico 操作符和自定义资源定义。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml</span><br></pre></td></tr></table></figure>
+
+<p>2、通过创建必要的自定义资源来安装 Calico</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#因为需要修改default IP pool CIDR to match your pod network CIDR，所以不建议直接执行</span></span><br><span class="line"><span class="comment">#kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/custom-resources.yaml</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#自行创建</span></span><br><span class="line">mkdir /usr/<span class="built_in">local</span>/calicofir</span><br><span class="line">wget  https://docs.projectcalico.org/manifests/custom-resources.yaml</span><br><span class="line"><span class="comment">#修改文件中的cidr地址为集群初始化指定的--pod.network.dir中指定的10.244.0.0.0/16</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/k8s%E9%83%A8%E7%BD%B2%E5%AE%89%E8%A3%85/%E6%88%AA%E5%9B%BE6.png" alt="截图6"></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">kubectl apply -f custom-resources.yaml</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/k8s%E9%83%A8%E7%BD%B2%E5%AE%89%E8%A3%85/%E6%88%AA%E5%9B%BE7.png" alt="截图7"></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#查看命名空间</span></span><br><span class="line">[root@k8s-master01 calicofir]<span class="comment"># kubectl get ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">calico-system     Active   79s</span><br><span class="line">default           Active   10h</span><br><span class="line">kube-node-lease   Active   10h</span><br><span class="line">kube-public       Active   10h</span><br><span class="line">kube-system       Active   10h</span><br><span class="line">tigera-operator   Active   9m3s</span><br><span class="line"></span><br><span class="line"> <span class="comment">#查看calico-system命名空间下的pod</span></span><br><span class="line">[root@k8s-master01 calicofir]<span class="comment"># kubectl get pods -n calico-system</span></span><br><span class="line">NAME                                       READY   STATUS              RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-78687bb75f-46l2t   0/1     Pending             0          94s</span><br><span class="line">calico-node-xfr2n                          0/1     PodInitializing     0          94s</span><br><span class="line">calico-typha-75444c4b8-nmmj5               1/1     Running             0          94s</span><br><span class="line">csi-node-driver-92q4k                      0/2     ContainerCreating   0          4s</span><br><span class="line"></span><br><span class="line"><span class="comment">#监控calico-system相关pod安装情况</span></span><br><span class="line">watch kubectl get pods -n calico-system</span><br><span class="line">Every 2.0s: kubectl get pods -n calico-system                                                                                                                     Sun Sep 11 09:39:03 2022</span><br><span class="line"></span><br><span class="line">NAME                                       READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-78687bb75f-46l2t   1/1     Running   0          8m26s</span><br><span class="line">calico-node-xfr2n                          1/1     Running   0          8m26s</span><br><span class="line">calico-typha-75444c4b8-nmmj5               1/1     Running   0          8m26s</span><br><span class="line">csi-node-driver-92q4k                      2/2     Running   0          6m56s</span><br></pre></td></tr></table></figure>
+
+<p>此时再看coredns处于Running状态表明联网成功。</p>
+<img src="/images/k8s部署安装/截图8.png" alt="截图8" style="zoom:80%;" />
+
+<h3 id="calico客户端安装"><a href="#calico客户端安装" class="headerlink" title="calico客户端安装"></a>calico客户端安装</h3><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#下载二进制文件</span></span><br><span class="line">安装</span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/calicofir</span><br><span class="line">curl -L https://github.com/projectcalico/calico/releases/download/v3.21.4/calicoctl-linux-amd64 -o calicoctl</span><br><span class="line"><span class="comment">#添加权限</span></span><br><span class="line">chmod +x /usr/<span class="built_in">local</span>/calicofir/calicoctl</span><br><span class="line">calicoctl version</span><br></pre></td></tr></table></figure>
+
+<h2 id="工作节点加入集群"><a href="#工作节点加入集群" class="headerlink" title="工作节点加入集群"></a>工作节点加入集群</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#在之前初始化后控制台打印输出以下语句，将其粘贴到需要加入集群的主机上执行</span></span><br><span class="line">Then you can join any number of worker nodes by running the following on each as root:</span><br><span class="line"></span><br><span class="line">kubeadm join 192.168.1.19:6443 --token 37exic.msprw2ejmhr9sgnm \</span><br><span class="line">        --discovery-token-ca-cert-hash sha256:55753d0edf239649301c3463300e1e5777340926b0c1f1bbc1cf86034bac4c4e</span><br></pre></td></tr></table></figure>
+
+<p>在node01和node02主机分别执行一次</p>
+<p><img src="/images/k8s%E9%83%A8%E7%BD%B2%E5%AE%89%E8%A3%85/%E6%88%AA%E5%9B%BE9.png" alt="截图9"></p>
+<p>回到master01主机查看，添加成功，等待拉取镜像安装</p>
+<p><img src="/images/k8s%E9%83%A8%E7%BD%B2%E5%AE%89%E8%A3%85/%E6%88%AA%E5%9B%BE10.png" alt="截图10"></p>
+<h2 id="集群可用性验证"><a href="#集群可用性验证" class="headerlink" title="集群可用性验证"></a>集群可用性验证</h2><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment">#查看所有节点</span></span><br><span class="line">[root@k8s-master01 calicofir]<span class="comment"># kubectl get nodes</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE     VERSION</span><br><span class="line">k8s-master01   Ready    control-plane,master   10h     v1.21.0</span><br><span class="line">k8s-node01     Ready    &lt;none&gt;                 9m31s   v1.21.0</span><br><span class="line">k8s-node02     Ready    &lt;none&gt;                 8m59s   v1.21.0</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看集群健康情况</span></span><br><span class="line">[root@k8s-master01 calicofir]<span class="comment"># kubectl get cs</span></span><br><span class="line">Warning: v1 ComponentStatus is deprecated <span class="keyword">in</span> v1.19+</span><br><span class="line">NAME                 STATUS      MESSAGE                                                                                       ERROR</span><br><span class="line">controller-manager   Unhealthy   Get <span class="string">"http://127.0.0.1:10252/healthz"</span>: dial tcp 127.0.0.1:10252: connect: connection refused   </span><br><span class="line">scheduler            Unhealthy   Get <span class="string">"http://127.0.0.1:10251/healthz"</span>: dial tcp 127.0.0.1:10251: connect: connection refused   </span><br><span class="line">etcd-0               Healthy     &#123;<span class="string">"health"</span>:<span class="string">"true"</span>&#125; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看k8s集群pod运行情况</span></span><br><span class="line">[root@k8s-master01 calicofir]<span class="comment"># kubectl get pods -n kube-system</span></span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">coredns-558bd4d5db-5j4gq               1/1     Running   0          10h</span><br><span class="line">coredns-558bd4d5db-79qsm               1/1     Running   0          10h</span><br><span class="line">etcd-k8s-master01                      1/1     Running   0          10h</span><br><span class="line">kube-apiserver-k8s-master01            1/1     Running   0          10h</span><br><span class="line">kube-controller-manager-k8s-master01   1/1     Running   0          10h</span><br><span class="line">kube-proxy-v2ltp                       1/1     Running   0          10h</span><br><span class="line">kube-proxy-wzxps                       1/1     Running   0          11m</span><br><span class="line">kube-proxy-zr77d                       1/1     Running   0          11m</span><br><span class="line">kube-scheduler-k8s-master01            1/1     Running   0          10h</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看calico网络工具运行情况</span></span><br><span class="line">[root@k8s-master01 calicofir]<span class="comment"># kubectl get pods -n calico-system</span></span><br><span class="line">NAME                                       READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-78687bb75f-46l2t   1/1     Running   0          43m</span><br><span class="line">calico-node-f9gx6                          1/1     Running   0          12m</span><br><span class="line">calico-node-rsk4w                          1/1     Running   0          13m</span><br><span class="line">calico-node-xfr2n                          1/1     Running   0          43m</span><br><span class="line">calico-typha-75444c4b8-4x7pp               1/1     Running   0          12m</span><br><span class="line">calico-typha-75444c4b8-nmmj5               1/1     Running   0          43m</span><br><span class="line">csi-node-driver-4l2ts                      2/2     Running   0          10m</span><br><span class="line">csi-node-driver-92q4k                      2/2     Running   0          42m</span><br><span class="line">csi-node-driver-kcw5b                      2/2     Running   0          11m</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>K8s</category>
+      </categories>
+      <tags>
+        <tag>K8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K8s-kubectl</title>
+    <url>/2022/11/15/k8s-kubectl/</url>
+    <content><![CDATA[<h1 id="命令说明"><a href="#命令说明" class="headerlink" title="命令说明"></a>命令说明</h1><img src="/images/k8s-kubectl/kubectl命令帮助1.png" alt="kubectl命令帮助1" style="zoom:80%;" />
+
+<a id="more"></a>
+
+<p><img src="/images/k8s-kubectl/kubectl%E5%91%BD%E4%BB%A4%E5%B8%AE%E5%8A%A92.png" alt="kubectl命令帮助2"></p>
+<h1 id="帮助文档"><a href="#帮助文档" class="headerlink" title="帮助文档"></a>帮助文档</h1><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">[root@k8s-master01 calicofir]<span class="comment"># kubectl -h</span></span><br><span class="line">kubectl controls the Kubernetes cluster manager.</span><br><span class="line"></span><br><span class="line"> Find more information at: https://kubernetes.io/docs/reference/kubectl/overview/</span><br><span class="line"></span><br><span class="line">Basic Commands (Beginner):</span><br><span class="line">  create        Create a resource from a file or from stdin.</span><br><span class="line">  expose        使用 replication controller, service, deployment 或者 pod 并暴露它作为一个 新的 Kubernetes</span><br><span class="line">Service</span><br><span class="line">  run           在集群中运行一个指定的镜像</span><br><span class="line">  <span class="built_in">set</span>           为 objects 设置一个指定的特征</span><br><span class="line"></span><br><span class="line">Basic Commands (Intermediate):</span><br><span class="line">  explain       查看资源的文档</span><br><span class="line">  get           显示一个或更多 resources</span><br><span class="line">  edit          在服务器上编辑一个资源</span><br><span class="line">  delete        Delete resources by filenames, stdin, resources and names, or by resources and label selector</span><br><span class="line"></span><br><span class="line">Deploy Commands:</span><br><span class="line">  rollout       Manage the rollout of a resource</span><br><span class="line">  scale         Set a new size <span class="keyword">for</span> a Deployment, ReplicaSet or Replication Controller</span><br><span class="line">  autoscale     Auto-scale a Deployment, ReplicaSet, StatefulSet, or ReplicationController</span><br><span class="line"></span><br><span class="line">Cluster Management Commands:</span><br><span class="line">  certificate   修改 certificate 资源.</span><br><span class="line">  cluster-info  显示集群信息</span><br><span class="line">  top           显示 Resource (CPU/Memory) 使用.</span><br><span class="line">  cordon        标记 node 为 unschedulable</span><br><span class="line">  uncordon      标记 node 为 schedulable</span><br><span class="line">  drain         Drain node <span class="keyword">in</span> preparation <span class="keyword">for</span> maintenance</span><br><span class="line">  taint         更新一个或者多个 node 上的 taints</span><br><span class="line"></span><br><span class="line">Troubleshooting and Debugging Commands:</span><br><span class="line">  describe      显示一个指定 resource 或者 group 的 resources 详情</span><br><span class="line">  logs          输出容器在 pod 中的日志</span><br><span class="line">  attach        Attach 到一个运行中的 container</span><br><span class="line">  <span class="built_in">exec</span>          在一个 container 中执行一个命令</span><br><span class="line">  port-forward  Forward one or more <span class="built_in">local</span> ports to a pod</span><br><span class="line">  proxy         运行一个 proxy 到 Kubernetes API server</span><br><span class="line">  cp            复制 files 和 directories 到 containers 和从容器中复制 files 和 directories.</span><br><span class="line">  auth          Inspect authorization</span><br><span class="line">  debug         Create debugging sessions <span class="keyword">for</span> troubleshooting workloads and nodes</span><br><span class="line"></span><br><span class="line">Advanced Commands:</span><br><span class="line">  diff          Diff live version against would-be applied version</span><br><span class="line">  apply         通过文件名或标准输入流(stdin)对资源进行配置</span><br><span class="line">  patch         Update field(s) of a resource</span><br><span class="line">  replace       通过 filename 或者 stdin替换一个资源</span><br><span class="line">  <span class="built_in">wait</span>          Experimental: Wait <span class="keyword">for</span> a specific condition on one or many resources.</span><br><span class="line">  kustomize     Build a kustomization target from a directory or URL.</span><br><span class="line"></span><br><span class="line">Settings Commands:</span><br><span class="line">  label         更新在这个资源上的 labels</span><br><span class="line">  annotate      更新一个资源的注解</span><br><span class="line">  completion    Output shell completion code <span class="keyword">for</span> the specified shell (bash or zsh)</span><br><span class="line"></span><br><span class="line">Other Commands:</span><br><span class="line">  api-resources Print the supported API resources on the server</span><br><span class="line">  api-versions  Print the supported API versions on the server, <span class="keyword">in</span> the form of <span class="string">"group/version"</span></span><br><span class="line">  config        修改 kubeconfig 文件</span><br><span class="line">  plugin        Provides utilities <span class="keyword">for</span> interacting with plugins.</span><br><span class="line">  version       输出 client 和 server 的版本信息</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  kubectl [flags] [options]</span><br><span class="line"></span><br><span class="line">Use <span class="string">"kubectl &lt;command&gt; --help"</span> <span class="keyword">for</span> more information about a given <span class="built_in">command</span>.</span><br><span class="line">Use <span class="string">"kubectl options"</span> <span class="keyword">for</span> a list of global <span class="built_in">command</span>-line options (applies to all commands).</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="命令补全"><a href="#命令补全" class="headerlink" title="命令补全"></a>命令补全</h1><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">yum install -y bash-completion</span><br><span class="line"><span class="built_in">source</span> /usr/share/bash-completion/bash_completion</span><br><span class="line"><span class="built_in">source</span> &lt;(kubectl completion bash)</span><br></pre></td></tr></table></figure>
+
+<p>以上命令执行后可以进行命令补全，但是退出终端重新进入后失效，需要执行以下操作</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">kubectl completion bash &gt; /root/.kube/completion.bash.inc</span><br><span class="line">vim <span class="variable">$HOME</span>/.bash_profile</span><br><span class="line"></span><br><span class="line"><span class="comment">#在$PATH前一行添加</span></span><br><span class="line"><span class="built_in">source</span> /root/.kube/completion.bash.inc</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>devops</category>
+        <category>K8s</category>
+      </categories>
+      <tags>
+        <tag>K8s</tag>
+      </tags>
+  </entry>
 </search>
