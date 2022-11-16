@@ -30,7 +30,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://yrlzero.github.io/images/k8s-controller/%E6%88%AA%E5%9B%BE18.png">
 <meta property="article:published_time" content="2022-11-15T14:32:13.607Z">
-<meta property="article:modified_time" content="2022-11-15T14:41:56.842Z">
+<meta property="article:modified_time" content="2022-11-16T02:32:50.109Z">
 <meta property="article:author" content="yrl">
 <meta property="article:tag" content="K8s">
 <meta name="twitter:card" content="summary">
@@ -209,10 +209,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-11-15 22:32:13 / 修改时间：22:41:56" itemprop="dateCreated datePublished" datetime="2022-11-15T22:32:13+08:00">2022-11-15</time>
+              <time title="创建时间：2022-11-15 22:32:13" itemprop="dateCreated datePublished" datetime="2022-11-15T22:32:13+08:00">2022-11-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-16 10:32:50" itemprop="dateModified" datetime="2022-11-16T10:32:50+08:00">2022-11-16</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -380,17 +386,17 @@
 </ul>
 <h3 id="1-4-1-无状态应用与有状态应用"><a href="#1-4-1-无状态应用与有状态应用" class="headerlink" title="1.4.1 无状态应用与有状态应用"></a>1.4.1 无状态应用与有状态应用</h3><h4 id="1-4-1-1-无状态应用"><a href="#1-4-1-1-无状态应用" class="headerlink" title="1.4.1.1 无状态应用"></a>1.4.1.1 无状态应用</h4><ul>
 <li>如nginx</li>
+<li>请求本身包含了响应端为响应这一请求所需的全部信息。每一个请求都像首次执行一样，不会依赖之前的数据进行响应。</li>
 </ul>
 <ul>
-<li>请求本身包含了响应端为响应这一请求所需的全部信息。每一个请求都像首次执行一样，不会依赖之前的数据进行响应。</li>
 <li>不需要持久化的数据</li>
 <li>无状态应用的多个实例之间互不依赖，可以无序的部署、删除或伸缩</li>
 </ul>
 <h4 id="1-4-1-1-有状态应用"><a href="#1-4-1-1-有状态应用" class="headerlink" title="1.4.1.1 有状态应用"></a>1.4.1.1 有状态应用</h4><ul>
 <li>如mysql</li>
+<li>前后请求有关联与依赖</li>
 </ul>
 <ul>
-<li>前后请求有关联与依赖</li>
 <li>需要持久化的数据</li>
 <li>有状态应用的多个实例之间有依赖，不能相互替换：无论怎么调度，每个 Pod 都有一个永久不变的 ID。</li>
 </ul>
@@ -408,7 +414,7 @@
 </ol>
 <h3 id="1-4-4-创建StatefulSet应用"><a href="#1-4-4-创建StatefulSet应用" class="headerlink" title="1.4.4 创建StatefulSet应用"></a>1.4.4 创建StatefulSet应用</h3><p>参考: <a href="https://kubernetes.io/zh/docs/tutorials/stateful-application/basic-stateful-set/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/tutorials/stateful-application/basic-stateful-set/</a></p>
 <h4 id="1-4-4-1-编辑YAML资源清单文件"><a href="#1-4-4-1-编辑YAML资源清单文件" class="headerlink" title="1.4.4.1  编辑YAML资源清单文件"></a>1.4.4.1  编辑YAML资源清单文件</h4><p>创建statelfulset应用来调用名为nfs-client的storageclass,以实现动态供给</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim nginx-storageclass-nfs.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: nginx</span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - port: 80</span><br><span class="line">    name: web</span><br><span class="line">  clusterIP: None								   <span class="comment"># 无头服务</span></span><br><span class="line">  selector:</span><br><span class="line">    app: nginx</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: web											<span class="comment"># statefulset的名称</span></span><br><span class="line">spec:</span><br><span class="line">  serviceName: <span class="string">"nginx"</span></span><br><span class="line">  replicas: 3										<span class="comment"># 3个副本</span></span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:1.15-alpine</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 80</span><br><span class="line">          name: web</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: www</span><br><span class="line">          mountPath: /usr/share/nginx/html</span><br><span class="line">  volumeClaimTemplates:</span><br><span class="line">  - metadata:</span><br><span class="line">      name: www</span><br><span class="line">    spec:</span><br><span class="line">      accessModes: [ <span class="string">"ReadWriteOnce"</span> ]</span><br><span class="line">      storageClassName: <span class="string">"nfs-client"</span>		<span class="comment"># 与前面定义的storageclass名称对应</span></span><br><span class="line">      resources:</span><br><span class="line">        requests:</span><br><span class="line">          storage: 1Gi</span><br><span class="line">          </span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f nginx-storageclass-nfs.yml</span></span><br><span class="line">service/nginx created</span><br><span class="line">statefulset.apps/web created</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># vim nginx-storageclass-nfs.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: nginx</span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - port: 80</span><br><span class="line">    name: web</span><br><span class="line">  clusterIP: None		<span class="comment"># 无头服务</span></span><br><span class="line">  selector:</span><br><span class="line">    app: nginx</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: web				<span class="comment"># statefulset的名称</span></span><br><span class="line">spec:</span><br><span class="line">  serviceName: <span class="string">"nginx"</span></span><br><span class="line">  replicas: 3			<span class="comment"># 3个副本</span></span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:1.15-alpine</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 80</span><br><span class="line">          name: web</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: www</span><br><span class="line">          mountPath: /usr/share/nginx/html</span><br><span class="line">  volumeClaimTemplates:</span><br><span class="line">  - metadata:</span><br><span class="line">      name: www</span><br><span class="line">    spec:</span><br><span class="line">      accessModes: [ <span class="string">"ReadWriteOnce"</span> ]</span><br><span class="line">      storageClassName: <span class="string">"nfs-client"</span>		<span class="comment"># 与前面定义的storageclass名称对应</span></span><br><span class="line">      resources:</span><br><span class="line">        requests:</span><br><span class="line">          storage: 1Gi</span><br><span class="line">          </span><br><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl apply -f nginx-storageclass-nfs.yml</span></span><br><span class="line">service/nginx created</span><br><span class="line">statefulset.apps/web created</span><br></pre></td></tr></table></figure>
 
 <h4 id="1-4-4-2-应用部署后验证"><a href="#1-4-4-2-应用部署后验证" class="headerlink" title="1.4.4.2 应用部署后验证"></a>1.4.4.2 应用部署后验证</h4><p>验证pod</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get pods |grep web</span></span><br><span class="line">web-0                                     1/1     Running   0          1m15s</span><br><span class="line">web-1                                     1/1     Running   0          1m7s</span><br><span class="line">web-2                                     1/1     Running   0          57s</span><br></pre></td></tr></table></figure>
@@ -533,7 +539,10 @@
     <a href="/2022/11/15/k8s-service/" rel="prev" title="K8s-service">
       <i class="fa fa-chevron-left"></i> K8s-service
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/16/k8s-%E5%AD%98%E5%82%A8%E5%8D%B7/" rel="next" title="K8s-存储卷">
+      K8s-存储卷 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -608,7 +617,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-count">96</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

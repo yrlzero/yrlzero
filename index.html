@@ -179,6 +179,93 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/16/k8s-%E5%AD%98%E5%82%A8%E5%8D%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/11/16/k8s-%E5%AD%98%E5%82%A8%E5%8D%B7/" class="post-title-link" itemprop="url">K8s-存储卷</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-16 11:27:09 / 修改时间：14:56:46" itemprop="dateCreated datePublished" datetime="2022-11-16T11:27:09+08:00">2022-11-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/" itemprop="url" rel="index"><span itemprop="name">devops</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/K8s/" itemprop="url" rel="index"><span itemprop="name">K8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="存储卷介绍"><a href="#存储卷介绍" class="headerlink" title="存储卷介绍"></a>存储卷介绍</h1><p>pod有生命周期，生命周期结束后pod里的数据会消失(如配置文件,业务数据等)。</p>
+<blockquote>
+<p>需要将数据与pod分离,将数据放在专门的存储卷上</p>
+</blockquote>
+<p>pod在k8s集群的节点中是可以调度的, 如果pod挂了被调度到另一个节点,那么数据和pod的联系会中断。</p>
+<blockquote>
+<p>需要与集群节点分离的存储系统才能实现数据持久化</p>
+</blockquote>
+<p>简单来说: <strong>volume提供了在容器上挂载外部存储的能力</strong></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/11/16/k8s-%E5%AD%98%E5%82%A8%E5%8D%B7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/15/k8s-controller/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -202,10 +289,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-11-15 22:32:13 / 修改时间：22:41:56" itemprop="dateCreated datePublished" datetime="2022-11-15T22:32:13+08:00">2022-11-15</time>
+              <time title="创建时间：2022-11-15 22:32:13" itemprop="dateCreated datePublished" datetime="2022-11-15T22:32:13+08:00">2022-11-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-16 10:32:50" itemprop="dateModified" datetime="2022-11-16T10:32:50+08:00">2022-11-16</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -933,90 +1026,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/15/k8s%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/11/15/k8s%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/" class="post-title-link" itemprop="url">K8s-命名空间</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-11-15 15:16:47 / 修改时间：15:24:44" itemprop="dateCreated datePublished" datetime="2022-11-15T15:16:47+08:00">2022-11-15</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/devops/" itemprop="url" rel="index"><span itemprop="name">devops</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/devops/K8s/" itemprop="url" rel="index"><span itemprop="name">K8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="一、命名空间-namespace-作用"><a href="#一、命名空间-namespace-作用" class="headerlink" title="一、命名空间(namespace)作用"></a><strong>一、命名空间(namespace)作用</strong></h1><ul>
-<li>Namespace是对一组资源和对象的抽象集合.</li>
-<li>常见的 pod, service, deployment 等都是属于某一个namespace的（默认是 default）</li>
-<li>不是所有资源都属于namespace，如nodes, persistent volume，namespace 等资源则不属于任何 namespace</li>
-</ul>
-<h1 id="二、查看namespace"><a href="#二、查看namespace" class="headerlink" title="二、查看namespace"></a><strong>二、查看namespace</strong></h1><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master1 ~]<span class="comment"># kubectl get namespaces       # namespaces可以简写为namespace或ns</span></span><br><span class="line">NAME              STATUS   AGE</span><br><span class="line">default           Active   130m         <span class="comment"># 所有未指定Namespace的对象都会被默认分配在default命名空间</span></span><br><span class="line">kube-node-lease   Active   130m         </span><br><span class="line">kube-public       Active   130m         <span class="comment"># 此命名空间下的资源可以被所有人访问</span></span><br><span class="line">kube-system       Active   130m         <span class="comment"># 所有由Kubernetes系统创建的资源都处于这个命名空间</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/11/15/k8s%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1088,7 +1097,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-count">96</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
