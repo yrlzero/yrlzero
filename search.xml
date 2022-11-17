@@ -10032,7 +10032,7 @@
 <h1 id="七、集成Sonar-Qube"><a href="#七、集成Sonar-Qube" class="headerlink" title="七、集成Sonar Qube"></a>七、集成Sonar Qube</h1><h2 id="7-1-Sonar-Qube介绍"><a href="#7-1-Sonar-Qube介绍" class="headerlink" title="7.1 Sonar Qube介绍"></a>7.1 Sonar Qube介绍</h2><p>Sonar Qube是一个开源的代码分析平台，支持Java、Python、PHP、JavaScript、CSS等25种以上的语言，可以检测出重复代码、代码漏洞、代码规范和安全性漏洞的问题。</p>
 <p>Sonar Qube可以与多种软件整合进行代码扫描，比如Maven，Gradle，Git，Jenkins等，并且会将代码检测结果推送回Sonar Qube并且在系统提供的UI界面上显示出来</p>
 <p><img src="/images/DevOps/SonarQube%E7%9A%84UI%E7%95%8C%E9%9D%A2.png" alt=""></p>
-<h2 id="7-2-Sonar-Qube环境搭建"><a href="#7-2-Sonar-Qube环境搭建" class="headerlink" title="7.2 Sonar Qube环境搭建"></a>7.2 Sonar Qube环境搭建</h2><h3 id="7-2-1-Sonar-Qube安装"><a href="#7-2-1-Sonar-Qube安装" class="headerlink" title="7.2.1 Sonar Qube安装"></a>7.2.1 Sonar Qube安装</h3><p>onar Qube在7.9版本中已经放弃了对MySQL的支持，并且建议在商业环境中采用PostgreSQL，那么安装Sonar Qube时需要依赖PostgreSQL。</p>
+<h2 id="7-2-Sonar-Qube环境搭建"><a href="#7-2-Sonar-Qube环境搭建" class="headerlink" title="7.2 Sonar Qube环境搭建"></a>7.2 Sonar Qube环境搭建</h2><h3 id="7-2-1-Sonar-Qube安装"><a href="#7-2-1-Sonar-Qube安装" class="headerlink" title="7.2.1 Sonar Qube安装"></a>7.2.1 Sonar Qube安装</h3><p>Sonar Qube在7.9版本中已经放弃了对MySQL的支持，并且建议在商业环境中采用PostgreSQL，那么安装Sonar Qube时需要依赖PostgreSQL。</p>
 <p>并且这里会安装Sonar Qube的长期支持版本8.9</p>
 <ul>
 <li><p>拉取镜像</p>
@@ -10060,7 +10060,7 @@
 <p><img src="/images/DevOps/%E9%87%8D%E6%96%B0%E8%AE%BE%E7%BD%AE%E5%AF%86%E7%A0%81.png" alt=""></p>
 </li>
 <li><p>Sonar Qube首页</p>
-<p>![](/images/DevOps/Sonar Qube首页.png)</p>
+<p><img src="/images/DevOps/SonarQube%E9%A6%96%E9%A1%B5.png" alt=""></p>
 </li>
 </ul>
 <h3 id="7-2-2-安装中文插件"><a href="#7-2-2-安装中文插件" class="headerlink" title="7.2.2 安装中文插件"></a>7.2.2 安装中文插件</h3><p>​    <img src="/images/DevOps/%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E6%8F%92%E4%BB%B6.png" alt=""></p>
