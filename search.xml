@@ -10031,7 +10031,7 @@
 </ul>
 <h1 id="七、集成Sonar-Qube"><a href="#七、集成Sonar-Qube" class="headerlink" title="七、集成Sonar Qube"></a>七、集成Sonar Qube</h1><h2 id="7-1-Sonar-Qube介绍"><a href="#7-1-Sonar-Qube介绍" class="headerlink" title="7.1 Sonar Qube介绍"></a>7.1 Sonar Qube介绍</h2><p>Sonar Qube是一个开源的代码分析平台，支持Java、Python、PHP、JavaScript、CSS等25种以上的语言，可以检测出重复代码、代码漏洞、代码规范和安全性漏洞的问题。</p>
 <p>Sonar Qube可以与多种软件整合进行代码扫描，比如Maven，Gradle，Git，Jenkins等，并且会将代码检测结果推送回Sonar Qube并且在系统提供的UI界面上显示出来</p>
-<p>![](/images/DevOps/Sonar Qube的UI界面.png)</p>
+<p><img src="/images/DevOps/SonarQube%E7%9A%84UI%E7%95%8C%E9%9D%A2.png" alt=""></p>
 <h2 id="7-2-Sonar-Qube环境搭建"><a href="#7-2-Sonar-Qube环境搭建" class="headerlink" title="7.2 Sonar Qube环境搭建"></a>7.2 Sonar Qube环境搭建</h2><h3 id="7-2-1-Sonar-Qube安装"><a href="#7-2-1-Sonar-Qube安装" class="headerlink" title="7.2.1 Sonar Qube安装"></a>7.2.1 Sonar Qube安装</h3><p>onar Qube在7.9版本中已经放弃了对MySQL的支持，并且建议在商业环境中采用PostgreSQL，那么安装Sonar Qube时需要依赖PostgreSQL。</p>
 <p>并且这里会安装Sonar Qube的长期支持版本8.9</p>
 <ul>
@@ -10078,7 +10078,7 @@
 <p><img src="/images/DevOps/%E6%89%A7%E8%A1%8C%E4%BB%A3%E7%A0%81%E6%A3%80%E6%B5%8B.png" alt=""></p>
 </li>
 <li><p>查看Sonar Qube界面检测结果</p>
-<p>![](/images/DevOps/Sonar Qube检测结果.png)</p>
+<p><img src="/images/DevOps/SonarQube%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C.png" alt=""></p>
 </li>
 </ul>
 <h3 id="7-3-2-Sonar-scanner实现代码检测"><a href="#7-3-2-Sonar-scanner实现代码检测" class="headerlink" title="7.3.2 Sonar-scanner实现代码检测"></a>7.3.2 Sonar-scanner实现代码检测</h3><ul>
@@ -10108,20 +10108,20 @@
 </li>
 </ul>
 <h2 id="7-4-Jenkins集成Sonar-Qube"><a href="#7-4-Jenkins集成Sonar-Qube" class="headerlink" title="7.4 Jenkins集成Sonar Qube"></a>7.4 Jenkins集成Sonar Qube</h2><p>Jenkins继承Sonar Qube实现代码扫描需要先下载整合插件</p>
-<h3 id="7-4-1-Jenkins安装插件"><a href="#7-4-1-Jenkins安装插件" class="headerlink" title="7.4.1 Jenkins安装插件"></a>7.4.1 Jenkins安装插件</h3><p>![](/images/DevOps/下载Sonar Qube插件.png)</p>
-<p>![](/images/DevOps/下载Sonar Qube插件2.png)</p>
-<p>![](/images/DevOps/下载Sonar Qube插件3.png)</p>
+<h3 id="7-4-1-Jenkins安装插件"><a href="#7-4-1-Jenkins安装插件" class="headerlink" title="7.4.1 Jenkins安装插件"></a>7.4.1 Jenkins安装插件</h3><p><img src="/images/DevOps/%E4%B8%8B%E8%BD%BDSonarQube%E6%8F%92%E4%BB%B6.png" alt=""></p>
+<p><img src="/images/DevOps/%E4%B8%8B%E8%BD%BDSonarQube%E6%8F%92%E4%BB%B62.png" alt=""></p>
+<p><img src="/images/DevOps/%E4%B8%8B%E8%BD%BDSonarQube%E6%8F%92%E4%BB%B63.png" alt=""></p>
 <h3 id="7-4-2-Jenkins配置Sonar-Qube"><a href="#7-4-2-Jenkins配置Sonar-Qube" class="headerlink" title="7.4.2 Jenkins配置Sonar Qube"></a>7.4.2 Jenkins配置Sonar Qube</h3><ul>
 <li><p>开启Sonar Qube权限验证</p>
-<p>![](/images/DevOps/开启Sonar Qube权限校验.png)</p>
+<p><img src="/images/DevOps/%E5%BC%80%E5%90%AFSonarQube%E6%9D%83%E9%99%90%E6%A0%A1%E9%AA%8C.png" alt=""></p>
 </li>
 <li><p>获取Sonar Qube的令牌</p>
 <p><img src="/images/DevOps/%E8%8E%B7%E5%8F%96%E4%BB%A4%E7%89%8C.png" alt=""></p>
 </li>
 <li><p>配置Jenkins的Sonar Qube信息</p>
-<p>![](/images/DevOps/配置Jenkins的Sonar Qube信息1.png)</p>
-<p>![](/images/DevOps/配置Jenkins的Sonar Qube信息2.png)</p>
-<p>![](/images/DevOps/配置Jenkins的Sonar Qube信息3.png)</p>
+<p><img src="/images/DevOps/%E9%85%8D%E7%BD%AEJenkins%E7%9A%84SonarQube%E4%BF%A1%E6%81%AF1.png" alt=""></p>
+<p><img src="/images/DevOps/%E9%85%8D%E7%BD%AEJenkins%E7%9A%84SonarQube%E4%BF%A1%E6%81%AF2.png" alt=""></p>
+<p><img src="/images/DevOps/%E9%85%8D%E7%BD%AEJenkins%E7%9A%84SonarQube%E4%BF%A1%E6%81%AF3.png" alt=""></p>
 </li>
 </ul>
 <h3 id="7-4-3-配置Sonar-scanner"><a href="#7-4-3-配置Sonar-scanner" class="headerlink" title="7.4.3 配置Sonar-scanner"></a>7.4.3 配置Sonar-scanner</h3><ul>
