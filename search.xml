@@ -9793,7 +9793,7 @@
 </ul>
 <p>为了保证整体流程可以高效的完成，各个阶段都有比较常见的工具，如下图：</p>
 <h1 id="二、Code阶段工具"><a href="#二、Code阶段工具" class="headerlink" title="二、Code阶段工具"></a>二、Code阶段工具</h1><p>在code阶段，我们需要将不同版本的代码存储到一个仓库中，常见的版本控制工具就是SVN或者Git，这里我们采用Git作为版本控制工具，GitLab作为远程仓库。</p>
-<h2 id="2-1-Git安装"><a href="#2-1-Git安装" class="headerlink" title="2.1 Git安装"></a>2.1 Git安装</h2><p><a href="https://git-scm.com/（傻瓜式安装）" target="_blank" rel="noopener">https://git-scm.com/（傻瓜式安装）</a></p>
+<h2 id="2-1-Git安装"><a href="#2-1-Git安装" class="headerlink" title="2.1 Git安装"></a>2.1 Git安装</h2><p><a href="https://git-scm.com/" target="_blank" rel="noopener">https://git-scm.com/</a></p>
 <h2 id="2-2-GitLab安装"><a href="#2-2-GitLab安装" class="headerlink" title="2.2 GitLab安装"></a>2.2 GitLab安装</h2><p>单独准备服务器，采用Docker安装</p>
 <ul>
 <li><p>查看GitLab镜像</p>
