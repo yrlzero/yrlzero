@@ -9870,7 +9870,7 @@
 <p>Jenkins涉及到将编写完毕的代码发布到测试环境和生产环境的任务，并且还涉及到了构建项目等任务。</p>
 <p>Jenkins需要大量的插件保证工作，安装成本较高，下面会基于Docker搭建Jenkins。</p>
 <h2 id="5-1-Jenkins介绍"><a href="#5-1-Jenkins介绍" class="headerlink" title="5.1 Jenkins介绍"></a>5.1 Jenkins介绍</h2><p>Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工具</p>
-<p>Jenkins应用广泛，大多数互联网公司都采用Jenkins配合GitLab、Docker、K8s作为实现<strong>DevOps</strong>]的核心工具。</p>
+<p>Jenkins应用广泛，大多数互联网公司都采用Jenkins配合GitLab、Docker、K8s作为实现<strong>DevOps</strong>的核心工具。</p>
 <p>Jenkins最强大的就在于插件，Jenkins官方提供了大量的插件库，来自动化CI/CD过程中的各种琐碎功能。</p>
 <p>Jenkins最主要的工作就是将GitLab上可以构建的工程代码拉取并且进行构建，再根据流程可以选择发布到测试环境或是生产环境。</p>
 <p>一般是GitLab上的代码经过大量的测试后，确定发行版本，再发布到生产环境。</p>
@@ -9979,11 +9979,10 @@
 <h3 id="5-3-4-配置Publish发布-amp-远程操作"><a href="#5-3-4-配置Publish发布-amp-远程操作" class="headerlink" title="5.3.4 配置Publish发布&amp;远程操作"></a>5.3.4 配置Publish发布&amp;远程操作</h3><p>jar包构建好之后，就可以根据情况发布到测试或生产环境，这里需要用到之前下载好的插件Publish Over SSH。</p>
 <ul>
 <li><p>配置Publish Over SSH连接测试、生产环境</p>
-<p>![](/images/DevOps/Publish Over SSH配置.png)</p>
+<p><img src="/images/DevOps/Publish-Over-SSH%E9%85%8D%E7%BD%AE.png" alt=""></p>
 </li>
 <li><p>配置任务的构建后操作，发布jar包到目标服务</p>
-<p><img src="/images/DevOps/%E9%85%8D%E7%BD%AE%E6%9E%84%E5%BB%BA%E5%90%8E%E6%93%8D%E4%BD%9C.png" alt="配置构建后操作"></p>
-<p><img src="/images/DevOps/%E9%85%8D%E7%BD%AE%E6%9E%84%E5%BB%BA%E5%90%8E%E6%93%8D%E4%BD%9C2.png" alt=""></p>
+<p><img src="/images/DevOps/%E9%85%8D%E7%BD%AE%E6%9E%84%E5%BB%BA%E5%90%8E%E6%93%8D%E4%BD%9C.png" alt="">)<img src="/images/DevOps/%E9%85%8D%E7%BD%AE%E6%9E%84%E5%BB%BA%E5%90%8E%E6%93%8D%E4%BD%9C2.png" alt=""></p>
 <p><img src="/images/DevOps/%E9%85%8D%E7%BD%AE%E6%9E%84%E5%BB%BA%E5%90%8E%E6%93%8D%E4%BD%9C3.png" alt=""></p>
 </li>
 <li><p>立即构建任务，并去目标服务查看</p>
