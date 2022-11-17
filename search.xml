@@ -10010,13 +10010,13 @@
 </li>
 <li><p>测试部署到目标服务器程序</p>
 <p><img src="/images/DevOps/%E6%9F%A5%E7%9C%8B%E7%9B%AE%E6%A0%87%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%B9%B6%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A3.png" alt=""></p>
-<p><img src="/images/DevOps/%E6%9F%A5%E7%9C%8B%E7%9B%AE%E6%A0%87%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%B9%B6%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A32.png" alt="查看目标服务器并测试接口2"></p>
+<p><img src="/images/DevOps/%E6%9F%A5%E7%9C%8B%E7%9B%AE%E6%A0%87%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%B9%B6%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A32.png" alt=""></p>
 </li>
 </ul>
 <h2 id="6-2-持续交付、部署"><a href="#6-2-持续交付、部署" class="headerlink" title="6.2 持续交付、部署"></a>6.2 持续交付、部署</h2><p>程序代码在经过多次集成操作到达最终可以交付，持续交付整体流程和持续集成类似，不过需要选取指定的发行版本</p>
 <ul>
 <li><p>下载Git Parameter插件</p>
-<p>![](/images/DevOps/下载Git Parameter.png)</p>
+<p><img src="/images/DevOps/%E4%B8%8B%E8%BD%BDGitParameter.png" alt=""></p>
 </li>
 <li><p>设置项目参数化构建</p>
 <p><img src="/images/DevOps/%E5%9F%BA%E4%BA%8EGit%E6%A0%87%E7%AD%BE%E6%9E%84%E5%BB%BA.png" alt=""></p>
