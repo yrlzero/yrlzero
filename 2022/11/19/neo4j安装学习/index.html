@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="安装Windows安装 如果尚未安装，则使用OpenJDK 8或Oracle Java 8，推荐用于Neo4j 3.0.x Version 7推荐用于2.3.0之前的版本。  找到您刚刚下载的zip文件并右键单击，解压缩所有文件。  将解压缩的文件放在服务器上的永久主目录中，例如D:\neo4j\。顶级目录称为NEO4J_HOME。  要将Neo4j作为控制台应用程序运行，请使用：&lt;NEO4">
+<meta property="og:type" content="article">
+<meta property="og:title" content="neo4j-安装学习">
+<meta property="og:url" content="http://yrlzero.github.io/2022/11/19/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="安装Windows安装 如果尚未安装，则使用OpenJDK 8或Oracle Java 8，推荐用于Neo4j 3.0.x Version 7推荐用于2.3.0之前的版本。  找到您刚刚下载的zip文件并右键单击，解压缩所有文件。  将解压缩的文件放在服务器上的永久主目录中，例如D:\neo4j\。顶级目录称为NEO4J_HOME。  要将Neo4j作为控制台应用程序运行，请使用：&lt;NEO4">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117170822985.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117171029841.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117174754450.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117175006410.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117175056445.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117212942547.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117213802555.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117215225986.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117220603617.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117221746753.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j/image-20221118100030368.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118095937407.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117214625204.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117215448728.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117220020780.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118093502191.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117223825852.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117223712390.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117224425086.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j/image-20221117224937030.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117225955885.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117230021860.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118101137943.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118105522886.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118122807669.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118151640234.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118153831453.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118154315712.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118160342387.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118161956431.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118162005412.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118163154155.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118164316931.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118170303862.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118171421675.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118172911214.png">
+<meta property="article:published_time" content="2022-11-19T09:26:19.299Z">
+<meta property="article:modified_time" content="2022-11-19T09:28:47.074Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="nosql">
+<meta property="article:tag" content="neo4j">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117170822985.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/11/19/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>neo4j-安装学习 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/19/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          neo4j-安装学习
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-19 17:26:19 / 修改时间：17:28:47" itemprop="dateCreated datePublished" datetime="2022-11-19T17:26:19+08:00">2022-11-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/neo4j/" itemprop="url" rel="index"><span itemprop="name">neo4j</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a><a href="https://neo4j.com/download-center/#community" target="_blank" rel="noopener">安装</a></h1><h2 id="Windows安装"><a href="#Windows安装" class="headerlink" title="Windows安装"></a>Windows安装</h2><ol>
+<li><p>如果尚未安装，则使用OpenJDK 8或Oracle Java 8，推荐用于Neo4j 3.0.x Version 7推荐用于2.3.0之前的版本。</p>
+</li>
+<li><p>找到您刚刚下载的zip文件并右键单击，解压缩所有文件。</p>
+</li>
+<li><p>将解压缩的文件放在服务器上的永久主目录中，例如<code>D:\neo4j\</code>。顶级目录称为<code>NEO4J_HOME</code>。</p>
+<ul>
+<li><p>要将Neo4j作为控制台应用程序运行，请使用：<code>&lt;NEO4J_HOME&gt;\bin\neo4j console</code></p>
+</li>
+<li><p>要将Neo4j作为服务使用安装：<code>&lt;NEO4J_HOME&gt;\bin\neo4j install-service</code>.</p>
+</li>
+<li><p>有关其他命令和了解Zip文件中包含的Windows PowerShell模块，<a href="https://neo4j.com/docs/operations-manual/current/installation/windows/" target="_blank" rel="noopener">请参阅Windows安装文档。</a></p>
+</li>
+</ul>
+</li>
+</ol>
+<img src="/images/neo4j安装学习/image-20221117170822985.png" style="zoom:67%;" />
+
+<img src="/images/neo4j安装学习/image-20221117171029841.png" style="zoom:67%;" />
+
+<a id="more"></a>
+
+<h2 id="Docker安装"><a href="#Docker安装" class="headerlink" title="Docker安装"></a>Docker安装</h2><ol>
+<li><p>拉取镜像</p>
+<p><code>docker pull neo4j:3.5.22-community</code></p>
+</li>
+<li><p>运行镜像</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 7474:7474 -p 7687:7687 --name neo4j \</span><br><span class="line">-e <span class="string">"NEO4J_AUTH=neo4j/123456"</span> \</span><br><span class="line">-v /usr/<span class="built_in">local</span>/soft/neo4j/data:/data \</span><br><span class="line">-v /usr/<span class="built_in">local</span>/soft/neo4j/logs:/logs \</span><br><span class="line">-v /usr/<span class="built_in">local</span>/soft/neo4j/conf:/var/lib/neo4j/conf \</span><br><span class="line">-v /usr/<span class="built_in">local</span>/soft/neo4j/import:/var/lib/neo4j/import \</span><br><span class="line">neo4j:3.5.22-community</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="Linux安装"><a href="#Linux安装" class="headerlink" title="Linux安装"></a>Linux安装</h2><ol>
+<li><code>tar -xf neo4j-community-3.5.35-unix.tar.gz</code></li>
+<li>将解压缩的文件放在服务器上的永久主目录中。顶级目录称为<code>NEO4J_HOME</code>。<ul>
+<li>要将Neo4j作为控制台应用程序运行，使用：<code>&lt;NEO4J_HOME&gt;/bin/neo4j console</code></li>
+<li>要在后台进程中运行Neo4j，使用：<code>&lt;NEO4J_HOME&gt;/bin/neo4j start</code></li>
+<li>有关其他命令，<a href="https://neo4j.com/docs/operations-manual/current/installation/linux/tarball/" target="_blank" rel="noopener">请参阅Unix tarball安装文档</a>。</li>
+</ul>
+</li>
+</ol>
+<h2 id="浏览器访问"><a href="#浏览器访问" class="headerlink" title="浏览器访问"></a>浏览器访问</h2><ol>
+<li><p>在浏览器中访问：<a href="http://localhost:7474。">http://localhost:7474。</a></p>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117174754450.png" alt=""></p>
+</li>
+<li><p>使用用户名’neo4j’和默认密码’neo4j’进行连接。然后系统会提示更改密码。</p>
+</li>
+</ol>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117175006410.png" alt=""></p>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117175056445.png" alt=""></p>
+<ul>
+<li>Neo4j浏览器是开发人员探索Neo4j数据库、执行Cypher查询并以表格或图表形式查看结果的工具。你甚至可以使用浏览器来:<ul>
+<li>导入数据</li>
+<li>在Java中调用用户定义过程</li>
+<li>配置文件查询，使用EXPLAIN和Profile查看执行计划。</li>
+</ul>
+</li>
+</ul>
+<h1 id="CQL语句"><a href="#CQL语句" class="headerlink" title="CQL语句"></a>CQL语句</h1><h2 id="CQL简介"><a href="#CQL简介" class="headerlink" title="CQL简介"></a>CQL简介</h2><p>  Neo4j的Cypher语言是为处理图形数据而构建的，CQL代表Cypher查询语言。像Oracle数据库具有查询 语言SQL，Neo4j具有CQL作为查询语言。</p>
+<ul>
+<li>它是Neo4j图形数据库的查询语言。</li>
+<li>它是一种声明性模式匹配语言</li>
+<li>它遵循SQL语法。</li>
+<li>它的语法是非常简单且人性化、可读的格式。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>CQL命令</th>
+<th>用户</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CREATE</td>
+<td>创建节点、关系和属性</td>
+</tr>
+<tr>
+<td>MATCH</td>
+<td>检索有关节点、关系和属性</td>
+</tr>
+<tr>
+<td>RETURN</td>
+<td>返回查询结构</td>
+</tr>
+<tr>
+<td>WHERE</td>
+<td>提供条件过滤检索数据</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>删除节点和关系</td>
+</tr>
+<tr>
+<td>REMOVE</td>
+<td>删除节点和关系的属性</td>
+</tr>
+<tr>
+<td>ORDER BY</td>
+<td>排序检索数据</td>
+</tr>
+<tr>
+<td>SET</td>
+<td>添加或更新标签</td>
+</tr>
+</tbody></table>
+<h2 id="CREATE"><a href="#CREATE" class="headerlink" title="CREATE"></a>CREATE</h2><ul>
+<li><p>创建节点</p>
+<ul>
+<li><p>创建没有属性的节点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE (&lt;node-name&gt;:&lt;label-name&gt;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用属性创建节点</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> (&lt;node-<span class="keyword">name</span>&gt;:&lt;label-<span class="keyword">name</span>&gt;&#123;&lt;propertyKey1&gt;:&lt;propertValue1&gt;,&lt;propertyKey2&gt;:&lt;propertValue2&gt;&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>创建关系</p>
+<ul>
+<li><p>在没有属性的节点之间创建关系</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE (node1-name:lable1) - [relationship-name:relationship-lable] -&gt; (node2-name:lable2)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>创建node1、node2，同时创建node1指向node2的关系</p>
+</blockquote>
+</li>
+<li><p>使用属性创建节点之间的关系</p>
+</li>
+</ul>
+</li>
+<li><p>创建标签</p>
+<ul>
+<li><p>为节点或关系创建单个或多个标签</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE(node-name:lable-name1:lable-name2)</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+</li>
+</ul>
+<p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE (&lt;node-name&gt;:&lt;label-name&gt;)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>&lt;node-name&gt;</code>：创建的节点名称</p>
+<p><code>&lt;label-name&gt;</code>：创建的节点标签名称</p>
+<p>不能使用<code>&lt;node-name&gt;</code>来访问节点详细信息，应该使用此标签名称来访问节点详细信息，应该使用<code>&lt;label-name&gt;</code>来访问节点详细信息。</p>
+</blockquote>
+<h3 id="创建无属性节点"><a href="#创建无属性节点" class="headerlink" title="创建无属性节点"></a>创建无属性节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">create(emp:Employee)</span><br><span class="line">create(dept:Department)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117212942547.png" alt="执行前"></p>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117213802555.png" alt="执行后"></p>
+<h3 id="创建带属性节点"><a href="#创建带属性节点" class="headerlink" title="创建带属性节点"></a>创建带属性节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create(c:coustomer&#123;id:&quot;1&quot;,name:&quot;zhangsan&quot;&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117215225986.png" alt=""></p>
+<h3 id="创建多标签节点"><a href="#创建多标签节点" class="headerlink" title="创建多标签节点"></a>创建多标签节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create(n1:l1:l2:l3)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>n1 节点名称</p>
+<p>l1、l2、l3都是标签</p>
+</blockquote>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117220603617.png" alt=""></p>
+<h3 id="创建有关系节点"><a href="#创建有关系节点" class="headerlink" title="创建有关系节点"></a>创建有关系节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create(z:zhangsan) - [l:love] -&gt; (w:wangwu)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117221746753.png" alt=""></p>
+<h2 id="MATCH"><a href="#MATCH" class="headerlink" title="MATCH"></a>MATCH</h2><ul>
+<li>从数据库获取有关节点和属性的数据</li>
+<li>从数据库获取有关节点，关系和属性的数据</li>
+</ul>
+<p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MATCH (&lt;node-name&gt;:&lt;label-name&gt;)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>MATCH无法单独使用需要配合RETURN命令一起使用</p>
+</blockquote>
+<h2 id="RETURN"><a href="#RETURN" class="headerlink" title="RETURN"></a>RETURN</h2><ul>
+<li>检索节点的某些属性</li>
+<li>检索节点的所有属性</li>
+<li>检索节点和关联关系的某些属性</li>
+<li>检索节点和关联关系的所有属性</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">RETURN </span><br><span class="line">   &lt;node-name&gt;.&lt;property1-name&gt;,</span><br><span class="line">   ........</span><br><span class="line">   &lt;node-name&gt;.&lt;propertyn-name&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>&lt;node-name&gt;</code> 节点名称</p>
+<p><code>&lt;propertyn-name&gt;</code> 属性是键值对形式，这里的<code>&lt;propertyn-name&gt;</code>指的是属性的key</p>
+</blockquote>
+<h2 id="MATCH和RETURN"><a href="#MATCH和RETURN" class="headerlink" title="MATCH和RETURN"></a>MATCH和RETURN</h2><p>CQL语句中MATCH 需要搭配RETURN命令 一起使用</p>
+<ul>
+<li>检索节点的某些属性</li>
+<li>检索节点的所有属性</li>
+<li>检索节点和关联关系的某些属性</li>
+<li>检索节点和关联关系的所有属性</li>
+</ul>
+<p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MATCH Command</span><br><span class="line">RETURN Command</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取所有节点"><a href="#获取所有节点" class="headerlink" title="获取所有节点"></a>获取所有节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MATCH (n1) RETURN n1 LIMIT 25</span><br></pre></td></tr></table></figure>
+
+<img src="/images/neo4j/image-20221118100030368.png" style="zoom:80%;" />
+
+<h3 id="获取含关系节点"><a href="#获取含关系节点" class="headerlink" title="获取含关系节点"></a>获取含关系节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MATCH (n1)-[r]-&gt;(n2) RETURN r, n1, n2 LIMIT 25</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118095937407.png" alt=""></p>
+<h3 id="基于标签检索节点"><a href="#基于标签检索节点" class="headerlink" title="基于标签检索节点"></a>基于标签检索节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MATCH (n:Employee) RETURN n LIMIT 25</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117214625204.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">match(n:coustomer) return n.name</span><br><span class="line">match(n:coustomer) return n.name,n.id</span><br><span class="line">MATCH (n:coustomer) RETURN n LIMIT 25</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117215448728.png" alt=""></p>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117220020780.png" alt=""></p>
+<h3 id="基于关系检索节点"><a href="#基于关系检索节点" class="headerlink" title="基于关系检索节点"></a>基于关系检索节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">match (p:Person) - [r:&#96;刷卡&#96;] -&gt; (c:Card) return p,r,c</span><br><span class="line">MATCH p&#x3D;()-[r:&#96;刷卡&#96;]-&gt;() RETURN p,r LIMIT 25</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118093502191.png" alt=""></p>
+<h2 id="MATCH和WHERE"><a href="#MATCH和WHERE" class="headerlink" title="MATCH和WHERE"></a>MATCH和WHERE</h2><p>像SQL一样，Neo4j CQL在CQL MATCH命令中提供了WHERE子句来过滤MATCH查询的结果。</p>
+<p>语法结构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">WHERE &lt;condition&gt;</span><br><span class="line">WHERE &lt;condition&gt; &lt;boolean-operator&gt; &lt;condition&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>操作符：AND、OR、NOT、XOR、=、&lt;&gt;、&lt;、&gt;、&lt;=、&gt;= 、in</p>
+</blockquote>
+<h3 id="单标签查询"><a href="#单标签查询" class="headerlink" title="单标签查询"></a>单标签查询</h3><p>创建三个标签为person的节点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create(a:Person&#123;name:&quot;zhangsan&quot;,age:18&#125;),(b:Person&#123;name:&quot;lisi&quot;,age:20&#125;),(c:Person&#123;name:&quot;wangwu&quot;,age:25&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117223825852.png" alt=""></p>
+<p>年龄大于19的节点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match(p:Person) where p.age &gt; 19 return p</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117223712390.png" alt=""></p>
+<h3 id="多标签查询"><a href="#多标签查询" class="headerlink" title="多标签查询"></a>多标签查询</h3><p>创建三个标签为card的节点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create(d1:Card&#123;num:123,money:100.11&#125;),(d2:Card&#123;num:124,money:200.22&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117224425086.png" alt=""></p>
+<p>多个节点关联查询</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match(c:Card),(p:Person) where c.num &#x3D; 123 and p.age &#x3D; 20 return c,p</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意大小写、值类型</p>
+</blockquote>
+<img src="/images/neo4j/image-20221117224937030.png" style="zoom:80%;" />
+
+<h3 id="创建关系"><a href="#创建关系" class="headerlink" title="创建关系"></a>创建关系</h3><p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">MATCH (&lt;node1-label-name&gt;:&lt;node1-name&gt;),(&lt;node2-label-name&gt;:&lt;node2-name&gt;) </span><br><span class="line">WHERE &lt;condition&gt;</span><br><span class="line">CREATE (&lt;node1-label-name&gt;)-[&lt;relationship-label-name&gt;:&lt;relationship-name&gt;</span><br><span class="line">       &#123;&lt;relationship-properties&gt;&#125;]-&gt;(&lt;node2-label-name&gt;)</span><br></pre></td></tr></table></figure>
+
+<p>通过where查出两个节点并为他们创建关系</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match(c:Card),(p:Person) where c.num &#x3D; 123 and p.age &#x3D; 20 create(p) - [x:刷卡] -&gt; (c)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>建立关系前</li>
+</ul>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117225955885.png" alt=""></p>
+<ul>
+<li>建立关系</li>
+</ul>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221117230021860.png" alt=""></p>
+<h2 id="MATCH和DELETE"><a href="#MATCH和DELETE" class="headerlink" title="MATCH和DELETE"></a>MATCH和DELETE</h2><ul>
+<li><p>删除节点。</p>
+<blockquote>
+<p>存在关系的节点无法直接删除，需要先删除关系</p>
+</blockquote>
+</li>
+<li><p>删除节点及相关节点和关系。</p>
+</li>
+</ul>
+<p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE &lt;node-name-list&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>使用逗号（，）运算符来分隔节点名</p>
+</blockquote>
+<h3 id="根据标签删除节点"><a href="#根据标签删除节点" class="headerlink" title="根据标签删除节点"></a>根据标签删除节点</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match(n:Department) delete n</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>该标签下所有节点都会被删除</p>
+<p>含有关系的节点无法直接删除</p>
+</blockquote>
+<h3 id="删除关系"><a href="#删除关系" class="headerlink" title="删除关系"></a>删除关系</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match p&#x3D;()-[r:love]-&gt;() delete r</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118101137943.png" alt=""></p>
+<h3 id="根据删除节点和关系"><a href="#根据删除节点和关系" class="headerlink" title="根据删除节点和关系"></a>根据删除节点和关系</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;重新为两节点建立关系</span><br><span class="line">match(z:zhangsan),(w:wangwu) create (z)-[l:love]-&gt;(w)</span><br><span class="line">&#x2F;&#x2F;同时删除两节点和关系</span><br><span class="line">match (z:zhangsan)-[l:love]-&gt;(w:wangwu) delete z,l,w</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;创建节点和关系</span><br><span class="line">create (z:zhangsan)-[l:love]-&gt;(w:wangwu)</span><br><span class="line">&#x2F;&#x2F;删除z节点和关系，保留w节点</span><br><span class="line">match (z:zhangsan)-[l:love]-&gt;(w:wangwu) delete z,l</span><br></pre></td></tr></table></figure>
+
+<h3 id="限定标签条件删除"><a href="#限定标签条件删除" class="headerlink" title="限定标签条件删除"></a>限定标签条件删除</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match (n:Person) where n.age &#x3D; 18 delete n</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>删除符合条件的标签节点</p>
+</blockquote>
+<h2 id="MATCH和REMOVE"><a href="#MATCH和REMOVE" class="headerlink" title="MATCH和REMOVE"></a>MATCH和REMOVE</h2><ul>
+<li>删除节点或关系的标签</li>
+<li>删除节点或关系的属性</li>
+</ul>
+<h3 id="移除属性"><a href="#移除属性" class="headerlink" title="移除属性"></a>移除属性</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;创建节点</span><br><span class="line">create(b:book&#123;title:&quot;java&quot;,price:123&#125;)</span><br><span class="line">&#x2F;&#x2F;移除属性</span><br><span class="line">match(b:book) remove b.price return b</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118105522886.png" alt=""></p>
+<h3 id="移除标签"><a href="#移除标签" class="headerlink" title="移除标签"></a>移除标签</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match(a:A1) remove a:A2</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意标签操作使用冒号</p>
+</blockquote>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118122807669.png" alt=""></p>
+<h2 id="MATCH和SET"><a href="#MATCH和SET" class="headerlink" title="MATCH和SET"></a>MATCH和SET</h2><ul>
+<li>向现有节点或关系添加新属性</li>
+<li>添加或更新属性值</li>
+</ul>
+<h3 id="设置标签"><a href="#设置标签" class="headerlink" title="设置标签"></a>设置标签</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match(a:A1) set a:A3</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>标签操作使用冒号</p>
+</blockquote>
+<h3 id="设置属性"><a href="#设置属性" class="headerlink" title="设置属性"></a>设置属性</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">match (a:A1) SET a.title &#x3D; &#39;属性值&#39;</span><br><span class="line">match(a:A1) set a.title &#x3D; &#39;属性值2&#39; return a</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>标签操作使用.</p>
+<p>不存在则新增，存在则修改</p>
+</blockquote>
+<h2 id="ORDER-BY"><a href="#ORDER-BY" class="headerlink" title="ORDER BY"></a>ORDER BY</h2><p>Neo4j CQL在MATCH命令中提供了“ORDER BY”子句，对MATCH查询返回的结果进行排序。</p>
+<p>我们可以按升序或降序对行进行排序。</p>
+<p>默认情况下，它按升序对行进行排序。 如果我们要按降序对它们进行排序，我们需要使用DESC子句。</p>
+<p>创建数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">create(e:Employee&#123;id:1001,name:&quot;zhangsan&quot;,age:18&#125;),(e2:Employee&#123;id:1002,name:&quot;lisi&quot;,age:15&#125;),(e3:Employee&#123;id:1003,name:&quot;wangwu&quot;,age:30&#125;)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;默认升序</span><br><span class="line">match(e:Employee) return e.id,e.name,e.age</span><br><span class="line">match(e:Employee) return e.id,e.name,e.age order by e.id desc</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118151640234.png" alt=""></p>
+<h2 id="UNION"><a href="#UNION" class="headerlink" title="UNION"></a>UNION</h2><p>与SQL一样，Neo4j CQL有两个子句，将两个不同的结果合并成一组结果</p>
+<ul>
+<li>UNION：去重</li>
+<li>UNION ALL：不去重</li>
+</ul>
+<p>创建User标签、Employee标签数据</p>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118153831453.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;union all</span><br><span class="line">match(u:User)return u.id as id,u.name as name,u.age as age union all match(e:Employee) return e.id as id,e.name as name,e.age as age order by e.id desc</span><br><span class="line">&#x2F;&#x2F;union</span><br><span class="line">match(u:User)return u.id as id,u.name as name,u.age as age union match(e:Employee) return e.id as id,e.name as name,e.age as age order by e.id desc</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意添加别名，保持字段名一致，否则执行报错</p>
+</blockquote>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118154315712.png" alt=""></p>
+<h2 id="LIMIT和SKIP子句"><a href="#LIMIT和SKIP子句" class="headerlink" title="LIMIT和SKIP子句"></a>LIMIT和SKIP子句</h2><p>通过limit限制输出获取数据</p>
+<p>通skip跳过某些数据</p>
+<p>两者结合可以实现翻页效果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">match (u:User) return u skip 1</span><br><span class="line">match(u:User) return u limit 1</span><br><span class="line">&#x2F;&#x2F;skip和limit结合使用达到翻页效果</span><br><span class="line">match(u:User) return u skip 1 limit 1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118160342387.png" alt=""></p>
+<h2 id="合并"><a href="#合并" class="headerlink" title="合并"></a>合并</h2><p>Neo4j使用CQL MERGE命令 -</p>
+<ul>
+<li>创建节点，关系和属性</li>
+<li>为从数据库检索数据</li>
+</ul>
+<p>MERGE命令是CREATE命令和MATCH命令的组合。</p>
+<p>使用CREATE命令创建节点，不管存不存在一样的节点都会创建，MERGE命令如果不存在一样的节点就新建，存在则不处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">create(t:Test1&#123;name:&quot;测试名称&quot;,age:12&#125;)</span><br><span class="line">merge(t:Test2&#123;name:&quot;测试名称2&quot;,age:18&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118161956431.png" alt=""></p>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118162005412.png" alt=""></p>
+<h2 id="NULL值"><a href="#NULL值" class="headerlink" title="NULL值"></a>NULL值</h2><p>当我们创建一个具有现有节点标签名称但未指定其属性值的节点时，它将创建一个具有NULL属性值的新节点。</p>
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118163154155.png" alt=""></p>
+<h2 id="IN"><a href="#IN" class="headerlink" title="IN"></a>IN</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match(n:User) where n.age in[25,40] return n</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118164316931.png" alt=""></p>
+<h2 id="CALL"><a href="#CALL" class="headerlink" title="CALL"></a>CALL</h2><h3 id="查询所有标签"><a href="#查询所有标签" class="headerlink" title="查询所有标签"></a>查询所有标签</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL db.labels()</span><br></pre></td></tr></table></figure>
+
+<h3 id="查询所有关系"><a href="#查询所有关系" class="headerlink" title="查询所有关系"></a>查询所有关系</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL db.relationshipTypes()</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h1><h2 id="字符串函数"><a href="#字符串函数" class="headerlink" title="字符串函数"></a>字符串函数</h2><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>upper</td>
+<td>转大写</td>
+</tr>
+<tr>
+<td>lower</td>
+<td>转小写</td>
+</tr>
+<tr>
+<td>substring</td>
+<td>截取字符串</td>
+</tr>
+<tr>
+<td>replace</td>
+<td>替换字符串</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">match(n:Person) return n.name as name,lower(n.name) as lower,upper(n.name) as upper,substring(n.name,1,3) as substring,replace(n.name,&#39;wang&#39;,&#39;王&#39;) as replace</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118170303862.png" alt=""></p>
+<h2 id="AGGEGATION聚合"><a href="#AGGEGATION聚合" class="headerlink" title="AGGEGATION聚合"></a>AGGEGATION聚合</h2><p>和SQL一样，Neo4j CQL提供了一些在RETURN子句中使用的聚合函数。 它类似于SQL中的GROUP BY子句。</p>
+<p>我们可以使用MATCH命令中的RETURN +聚合函数来处理一组节点并返回一些聚合值。</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>count</td>
+<td>统计返回的行数</td>
+</tr>
+<tr>
+<td>max</td>
+<td>获取返回的最大值</td>
+</tr>
+<tr>
+<td>min</td>
+<td>获取返货的最小值</td>
+</tr>
+<tr>
+<td>sum</td>
+<td>所有返回数据累加求和</td>
+</tr>
+<tr>
+<td>avg</td>
+<td>所有返回数据求平均值</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;函数后面的p.name，相当于sql里面的group by p.name</span><br><span class="line">match(p:Person) return count(p.name),p.name</span><br><span class="line">match(p:Person) return count(p.name),max(p.age),min(p.age),avg(p.age),sum(p.age)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118171421675.png" alt=""></p>
+<h2 id="关系函数"><a href="#关系函数" class="headerlink" title="关系函数"></a>关系函数</h2><p>Neo4j CQL提供了一组关系函数，以在获取开始节点，结束节点等细节时知道关系的细节。</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>startnode</td>
+<td>用于查找关系的开始节点</td>
+</tr>
+<tr>
+<td>endnode</td>
+<td>用于查找关系的结束节点</td>
+</tr>
+<tr>
+<td>id</td>
+<td>用于查找关系的id</td>
+</tr>
+<tr>
+<td>type</td>
+<td>用于查找关系的类型，即关系的名称</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">match n&#x3D;()-[r:&#96;刷卡&#96;]-() return startnode(r),endnode(r),id(r),type(r)</span><br><span class="line">match (p:Person)-[r:&#96;刷卡&#96;]-(c:Card) return startnode(r),endnode(r),id(r),type(r)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/neo4j%E5%AE%89%E8%A3%85%E5%AD%A6%E4%B9%A0/image-20221118172911214.png" alt=""></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/nosql/" rel="tag"># nosql</a>
+              <a href="/tags/neo4j/" rel="tag"># neo4j</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/16/DevOps/" rel="prev" title="DevOps-CICD">
+      <i class="fa fa-chevron-left"></i> DevOps-CICD
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/19/neo4j%E4%B8%8Espringboot%E6%95%B4%E5%90%88/" rel="next" title="neo4j-与springboot整合">
+      neo4j-与springboot整合 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#安装"><span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Windows安装"><span class="nav-text">Windows安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker安装"><span class="nav-text">Docker安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux安装"><span class="nav-text">Linux安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#浏览器访问"><span class="nav-text">浏览器访问</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CQL语句"><span class="nav-text">CQL语句</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CQL简介"><span class="nav-text">CQL简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CREATE"><span class="nav-text">CREATE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建无属性节点"><span class="nav-text">创建无属性节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建带属性节点"><span class="nav-text">创建带属性节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建多标签节点"><span class="nav-text">创建多标签节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建有关系节点"><span class="nav-text">创建有关系节点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MATCH"><span class="nav-text">MATCH</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RETURN"><span class="nav-text">RETURN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MATCH和RETURN"><span class="nav-text">MATCH和RETURN</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#获取所有节点"><span class="nav-text">获取所有节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取含关系节点"><span class="nav-text">获取含关系节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于标签检索节点"><span class="nav-text">基于标签检索节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于关系检索节点"><span class="nav-text">基于关系检索节点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MATCH和WHERE"><span class="nav-text">MATCH和WHERE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#单标签查询"><span class="nav-text">单标签查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多标签查询"><span class="nav-text">多标签查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建关系"><span class="nav-text">创建关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MATCH和DELETE"><span class="nav-text">MATCH和DELETE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#根据标签删除节点"><span class="nav-text">根据标签删除节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除关系"><span class="nav-text">删除关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根据删除节点和关系"><span class="nav-text">根据删除节点和关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#限定标签条件删除"><span class="nav-text">限定标签条件删除</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MATCH和REMOVE"><span class="nav-text">MATCH和REMOVE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#移除属性"><span class="nav-text">移除属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#移除标签"><span class="nav-text">移除标签</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MATCH和SET"><span class="nav-text">MATCH和SET</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#设置标签"><span class="nav-text">设置标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置属性"><span class="nav-text">设置属性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ORDER-BY"><span class="nav-text">ORDER BY</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UNION"><span class="nav-text">UNION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LIMIT和SKIP子句"><span class="nav-text">LIMIT和SKIP子句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合并"><span class="nav-text">合并</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NULL值"><span class="nav-text">NULL值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IN"><span class="nav-text">IN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CALL"><span class="nav-text">CALL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查询所有标签"><span class="nav-text">查询所有标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询所有关系"><span class="nav-text">查询所有关系</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#函数"><span class="nav-text">函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#字符串函数"><span class="nav-text">字符串函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AGGEGATION聚合"><span class="nav-text">AGGEGATION聚合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关系函数"><span class="nav-text">关系函数</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">99</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>

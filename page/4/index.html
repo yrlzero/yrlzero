@@ -179,6 +179,178 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/07/31/rocketmq%20%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/31/rocketmq%20%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/" class="post-title-link" itemprop="url">rocketmq 常见面试题</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-31 23:24:08 / 修改时间：23:34:35" itemprop="dateCreated datePublished" datetime="2021-07-31T23:24:08+08:00">2021-07-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/" itemprop="url" rel="index"><span itemprop="name">mq</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/rocketmq/" itemprop="url" rel="index"><span itemprop="name">rocketmq</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="为什么要使用MQ？"><a href="#为什么要使用MQ？" class="headerlink" title="为什么要使用MQ？"></a>为什么要使用MQ？</h2><p>因为项目比较大，做了分布式系统，所有远程服务调用请求都是<strong>同步执行</strong>经常出问题，所以引入了mq</p>
+<p><strong>解耦</strong>：系统耦合度降低，没有强依赖关系</p>
+<p><strong>异步</strong>：不需要同步执行的远程调用可以有效提高响应时间</p>
+<p><strong>削峰</strong>：请求达到峰值后，后端service还可以保持固定消费速率消费，不会被压垮</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/31/rocketmq%20%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/07/31/rocketmq%20%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/31/rocketmq%20%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">rocketmq 安装</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-31 23:24:05 / 修改时间：23:50:13" itemprop="dateCreated datePublished" datetime="2021-07-31T23:24:05+08:00">2021-07-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/" itemprop="url" rel="index"><span itemprop="name">mq</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/rocketmq/" itemprop="url" rel="index"><span itemprop="name">rocketmq</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、rocketmq"><a href="#一、rocketmq" class="headerlink" title="一、rocketmq"></a>一、rocketmq</h2><h3 id="1-1、文档"><a href="#1-1、文档" class="headerlink" title="1.1、文档"></a>1.1、文档</h3><p><a href="https://rocketmq.apache.org/docs/quick-start/" target="_blank" rel="noopener">官网Quick Start</a></p>
+<p><a href="https://github.com/apache/rocketmq/tree/master/docs/cn" target="_blank" rel="noopener">github中文文档</a></p>
+<h3 id="1-2、下载"><a href="#1-2、下载" class="headerlink" title="1.2、下载"></a>1.2、下载</h3><p><a href="https://www.apache.org/dyn/closer.cgi?path=rocketmq/4.9.0/rocketmq-all-4.9.0-source-release.zip" target="_blank" rel="noopener">apache官网下载地址yi</a></p>
+<p><a href="https://github.com/apache/rocketmq/releases" target="_blank" rel="noopener">github源码下载地址</a></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/31/rocketmq%20%E5%AE%89%E8%A3%85/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/07/31/zookeeper%E5%AE%89%E8%A3%85%E3%80%81%E5%91%BD%E4%BB%A4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -867,174 +1039,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/06/12/elasticsearch%EF%BC%88%E5%8D%81%E4%B8%80%EF%BC%89Highlight%E3%80%81Suggest/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/06/12/elasticsearch%EF%BC%88%E5%8D%81%E4%B8%80%EF%BC%89Highlight%E3%80%81Suggest/" class="post-title-link" itemprop="url">elasticsearch（十一）Highlight、Suggest</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-06-12 15:23:41 / 修改时间：18:37:15" itemprop="dateCreated datePublished" datetime="2021-06-12T15:23:41+08:00">2021-06-12</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、-Highlight-高亮查询"><a href="#一、-Highlight-高亮查询" class="headerlink" title="一、 Highlight-高亮查询"></a>一、 <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/highlighting.html" target="_blank" rel="noopener">Highlight-高亮查询</a></h2><h3 id="三种高亮方式"><a href="#三种高亮方式" class="headerlink" title="三种高亮方式"></a>三种高亮方式</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">unified：默认的高亮方式，使用Lucene的实现方式</span><br><span class="line"></span><br><span class="line">plain：性能较高，消耗少量内存，性价比高</span><br><span class="line"></span><br><span class="line">fvh &#x3D;&gt; fast vactor highlighter 适合字段较大，较复杂的查询情况</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/06/12/elasticsearch%EF%BC%88%E5%8D%81%E4%B8%80%EF%BC%89Highlight%E3%80%81Suggest/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2021/06/06/elasticsearch%EF%BC%88%E5%8D%81%EF%BC%89relevance%20score/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="yrl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="yrl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/06/06/elasticsearch%EF%BC%88%E5%8D%81%EF%BC%89relevance%20score/" class="post-title-link" itemprop="url">elasticsearch（十）相关性得分及分值排序优化</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-06-06 22:34:26" itemprop="dateCreated datePublished" datetime="2021-06-06T22:34:26+08:00">2021-06-06</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-12 15:17:35" itemprop="dateModified" datetime="2021-06-12T15:17:35+08:00">2021-06-12</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="relevance-score（相关性得分）"><a href="#relevance-score（相关性得分）" class="headerlink" title="relevance score（相关性得分）"></a>relevance score（相关性得分）</h2><h3 id="TF-IDF"><a href="#TF-IDF" class="headerlink" title="TF/IDF"></a>TF/IDF</h3><ul>
-<li>TF(term frequency): 关键词在每个doc中出现的次数</li>
-<li>IDF(inverse doc frequency): 关键词在整个索引中出现的次数</li>
-</ul>
-<h3 id="计算规则"><a href="#计算规则" class="headerlink" title="计算规则"></a>计算规则</h3><p>​        TF数值大的得分较高，因为关键词在一个文档出现的次数多，证明该文档的相关性更大</p>
-<p>​        IDF数值大的得分较低，关键词在整个倒排索引中出现的次数越多，关联的文档越多，证明其相关越低</p>
-<p>​        relevance score（相关性得分）：每个query的分数，乘以matched query数量，除以总query数量</p>
-<ol>
-<li>它会执行 should 语句中的两个查询。</li>
-<li>两个查询的评分相加。</li>
-<li>乘以匹配语句的总数。</li>
-<li>除以所有语句总数</li>
-</ol>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/06/06/elasticsearch%EF%BC%88%E5%8D%81%EF%BC%89relevance%20score/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1106,19 +1110,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">97</span>
+          <span class="site-state-item-count">99</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-count">38</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">47</span>
+        <span class="site-state-item-count">48</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
