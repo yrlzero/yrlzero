@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Project Reactor响应式概念响应式编程通常以面向对象的语言呈现，作为观察者设计模式的扩展。 通过编写异步、非阻塞的代码寻求更高的处理效率。 Callback异步处理，通过Future获取结果可能会出现回调地狱，CompletableFuture可以将多个Future进行编排，但使用上并不是那么容易，且不支持惰性计算、多值和处理的灵活性。 响应式库（例如 Reactor）旨在解决 JVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="响应式编程-ProjectReactor">
+<meta property="og:url" content="http://yrlzero.github.io/2022/11/29/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="Project Reactor响应式概念响应式编程通常以面向对象的语言呈现，作为观察者设计模式的扩展。 通过编写异步、非阻塞的代码寻求更高的处理效率。 Callback异步处理，通过Future获取结果可能会出现回调地狱，CompletableFuture可以将多个Future进行编排，但使用上并不是那么容易，且不支持惰性计算、多值和处理的灵活性。 响应式库（例如 Reactor）旨在解决 JVM">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125212614521.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221127212549430.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221127153950559.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221127154013364.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125160433884.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125160254989.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221128143928695.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125160221699.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221127215730456.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221127220112862.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221127220940230.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125160122401.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125161829462.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125211138683.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221128102520007.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221128102707085.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221129101025401.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125162702366.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125163614773.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125164347476.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125164749737.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125205639146.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125205906914.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125213259115.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125214421792.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125220330299.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125220833268.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221126103524182.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221126103808707.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221126104608798.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221126105655754.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221126112534233.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125221720220.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221126112948110.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125172110724.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125173941191.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125174159354.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125181532025.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221128095838549.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221128101415871.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221128145513167.png">
+<meta property="article:published_time" content="2022-11-29T14:35:20.316Z">
+<meta property="article:modified_time" content="2022-11-29T14:35:08.556Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="spring">
+<meta property="article:tag" content="webflux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/image-20221125212614521.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/11/29/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>响应式编程-ProjectReactor | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/29/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          响应式编程-ProjectReactor
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-29 22:35:20 / 修改时间：22:35:08" itemprop="dateCreated datePublished" datetime="2022-11-29T22:35:20+08:00">2022-11-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/webflux/" itemprop="url" rel="index"><span itemprop="name">webflux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Project-Reactor"><a href="#Project-Reactor" class="headerlink" title="Project Reactor"></a><a href="https://projectreactor.io/docs/core/release/reference/index.html#about-doc" target="_blank" rel="noopener">Project Reactor</a></h1><h2 id="响应式概念"><a href="#响应式概念" class="headerlink" title="响应式概念"></a>响应式概念</h2><p>响应式编程通常以面向对象的语言呈现，作为观察者设计模式的扩展。</p>
+<p>通过编写异步、非阻塞的代码寻求更高的处理效率。</p>
+<p>Callback异步处理，通过Future获取结果可能会出现回调地狱，CompletableFuture可以将多个Future进行编排，但使用上并不是那么容易，且不支持惰性计算、多值和处理的灵活性。</p>
+<p>响应式库（例如 Reactor）旨在解决 JVM 上“经典”异步方法的这些缺点：</p>
+<ul>
+<li>可组合性和可读性</li>
+<li>数据作为使用丰富的运算符词汇操作的流</li>
+<li>在订阅之前什么都不会发生</li>
+<li>背压或消费者向生产者发出排放率过高信号的能力</li>
+<li>与并发无关的高级但高价值的抽象</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="reactort-概念"><a href="#reactort-概念" class="headerlink" title="reactort 概念"></a>reactort 概念</h2><ul>
+<li>对响应式流规范的一种实现</li>
+<li>Spring WebFlux默认的响应式框架</li>
+<li>完全异步非阻塞，对背压支持</li>
+<li>提供两个异步序列API：Flux[N]、Mono[0|1]</li>
+<li>提供对响应式流的操作</li>
+</ul>
+<h2 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;io.projectreactor&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;reactor-core&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;io.projectreactor&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;reactor-test&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="接口定义"><a href="#接口定义" class="headerlink" title="接口定义"></a>接口定义</h2><ul>
+<li><p>Publisher - 发布者</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Publisher</span>&lt;<span class="title">T</span>&gt;</span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">subscribe</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> T&gt; s)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>发送<code>onNex</code>t信号次数不得超过订阅者请求的元素个数</li>
+<li>如果进程失败，需要调用<code>onError</code>告知订阅者</li>
+<li><code>Publisher.subscribe()</code>内部需调用<code>onSubscribe(Subscriber s)</code></li>
+<li>允许同时存在多个订阅者</li>
+</ul>
+</li>
+<li><p>Subscriber - 订阅者</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Subscriber</span>&lt;<span class="title">T</span>&gt;</span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSubscribe</span><span class="params">(Subscription s)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(T t)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable t)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onComplete</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>需要调用<code>Subscriptions.request(long n)</code>来向发布者请求数据，n指请求多少数据量</li>
+<li><code>onComplete</code>或<code>onError</code>方法，终止方法</li>
+<li>只能存在一个活跃的订阅</li>
+<li>调用<code>Subscription.cancel()</code>之后仍有<code>onNext</code>信号发送</li>
+</ul>
+</li>
+<li><p>Subscription - 订阅关系</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Subscription</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">request</span><span class="params">(<span class="keyword">long</span> n)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cancel</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>需要在当前订阅者的上下文中被调用</li>
+<li><code>Subscription.request(long n)</code>最多请求2^63-1个元素</li>
+</ul>
+</li>
+<li><p>Processor -  处理器，reactor3.5后废弃</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Processor</span>&lt;<span class="title">T</span>,<span class="title">R</span>&gt; <span class="keyword">extends</span> <span class="title">Subscriber</span>&lt;<span class="title">T</span>&gt;,<span class="title">Publisher</span>&lt;<span class="title">R</span>&gt;</span>&#123;</span><br><span class="line">   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ul>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><h4 id="Mono"><a href="#Mono" class="headerlink" title="Mono"></a>Mono</h4><p>Mono最多可以指定一个元素</p>
+<ul>
+<li><p>just - 指定一个元素</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//指定元素，只能指定一个元素</span></span><br><span class="line">Mono&lt;String&gt; just = Mono.just(<span class="string">"hello"</span>);</span><br><span class="line">just.subscribe(System.out::println);<span class="comment">//hello</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>justOrEmpty - 指定可能为空的元素</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//指定可能为空的元素</span></span><br><span class="line">Mono&lt;Object&gt; objectMono = Mono.justOrEmpty(<span class="keyword">null</span>);</span><br><span class="line">objectMono.subscribe(System.out::println);<span class="comment">//无输出</span></span><br><span class="line"></span><br><span class="line">Mono&lt;Object&gt; objectMono = Mono.justOrEmpty(Optional.empty());</span><br><span class="line">objectMono.subscribe(System.out::println);<span class="comment">//无输出</span></span><br><span class="line"></span><br><span class="line">Mono&lt;Object&gt; objectMono = Mono.justOrEmpty(<span class="number">123</span>);</span><br><span class="line">objectMono.subscribe(System.out::println);<span class="comment">//123</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>fromCallable - 异步调用创建，<strong>并未试出异步效果？</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">request</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        URL url = <span class="keyword">new</span> URL(<span class="string">"http://www.baidu.com"</span>);</span><br><span class="line">        URLConnection urlConnection = url.openConnection();</span><br><span class="line">        urlConnection.connect();</span><br><span class="line">        InputStream inputStream = urlConnection.getInputStream();</span><br><span class="line">        BufferedReader bufferedReader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(inputStream));</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        String temp = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">while</span> ((temp = bufferedReader.readLine()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">            sb.append(temp).append(<span class="string">"\r\n"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Thread.currentThread().getName());<span class="comment">//打印出来还是main线程？</span></span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line"><span class="comment">//        System.out.println(request());</span></span><br><span class="line">        Mono.just(request()).subscribe(System.out::println);</span><br><span class="line">        Mono.fromCallable(() -&gt; request()).subscribe(System.out::println);</span><br><span class="line">        Mono.fromCallable(AsyncMonoTest::request).subscribe(System.out::println);</span><br><span class="line">        Mono.fromCallable(AsyncMonoTest::request)</span><br><span class="line">                .subscribe(</span><br><span class="line">                        data -&gt; &#123;</span><br><span class="line">                            System.out.println(Thread.currentThread().getName());</span><br><span class="line">                            System.out.println(data);</span><br><span class="line">                        &#125;,</span><br><span class="line">                        ex -&gt; System.out.println(<span class="string">"出错："</span> + ex),</span><br><span class="line">                        () -&gt; System.out.println(<span class="string">"请求完成"</span>)</span><br><span class="line">                );</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<h4 id="Flux"><a href="#Flux" class="headerlink" title="Flux"></a>Flux</h4><p>Flux可以指定多个元素创建响应式流</p>
+<ul>
+<li><p>just - 列举创建</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;String&gt; just = Flux.just(<span class="string">"hello"</span>, <span class="string">"every body"</span>);</span><br><span class="line">just.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hello<br>every body</p>
+</blockquote>
+</li>
+<li><p>fromArray - 数组创建</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;String&gt; stringFlux = Flux.fromArray(<span class="keyword">new</span> String[]&#123;<span class="string">"hello"</span>, <span class="string">"world"</span>&#125;);</span><br><span class="line">stringFlux.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hello<br>every body</p>
+</blockquote>
+</li>
+<li><p>fromIterable - iterable接口创建</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; iterableFlux = Flux.fromIterable(Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>));</span><br><span class="line">iterableFlux.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1<br>2<br>3<br>4</p>
+</blockquote>
+</li>
+<li><p>range - 递增序列创建</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125212614521.png" style="zoom: 80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第一个参数（即1000）为递增序列的初始值；第二个参数为递增的总数据量，包含初始值</span></span><br><span class="line">Flux&lt;Integer&gt; rangeFlux = Flux.range(<span class="number">1000</span>, <span class="number">5</span>);</span><br><span class="line">rangeFlux.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1000<br>1001<br>1002<br>1003<br>1004</p>
+</blockquote>
+</li>
+<li><p>from - 基于publisher创建</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">Flux.from(<span class="keyword">new</span> Publisher&lt;String&gt;() &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 请求Publisher开始流数据</span></span><br><span class="line"><span class="comment">             * 这是一个“工厂方法”，可以多次调用，每次启动一个新的Subscription。</span></span><br><span class="line"><span class="comment">             * 每个订阅（Subscription）只适用于单个订阅服务器（Subscriber）。</span></span><br><span class="line"><span class="comment">             * 订阅服务器（Subscriber）只能向单个发布服务器（Publisher）订阅一次。</span></span><br><span class="line"><span class="comment">             * 如果发布者（Publisher）拒绝订阅（Subscriber）尝试或以其他方式失败，它将通过Subscriber.onError发出错误信号。</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> subscriber</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">subscribe</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> String&gt; subscriber)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            subscriber.onNext(<span class="string">"hello - "</span> + i);</span><br><span class="line">        &#125;</span><br><span class="line">        subscriber.onComplete();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).subscribe(</span><br><span class="line">    data -&gt; System.out.println(data),</span><br><span class="line">    ex -&gt; System.out.println(<span class="string">"出错："</span> + ex),</span><br><span class="line">    () -&gt; System.out.println(<span class="string">"请求完成"</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">//lambda简化</span></span><br><span class="line">Flux.from((Publisher&lt;String&gt;) subscriber -&gt; &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        subscriber.onNext(<span class="string">"hello - "</span> + i);</span><br><span class="line">    &#125;</span><br><span class="line">    subscriber.onComplete();</span><br><span class="line">&#125;).subscribe(</span><br><span class="line">    data -&gt; System.out.println(data),</span><br><span class="line">    ex -&gt; System.out.println(<span class="string">"出错："</span> + ex),</span><br><span class="line">    () -&gt; System.out.println(<span class="string">"请求完成"</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hello - 0<br>hello - 1<br>hello - 2<br>hello - 3<br>hello - 4<br>请求完成</p>
+</blockquote>
+</li>
+<li><p>interval - 间隔创建</p>
+<p>指定时间间隔内，从0开始递增产生值</p>
+<p><code>public static Flux&lt;Long&gt; interval(Duration delay, Duration period, Scheduler timer)</code></p>
+<p>第一个参数：延迟开始时间、第二个参数：间隔时间周期、第三个参数：调度线程池</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221127212549430.png" style="zoom:80%;" />
+
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Flux.interval(Duration.ZERO, Duration.ofMillis(<span class="number">1000</span>))</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h4 id="编程方式创建"><a href="#编程方式创建" class="headerlink" title="编程方式创建"></a>编程方式创建</h4><h5 id="generate"><a href="#generate" class="headerlink" title="generate"></a>generate</h5><p>逐一对信号进行加工输出创建Flux，通过BiFunction函数对状态加工输出，发送给下游订阅者</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;String&gt; flux = Flux.generate(</span><br><span class="line">    <span class="comment">//为每个订阅提供初始状态值</span></span><br><span class="line">    <span class="keyword">new</span> Callable&lt;Integer&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">//处理状态值，为订阅者提供数据</span></span><br><span class="line">    <span class="comment">//state：状态值；sink</span></span><br><span class="line">    <span class="keyword">new</span> BiFunction&lt;Integer, SynchronousSink&lt;String&gt;, Integer&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Integer <span class="title">apply</span><span class="params">(Integer state, SynchronousSink&lt;String&gt; sink)</span> </span>&#123;</span><br><span class="line">            sink.next(<span class="string">"3 x "</span> + state + <span class="string">" = "</span> + <span class="number">3</span> * state);<span class="comment">//将数据输出给订阅者</span></span><br><span class="line">            <span class="keyword">if</span> (state == <span class="number">10</span>) &#123;</span><br><span class="line">                <span class="comment">//当前订阅的流已结束</span></span><br><span class="line">                sink.complete();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//传递状态值，会继续调用apply方法</span></span><br><span class="line">            <span class="keyword">return</span> state + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">//当第二个参数终止或者下游调用取消时，这里接收最后一个状态值</span></span><br><span class="line">    <span class="keyword">new</span> Consumer&lt;Integer&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(Integer state)</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"state:"</span> + state);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br><span class="line">flux.subscribe(System.out::println);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//lambda简化</span></span><br><span class="line">Flux&lt;String&gt; flux = Flux.generate(</span><br><span class="line">    () -&gt; <span class="number">0</span>,</span><br><span class="line">    (state, sink) -&gt; &#123;</span><br><span class="line">        sink.next(<span class="string">"3 x "</span> + state + <span class="string">" = "</span> + <span class="number">3</span> * state);</span><br><span class="line">        <span class="keyword">if</span> (state == <span class="number">10</span>) &#123;</span><br><span class="line">            sink.complete();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> state + <span class="number">1</span>;</span><br><span class="line">    &#125;,</span><br><span class="line">    (state) -&gt; System.out.println(<span class="string">"state:"</span> + state));</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>3 x 0 = 0<br>3 x 1 = 3<br>3 x 2 = 6<br>3 x 3 = 9<br>3 x 4 = 12<br>3 x 5 = 15<br>3 x 6 = 18<br>3 x 7 = 21<br>3 x 8 = 24<br>3 x 9 = 27<br>3 x 10 = 30<br>state:11</p>
+</blockquote>
+<h5 id="push"><a href="#push" class="headerlink" title="push"></a>push</h5><p>适用于单线程生产者，默认背压策略：<code>OverflowStrategy.BUFFER</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Flux&lt;T&gt; <span class="title">push</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> FluxSink&lt;T&gt;&gt; emitter)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> push(emitter, OverflowStrategy.BUFFER);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Flux&lt;T&gt; <span class="title">push</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> FluxSink&lt;T&gt;&gt; emitter, OverflowStrategy backpressure)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> onAssembly(<span class="keyword">new</span> FluxCreate&lt;&gt;(emitter, backpressure, FluxCreate.CreateMode.PUSH_ONLY));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<img src="/images/响应式编程-ProjectReactor/image-20221127153950559.png" style="zoom: 80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Flux.push(<span class="keyword">new</span> Consumer&lt;FluxSink&lt;Integer&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(FluxSink&lt;Integer&gt; fluxSink)</span> </span>&#123;</span><br><span class="line">        IntStream.range(<span class="number">1</span>, <span class="number">10</span>)</span><br><span class="line">                .forEach(item -&gt; fluxSink.next(item));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h5 id="create"><a href="#create" class="headerlink" title="create"></a>create</h5><p>使用上与push类似，适用于多线程生产者，默认背压策略：<code>OverflowStrategy.BUFFER</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Flux&lt;T&gt; <span class="title">create</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> FluxSink&lt;T&gt;&gt; emitter)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> create(emitter, OverflowStrategy.BUFFER);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Flux&lt;T&gt; <span class="title">create</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> FluxSink&lt;T&gt;&gt; emitter, OverflowStrategy backpressure)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> onAssembly(<span class="keyword">new</span> FluxCreate&lt;&gt;(emitter, backpressure, FluxCreate.CreateMode.PUSH_PULL));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>多线程使用上如何体现？</strong></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221127154013364.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Flux.create(<span class="keyword">new</span> Consumer&lt;FluxSink&lt;Integer&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(FluxSink&lt;Integer&gt; fluxSink)</span> </span>&#123;</span><br><span class="line">        IntStream.range(<span class="number">1</span>, <span class="number">10</span>)</span><br><span class="line">                .forEach(item -&gt; fluxSink.next(item));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="背压策略"><a href="#背压策略" class="headerlink" title="背压策略"></a>背压策略</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> OverflowStrategy &#123;</span><br><span class="line">	<span class="comment">//完全忽略下游的背压请求。</span></span><br><span class="line">	IGNORE,</span><br><span class="line">	<span class="comment">//当消费不过来有新元素下发时，报错。</span></span><br><span class="line">	ERROR,</span><br><span class="line">	<span class="comment">//如果下游没有准备好接收信号，则丢弃传入信号。</span></span><br><span class="line">	DROP,</span><br><span class="line">	<span class="comment">//只会保留最新的元素。</span></span><br><span class="line">	LATEST,</span><br><span class="line">	<span class="comment">//下发元素时会在一个队列中进行缓存。</span></span><br><span class="line">	BUFFER</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">CountDownLatch latch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">Flux.range(<span class="number">1</span>,<span class="number">1000</span>)</span><br><span class="line">        .delayElements(Duration.ofMillis(<span class="number">10</span>))</span><br><span class="line">        .onBackpressureError()</span><br><span class="line">        .delayElements(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">        .subscribe(</span><br><span class="line">                System.out::println,</span><br><span class="line">                ex -&gt;&#123;</span><br><span class="line">                    System.out.println(ex);</span><br><span class="line">                    latch.countDown();</span><br><span class="line">                &#125;,</span><br><span class="line">                () -&gt;&#123;</span><br><span class="line">                    System.out.println(<span class="string">"处理完毕"</span>);</span><br><span class="line">                    latch.countDown();</span><br><span class="line">                &#125;</span><br><span class="line">        );</span><br><span class="line">latch.await();</span><br><span class="line">System.out.println(<span class="string">"main结束"</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1<br>2<br>3<br>reactor.core.Exceptions$OverflowException: The receiver is overrun by more signals than expected (bounded queue…)<br>main结束</p>
+</blockquote>
+<h3 id="订阅"><a href="#订阅" class="headerlink" title="订阅"></a>订阅</h3><p>当订阅时，Subscriber会创建一个对象链，沿着链向上寻找第一个发布者。</p>
+<h4 id="基于-Lambda-订阅"><a href="#基于-Lambda-订阅" class="headerlink" title="基于 Lambda 订阅"></a>基于 Lambda 订阅</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//订阅并触发序列</span></span><br><span class="line">subscribe(); </span><br><span class="line"><span class="comment">//对每个产生的值做一些事情</span></span><br><span class="line">subscribe(Consumer&lt;? <span class="keyword">super</span> T&gt; consumer); </span><br><span class="line"><span class="comment">//处理值但也对错误做出反应</span></span><br><span class="line">subscribe(Consumer&lt;? <span class="keyword">super</span> T&gt; consumer,</span><br><span class="line">          Consumer&lt;? <span class="keyword">super</span> Throwable&gt; errorConsumer); </span><br><span class="line"><span class="comment">//处理值和错误，但也在序列成功完成时运行一些代码</span></span><br><span class="line">subscribe(Consumer&lt;? <span class="keyword">super</span> T&gt; consumer,</span><br><span class="line">          Consumer&lt;? <span class="keyword">super</span> Throwable&gt; errorConsumer,</span><br><span class="line">          Runnable completeConsumer); </span><br><span class="line"><span class="comment">//处理值和错误并成功完成，但也对该调用Subscription产生的结果做一些事情</span></span><br><span class="line">subscribe(Consumer&lt;? <span class="keyword">super</span> T&gt; consumer,</span><br><span class="line">          Consumer&lt;? <span class="keyword">super</span> Throwable&gt; errorConsumer,</span><br><span class="line">          Runnable completeConsumer,</span><br><span class="line">          Consumer&lt;? <span class="keyword">super</span> Subscription&gt; subscriptionConsumer);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>所有这些subscribe()都有一个Disposable返回类型，可以通过调用其dispose()方法取消订阅。</p>
+<p>对于<code>Flux</code>or <code>Mono</code>，取消是一个信号，表明源应该停止生成元素。但是，它不能保证是立即的：某些源可能会非常快地生成元素，以至于它们甚至可以在收到取消指令之前完成</p>
+</blockquote>
+<h4 id="基于BaseSubscriber订阅"><a href="#基于BaseSubscriber订阅" class="headerlink" title="基于BaseSubscriber订阅"></a>基于BaseSubscriber订阅</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; flux = Flux.range(<span class="number">1</span>, <span class="number">4</span>);</span><br><span class="line">flux.subscribe(<span class="keyword">new</span> BaseSubscriber&lt;Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">hookOnSubscribe</span><span class="params">(Subscription subscription)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Subscribed"</span>);</span><br><span class="line">        request(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">hookOnNext</span><span class="params">(Integer value)</span> </span>&#123;</span><br><span class="line">        System.out.println(value);</span><br><span class="line">        request(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Subscribed<br>1<br>2<br>3<br>4</p>
+</blockquote>
+<h3 id="using-资源统一处理"><a href="#using-资源统一处理" class="headerlink" title="using - 资源统一处理"></a>using - 资源统一处理</h3><p><code>public static &lt;T, D&gt; Flux&lt;T&gt; using(Callable&lt;? extends D&gt; resourceSupplier, Function&lt;? super D, ? extends Publisher&lt;? extends T&gt;&gt; sourceSupplier, Consumer&lt;? super D&gt; resourceCleanup)</code></p>
+<ul>
+<li><p>resourceSupplier：在订阅时被调用，以生成资源的可调用对象</p>
+</li>
+<li><p>sourceSupplier：从resourceSupplier获取Publisher，数据源</p>
+</li>
+<li><p>resourceCleanup：在完成时，调用资源对象的清理回调</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Connection</span> <span class="keyword">implements</span> <span class="title">AutoCloseable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Random rnd = <span class="keyword">new</span> Random();</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">static</span> Connection <span class="title">newConnection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"创建Connection对象"</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> Connection();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Iterable&lt;String&gt; <span class="title">getData</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (rnd.nextInt(<span class="number">10</span>) &lt; <span class="number">3</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"通信异常"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> Arrays.asList(<span class="string">"数据1"</span>, <span class="string">"数据2"</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// close方法可以释放内部资源，并且应该始终被调用，即使在getData执行期间发生错误也是如此。</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"关闭Connection连接"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"><span class="comment">//        try (Connection connection = Connection.newConnection()) &#123;</span></span><br><span class="line"><span class="comment">//            connection.getData().forEach(data -&gt; System.out.println("接收的数据：" +</span></span><br><span class="line"><span class="comment">//                    data));</span></span><br><span class="line"><span class="comment">//        &#125; catch (Exception e) &#123;</span></span><br><span class="line"><span class="comment">//            System.err.println("错误信息：" + e);</span></span><br><span class="line"><span class="comment">//        &#125;</span></span><br><span class="line"></span><br><span class="line">        Flux.using(</span><br><span class="line">                Connection::newConnection,</span><br><span class="line">                connection -&gt; Flux.fromIterable(connection.getData()),</span><br><span class="line">                Connection::close</span><br><span class="line">        ).subscribe(</span><br><span class="line">                data -&gt; System.out.println(<span class="string">"onNext接收到数据："</span> + data),</span><br><span class="line">                ex -&gt; System.err.println(<span class="string">"onError接收到的异常信息："</span> + ex),</span><br><span class="line">                () -&gt; System.out.println(<span class="string">"处理完毕"</span>)</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>创建Connection对象<br>关闭Connection连接<br>onError接收到的异常信息：java.lang.RuntimeException: 通信异常</p>
+</blockquote>
+<h3 id="Schedulers"><a href="#Schedulers" class="headerlink" title="Schedulers"></a>Schedulers</h3><h4 id="调度线程池"><a href="#调度线程池" class="headerlink" title="调度线程池"></a>调度线程池</h4><ul>
+<li><strong>Schedulers.newSingle()</strong>：单个可重复使用的线程。</li>
+<li><strong>Schedulers.elastic()</strong>： 无界弹性线程池，有隐藏背压问题并导致过多线程的倾向，3.5.0开始弃用。</li>
+<li><strong>Schedulers.boundedElastic()</strong>：有界弹性线程池 ，会根据需要创建新的工作池并重用闲置的工作池；闲置时间过长（默认为 60 秒）的工作池也会被处理掉。与elastic()不同，它对其可以创建的支持线程数有上限（默认为 CPU 核心数 x 10）。达到上限后提交的最多 100 000 个任务将被排入队列，并在线程可用时重新安排（延迟调度时，延迟在线程可用时开始）。</li>
+<li><strong>Schedulers.parallel()</strong> ：为并行工作调整的固定工作池，创建与CPU 内核一样多的worker。</li>
+<li><strong>Schedulers.newParallel()</strong> ：指定线程数，线程工厂的自定义线程池。可以使用newXXX 方法自定义创建各种调度程序类型的新实例。</li>
+</ul>
+<h4 id="publishOn"><a href="#publishOn" class="headerlink" title="publishOn"></a>publishOn</h4><p>影响调用publishOn()之后方法的执行上下文，任务被提交给Schedulers 的线程执行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Scheduler s = Schedulers.newParallel(<span class="string">"parallel-scheduler"</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Flux&lt;String&gt; flux = Flux</span><br><span class="line">        .range(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">        .map(i -&gt; &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName());<span class="comment">//main</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="number">10</span> + i;</span><br><span class="line">                &#125;</span><br><span class="line">        )</span><br><span class="line">        .publishOn(s)<span class="comment">//此方法之后的链路切换为Scheduler线程</span></span><br><span class="line">        .map(i -&gt; &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName()); <span class="comment">//parallel-scheduler-1</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="string">"value"</span> + i;</span><br><span class="line">                &#125;</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">flux.subscribe(item -&gt; System.out.println(Thread.currentThread().getName() + <span class="string">" "</span> + item));<span class="comment">//parallel-scheduler-1</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>main<br>main<br>parallel-scheduler-1<br>parallel-scheduler-1 value11<br>parallel-scheduler-1<br>parallel-scheduler-1 value12</p>
+</blockquote>
+<h4 id="subscribeOn"><a href="#subscribeOn" class="headerlink" title="subscribeOn"></a>subscribeOn</h4><p>从订阅开始整条链路的执行上下文都交给Schedulers 的线程执行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Scheduler s = Schedulers.newParallel(<span class="string">"parallel-scheduler"</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Flux&lt;String&gt; flux = Flux</span><br><span class="line">    .range(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">    .map(i -&gt; &#123;</span><br><span class="line">        System.out.println(Thread.currentThread().getName());<span class="comment">//parallel-scheduler-1</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">10</span> + i;</span><br><span class="line">    &#125;</span><br><span class="line">        )</span><br><span class="line">    .subscribeOn(s) <span class="comment">//从订阅时间开始切换整个序列的上下文交给Scheduler的线程执行</span></span><br><span class="line">    .map(i -&gt; &#123;</span><br><span class="line">        System.out.println(Thread.currentThread().getName()); <span class="comment">//parallel-scheduler-1</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"value"</span> + i;</span><br><span class="line">    &#125;</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">flux.subscribe(item -&gt; System.out.println(Thread.currentThread().getName() + <span class="string">" "</span> + item));<span class="comment">//parallel-scheduler-1</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>parallel-scheduler-1<br>parallel-scheduler-1<br>parallel-scheduler-1 value11<br>parallel-scheduler-1<br>parallel-scheduler-1<br>parallel-scheduler-1 value12</p>
+</blockquote>
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><h4 id="doOnError：出错时触发"><a href="#doOnError：出错时触发" class="headerlink" title="doOnError：出错时触发"></a>doOnError：出错时触发</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; range = Flux</span><br><span class="line">        .range(<span class="number">1000</span>, <span class="number">3</span>)</span><br><span class="line">        .concatWith(Flux.error(<span class="keyword">new</span> RuntimeException(<span class="string">"出错"</span>)))</span><br><span class="line">        .doOnError((ex) -&gt; System.out.println(ex));</span><br><span class="line">range.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1000<br>1001<br>1002<br>java.lang.RuntimeException: 出错<br>[ERROR] (main) Operator called default onErrorDropped - reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.RuntimeException: 出错<br>reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.RuntimeException: 出错<br>Caused by: java.lang.RuntimeException: 出错<br>    at com.yrl.reactor.ReactorDemo1.main(ReactorDemo1.java:18)</p>
+</blockquote>
+<h4 id="retry：重试"><a href="#retry：重试" class="headerlink" title="retry：重试"></a>retry：重试</h4><p>不指定重试次数则无限重试</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; range = Flux</span><br><span class="line">        .range(<span class="number">1000</span>, <span class="number">3</span>)</span><br><span class="line">        .concatWith(Flux.error(<span class="keyword">new</span> RuntimeException(<span class="string">"出错"</span>)))</span><br><span class="line">        .doOnError((ex) -&gt; System.out.println(ex))</span><br><span class="line">        .retry(<span class="number">1</span>);</span><br><span class="line">range.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1000<br>1001<br>1002<br>java.lang.RuntimeException: 出错<br>1000<br>1001<br>1002<br>java.lang.RuntimeException: 出错<br>[ERROR] (main) Operator called default onErrorDropped - reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.RuntimeException: 出错<br>reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.RuntimeException: 出错<br>Caused by: java.lang.RuntimeException: 出错<br>    at com.yrl.reactor.ReactorDemo1.main(ReactorDemo1.java:18)</p>
+<p>Process finished with exit code 0</p>
+</blockquote>
+<h4 id="onErrorResume：出错使用备用流"><a href="#onErrorResume：出错使用备用流" class="headerlink" title="onErrorResume：出错使用备用流"></a>onErrorResume：出错使用备用流</h4><p>根据错误返回对应的流</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; range = Flux</span><br><span class="line">    .range(<span class="number">1000</span>, <span class="number">3</span>)</span><br><span class="line">    .concatWith(Flux.error(<span class="keyword">new</span> RuntimeException(<span class="string">"出错"</span>)))</span><br><span class="line">    .doOnError((ex) -&gt; System.out.println(ex))</span><br><span class="line">    .onErrorResume(ex -&gt; &#123;</span><br><span class="line">        System.out.println(<span class="string">"onErrorResume - ex:"</span> + ex);</span><br><span class="line">        <span class="keyword">return</span> Flux.just(<span class="number">11111</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">range.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1000<br>1001<br>1002<br>java.lang.RuntimeException: 出错<br>onErrorResume - ex:java.lang.RuntimeException: 出错<br>11111</p>
+<p>Process finished with exit code 0</p>
+</blockquote>
+<h4 id="onErrorReturn-存在错误则返回指定值"><a href="#onErrorReturn-存在错误则返回指定值" class="headerlink" title="onErrorReturn - 存在错误则返回指定值"></a>onErrorReturn - 存在错误则返回指定值</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; range = Flux</span><br><span class="line">        .range(<span class="number">1000</span>, <span class="number">3</span>)</span><br><span class="line">        .concatWith(Flux.error(<span class="keyword">new</span> RuntimeException(<span class="string">"出错"</span>)))</span><br><span class="line">        .doOnError((ex) -&gt; System.out.println(ex))</span><br><span class="line">        .onErrorReturn(<span class="number">11111</span>);</span><br><span class="line">range.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1000<br>1001<br>1002<br>java.lang.RuntimeException: 出错<br>11111</p>
+</blockquote>
+<h4 id="onErrorMap-对错误进行转换"><a href="#onErrorMap-对错误进行转换" class="headerlink" title="onErrorMap - 对错误进行转换"></a>onErrorMap - 对错误进行转换</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; range = Flux</span><br><span class="line">        .range(<span class="number">1000</span>, <span class="number">3</span>)</span><br><span class="line">        .concatWith(Flux.error(<span class="keyword">new</span> RuntimeException(<span class="string">"出错"</span>)))</span><br><span class="line">        .doOnError((ex) -&gt; System.out.println(ex))</span><br><span class="line">        .onErrorMap(ex -&gt; <span class="keyword">new</span> Exception(ex.getMessage()));</span><br><span class="line">range.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1000<br>1001<br>1002<br>java.lang.RuntimeException: 出错<br>[ERROR] (main) Operator called default onErrorDropped - reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.Exception: 出错<br>reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.Exception: 出错<br>Caused by: java.lang.Exception: 出错<br>    at com.yrl.reactor.ReactorDemo1.lambda$main$1(ReactorDemo1.java:21)<br>    at reactor.core.publisher.Flux.lambda$onErrorMap$27(Flux.java:6544)<br>    at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:94)<br>    at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:221)<br>    at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onError(Operators.java:2023)<br>    at reactor.core.publisher.Operators.error(Operators.java:196)<br>    at reactor.core.publisher.FluxError.subscribe(FluxError.java:43)<br>    at reactor.core.publisher.Flux.subscribe(Flux.java:8095)<br>    at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:208)<br>    at reactor.core.publisher.FluxConcatArray.subscribe(FluxConcatArray.java:80)<br>    at reactor.core.publisher.Flux.subscribe(Flux.java:8095)<br>    at reactor.core.publisher.Flux.subscribeWith(Flux.java:8268)<br>    at reactor.core.publisher.Flux.subscribe(Flux.java:8065)<br>    at reactor.core.publisher.Flux.subscribe(Flux.java:7989)<br>    at reactor.core.publisher.Flux.subscribe(Flux.java:7932)<br>    at com.yrl.reactor.ReactorDemo1.main(ReactorDemo1.java:22)</p>
+</blockquote>
+<h3 id="defaultIfEmpty-为空时使用默认值"><a href="#defaultIfEmpty-为空时使用默认值" class="headerlink" title="defaultIfEmpty - 为空时使用默认值"></a>defaultIfEmpty - 为空时使用默认值</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Flux.empty().defaultIfEmpty(<span class="string">"hello"</span>).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hello</p>
+</blockquote>
+<h3 id="defer-延迟执行"><a href="#defer-延迟执行" class="headerlink" title="defer - 延迟执行"></a>defer - 延迟执行</h3><p><code>public static &lt;T&gt; Mono&lt;T&gt; defer(Supplier&lt;? extends Mono&lt;? extends T&gt;&gt; supplier)</code></p>
+<p>延迟执行，有订阅者出现才会执行，且为每个订阅者生成所有数据</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125160433884.png"  style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">data</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    String data = UUID.randomUUID().toString();</span><br><span class="line">    System.out.println(<span class="string">"生成数据:"</span> + data);</span><br><span class="line">    <span class="keyword">return</span> data;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Mono&lt;String&gt; mono = Mono.just(data());</span><br><span class="line">    Flux&lt;String&gt; flux = Flux.just(data());</span><br><span class="line">    <span class="comment">//不订阅也会执行data()逻辑</span></span><br><span class="line">    <span class="comment">//生成数据:3915beeb-d8c3-4201-a296-9c8bfaa5d90d</span></span><br><span class="line">	<span class="comment">//生成数据:4d5fffff-1546-4b7b-accb-3fd501b78606</span></span><br><span class="line">	<span class="comment">//=========</span></span><br><span class="line">    </span><br><span class="line">    Mono&lt;String&gt; deferMono = Mono.defer(() -&gt; Mono.just(data()));</span><br><span class="line">    Flux&lt;String&gt; deferFlux = Flux.defer(() -&gt; Flux.just(data()));</span><br><span class="line">    System.out.println(<span class="string">"========="</span>);</span><br><span class="line">    deferMono.subscribe();<span class="comment">//订阅才会执行data()逻辑</span></span><br><span class="line">    deferFlux.subscribe();<span class="comment">//订阅才会执行data()逻辑</span></span><br><span class="line">    <span class="comment">//=========</span></span><br><span class="line">	<span class="comment">//生成数据:c7dbd697-bd1a-42af-b832-b39a48f8374e</span></span><br><span class="line">	<span class="comment">//生成数据:20c38ced-1476-4624-af23-6835c05ba32b</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="doOnNext"><a href="#doOnNext" class="headerlink" title="doOnNext"></a>doOnNext</h3><p><code>public final Flux&lt;T&gt; doOnNext(Consumer&lt;? super T&gt; onNext)</code></p>
+<p>通过该方法可以对 Flux 或 Mono 上的每个元素执行一些操作，回调Subscriber.onNext</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125160254989.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">100</span>,<span class="number">3</span>)</span><br><span class="line">    .doOnNext(System.out::println)</span><br><span class="line">    .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>100<br>101<br>102</p>
+</blockquote>
+<h3 id="doOnComplete"><a href="#doOnComplete" class="headerlink" title="doOnComplete"></a>doOnComplete</h3><p>完成订阅处理后回调doOnComplete方法</p>
+<p><code>public final Flux&lt;T&gt; doOnComplete(Runnable onComplete)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221128143928695.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; range = Flux</span><br><span class="line">        .range(<span class="number">1000</span>, <span class="number">3</span>)</span><br><span class="line">        .doOnComplete(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"完成"</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">range.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1000<br>1001<br>1002<br>完成</p>
+</blockquote>
+<h3 id="doOnTerminate"><a href="#doOnTerminate" class="headerlink" title="doOnTerminate"></a>doOnTerminate</h3><p>无论什么原因终止都会被调用</p>
+<h3 id="log-日志跟踪"><a href="#log-日志跟踪" class="headerlink" title="log - 日志跟踪"></a>log - 日志跟踪</h3><p>观察所有活性流信号并使用Logger支持跟踪它们，默认使用info级别和java.util.logging（如果SLF4J可用则使用它）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; range = Flux</span><br><span class="line">        .range(<span class="number">1000</span>, <span class="number">3</span>)</span><br><span class="line">        .log();</span><br><span class="line">range.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[ INFO] (main) | onSubscribe([Synchronous Fuseable] FluxRange.RangeSubscription)<br>[ INFO] (main) | request(unbounded)<br>[ INFO] (main) | onNext(1000)<br>1000<br>[ INFO] (main) | onNext(1001)<br>1001<br>[ INFO] (main) | onNext(1002)<br>1002<br>[ INFO] (main) | onComplete()</p>
+</blockquote>
+<h3 id="map-转换数据"><a href="#map-转换数据" class="headerlink" title="map - 转换数据"></a>map - 转换数据</h3><p>使用Function函数转换入参数据，返回指定形式数据</p>
+<p><code>public final &lt;V&gt; Flux&lt;V&gt; map(Function&lt;? super T, ? extends V&gt; mapper)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125160221699.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">100</span>,<span class="number">3</span>)</span><br><span class="line">    .map(num -&gt; <span class="string">"hello "</span> + num)<span class="comment">//传入Function类型的lambda表达式转换数据格式</span></span><br><span class="line">    .doOnNext(System.out::println)<span class="comment">//打印数据流上的数据</span></span><br><span class="line">    .subscribe();<span class="comment">//订阅数据</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hello 100<br>hello 101<br>hello 102</p>
+</blockquote>
+<h3 id="扁平化数据"><a href="#扁平化数据" class="headerlink" title="扁平化数据"></a>扁平化数据</h3><h4 id="flatMap-立即订阅，交错处理"><a href="#flatMap-立即订阅，交错处理" class="headerlink" title="flatMap - 立即订阅，交错处理"></a>flatMap - 立即订阅，交错处理</h4><p>同时订阅数据，数据交错处理</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221127215730456.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Random random = <span class="keyword">new</span> Random();</span><br><span class="line">Flux.just(Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>),Arrays.asList(<span class="string">"a"</span>,<span class="string">"b"</span>,<span class="string">"c"</span>,<span class="string">"d"</span>),Arrays.asList(<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>))</span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .flatMap(item -&gt; Flux.fromIterable(item)</span><br><span class="line">        .doOnSubscribe(subscription -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"已经订阅"</span>);</span><br><span class="line">        &#125;)<span class="comment">//增加一个延时，订阅后延时一段时间再发送</span></span><br><span class="line">        .delayElements(Duration.ofMillis(random.nextInt(<span class="number">100</span>) + <span class="number">100</span>))</span><br><span class="line">        ).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[1, 2, 3]<br>已经订阅<br>[a, b, c, d]<br>已经订阅<br>[7, 8, 9]<br>已经订阅<br>1<br>a<br>7<br>2<br>b<br>3<br>c<br>8<br>d<br>9</p>
+</blockquote>
+<h4 id="concatMap-顺序订阅，顺序处理"><a href="#concatMap-顺序订阅，顺序处理" class="headerlink" title="concatMap- 顺序订阅，顺序处理"></a>concatMap- 顺序订阅，顺序处理</h4><img src="/images/响应式编程-ProjectReactor/image-20221127220112862.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Random random = <span class="keyword">new</span> Random();</span><br><span class="line">Flux.just(Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>),Arrays.asList(<span class="string">"a"</span>,<span class="string">"b"</span>,<span class="string">"c"</span>,<span class="string">"d"</span>),Arrays.asList(<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>))</span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .concatMap(item -&gt; Flux.fromIterable(item)</span><br><span class="line">                .doOnSubscribe(subscription -&gt; &#123;</span><br><span class="line">                    System.out.println(<span class="string">"已经订阅"</span>);</span><br><span class="line">                &#125;)<span class="comment">//增加一个延时，订阅后延时一段时间再发送</span></span><br><span class="line">                .delayElements(Duration.ofMillis(random.nextInt(<span class="number">100</span>) + <span class="number">100</span>))</span><br><span class="line">        ).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[1, 2, 3]<br>已经订阅<br>[a, b, c, d]<br>[7, 8, 9]<br>1<br>2<br>3<br>已经订阅<br>a<br>b<br>c<br>d<br>已经订阅<br>7<br>8<br>9</p>
+</blockquote>
+<h4 id="flatMapSequential-立即订阅，顺序处理"><a href="#flatMapSequential-立即订阅，顺序处理" class="headerlink" title="flatMapSequential - 立即订阅，顺序处理"></a>flatMapSequential - 立即订阅，顺序处理</h4><img src="/images/响应式编程-ProjectReactor/image-20221127220940230.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Random random = <span class="keyword">new</span> Random();</span><br><span class="line">Flux.just(Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>),Arrays.asList(<span class="string">"a"</span>,<span class="string">"b"</span>,<span class="string">"c"</span>,<span class="string">"d"</span>),Arrays.asList(<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>))</span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .flatMapSequential(item -&gt; Flux.fromIterable(item)</span><br><span class="line">                .doOnSubscribe(subscription -&gt; &#123;</span><br><span class="line">                    System.out.println(<span class="string">"已经订阅"</span>);</span><br><span class="line">                &#125;)<span class="comment">// 我们增加一个延时，订阅后延时一段时间再发送</span></span><br><span class="line">                .delayElements(Duration.ofMillis(random.nextInt(<span class="number">100</span>) + <span class="number">100</span>))</span><br><span class="line">        ).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[1, 2, 3]<br>已经订阅<br>[a, b, c, d]<br>已经订阅<br>[7, 8, 9]<br>已经订阅<br>1<br>2<br>3<br>a<br>b<br>c<br>d<br>7<br>8<br>9</p>
+</blockquote>
+<h3 id="filter-过滤"><a href="#filter-过滤" class="headerlink" title="filter - 过滤"></a>filter - 过滤</h3><p><code>public final Flux&lt;T&gt; filter(Predicate&lt;? super T&gt; p)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">100</span>,<span class="number">3</span>)</span><br><span class="line">    .filter(num -&gt; num % <span class="number">3</span> == <span class="number">0</span>)<span class="comment">//过滤数据，只有102符合</span></span><br><span class="line">    .map(num -&gt; <span class="string">"hello "</span> + num)<span class="comment">//数据转换</span></span><br><span class="line">    .doOnNext(System.out::println)<span class="comment">//</span></span><br><span class="line">    .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hello 102</p>
+</blockquote>
+<h3 id="index-增加索引值"><a href="#index-增加索引值" class="headerlink" title="index - 增加索引值"></a>index - 增加索引值</h3><p><code>public final Flux&lt;Tuple2&lt;Long, T&gt;&gt; index()</code></p>
+<p>为数据增加索引，构建二元数据 Tuple2&lt;(index, value)&gt;</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125160122401.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">100</span>, <span class="number">3</span>)</span><br><span class="line">    .map(item -&gt; <span class="string">"hello-"</span> + item)</span><br><span class="line">    .index()</span><br><span class="line">    .doOnNext(item -&gt; &#123;</span><br><span class="line">        System.out.println(<span class="string">"Tuple2："</span> + item);</span><br><span class="line">        <span class="comment">// 二元组第一个元素 ，编号0开始</span></span><br><span class="line">        Long t1 = item.getT1();</span><br><span class="line">        System.out.println(<span class="string">"索引："</span> + t1);</span><br><span class="line">        <span class="comment">// 二元组第二个元素，也就是具体值</span></span><br><span class="line">        String t2 = item.getT2();</span><br><span class="line">        System.out.println(<span class="string">"值："</span> + t2);</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;)</span><br><span class="line">    .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Tuple2：[0,hello-100]<br>索引：0<br>值：hello-100</p>
+<p>Tuple2：[1,hello-101]<br>索引：1<br>值：hello-101</p>
+<p>Tuple2：[2,hello-102]<br>索引：2<br>值：hello-102</p>
+</blockquote>
+<h3 id="timestamp-增加时间戳"><a href="#timestamp-增加时间戳" class="headerlink" title="timestamp - 增加时间戳"></a>timestamp - 增加时间戳</h3><p><code>public final Flux&lt;Tuple2&lt;Long, T&gt;&gt; timestamp()</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125161829462.png" style="zoom:50%;" />
+
+<p>为数据增加当前时间戳，构建二元数据 Tuple2&lt;(timestamp , value)&gt;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">100</span>,<span class="number">101</span>,<span class="number">102</span>)</span><br><span class="line">    .map(item -&gt; <span class="string">"hello-"</span> + item)</span><br><span class="line">    .timestamp()</span><br><span class="line">    .doOnNext(item -&gt; &#123;</span><br><span class="line">        System.out.println(<span class="string">"Tuple2："</span> + item);</span><br><span class="line">        <span class="comment">// 二元组第一个元素 ，当前时间戳</span></span><br><span class="line">        Long t1 = item.getT1();</span><br><span class="line">        System.out.println(<span class="string">"时间戳："</span> + t1);</span><br><span class="line">        <span class="comment">// 二元组第二个元素，也就是具体值</span></span><br><span class="line">        String t2 = item.getT2();</span><br><span class="line">        System.out.println(<span class="string">"值："</span> + t2);</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;)</span><br><span class="line">    .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Tuple2：[1669364259980,hello-100]<br>时间戳：1669364259980<br>值：hello-100</p>
+<p>Tuple2：[1669364259980,hello-101]<br>时间戳：1669364259980<br>值：hello-101</p>
+<p>Tuple2：[1669364259980,hello-102]<br>时间戳：1669364259980<br>值：hello-102</p>
+</blockquote>
+<h3 id="skip-跳过"><a href="#skip-跳过" class="headerlink" title="skip - 跳过"></a>skip - 跳过</h3><p>跳过指定数量的元素</p>
+<p><code>public final Flux&lt;T&gt; skip(long skipped)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125211138683.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">100</span>,<span class="number">101</span>,<span class="number">102</span>)</span><br><span class="line">        .skip(<span class="number">2</span>)</span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>102</p>
+</blockquote>
+<h3 id="then"><a href="#then" class="headerlink" title="then"></a>then</h3><p>忽略来自该Flux的元素，并将其完成信号转换为所新提供Mono的发射和完成信号，订阅者只处理Mono数据</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221128102520007.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>)</span><br><span class="line">        .doOnNext(item -&gt; System.out.println(<span class="string">"doOnNext:"</span> + item))</span><br><span class="line">        .then(Mono.just(<span class="number">7</span>))</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>doOnNext:1<br>doOnNext:2<br>doOnNext:3<br>doOnNext:4<br>doOnNext:5<br>doOnNext:6<br>7</p>
+</blockquote>
+<h3 id="thenMany"><a href="#thenMany" class="headerlink" title="thenMany"></a>thenMany</h3><p>让这个Flux完成后使用新的Flux，订阅者只处理新Flux数据</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221128102707085.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>)</span><br><span class="line">        .doOnNext(item -&gt; System.out.println(<span class="string">"doOnNext:"</span> + item))</span><br><span class="line">        .thenMany(Flux.just(<span class="number">8</span>, <span class="number">9</span>))</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>doOnNext:1<br>doOnNext:2<br>doOnNext:3<br>doOnNext:4<br>doOnNext:5<br>doOnNext:6<br>8<br>9</p>
+</blockquote>
+<h3 id="next-只获取一个数据"><a href="#next-只获取一个数据" class="headerlink" title="next - 只获取一个数据"></a>next - 只获取一个数据</h3><p>只获取一个数据到一个新的Mono。如果为空，则发出一个空的Mono。</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221129101025401.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Mono&lt;Integer&gt; next = Flux</span><br><span class="line">        .range(<span class="number">1000</span>, <span class="number">5</span>)</span><br><span class="line">        .next();</span><br><span class="line">next.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1000</p>
+</blockquote>
+<h3 id="take-获取前N个数据"><a href="#take-获取前N个数据" class="headerlink" title="take - 获取前N个数据"></a>take - 获取前N个数据</h3><p><code>public final Flux&lt;T&gt; take(long n)</code></p>
+<p>获取前N个数据后取消订阅剩余数据</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125162702366.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">100</span>,<span class="number">101</span>,<span class="number">102</span>)</span><br><span class="line">        .take(<span class="number">2</span>)<span class="comment">//只获取2条数据</span></span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>100<br>101</p>
+</blockquote>
+<h3 id="takeLast-获取后N个数据"><a href="#takeLast-获取后N个数据" class="headerlink" title="takeLast - 获取后N个数据"></a>takeLast - 获取后N个数据</h3><p><code>public final Flux&lt;T&gt; takeLast(int n)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125163614773.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">100</span>,<span class="number">101</span>,<span class="number">102</span>)</span><br><span class="line">        .takeLast(<span class="number">2</span>)</span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>101<br>102</p>
+</blockquote>
+<h3 id="takeUntil-传递值，直到条件满足则停止"><a href="#takeUntil-传递值，直到条件满足则停止" class="headerlink" title="takeUntil - 传递值，直到条件满足则停止"></a>takeUntil - 传递值，直到条件满足则停止</h3><p><code>public final Flux&lt;T&gt; takeUntil(Predicate&lt;? super T&gt; predicate)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125164347476.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">100</span>,<span class="number">101</span>,<span class="number">102</span>)</span><br><span class="line">        .takeUntil(num -&gt; num == <span class="number">101</span>)<span class="comment">//传递100、101，此时规则为true，停止传递数据</span></span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>100<br>101</p>
+</blockquote>
+<h3 id="elementAt-根据索引获取数据"><a href="#elementAt-根据索引获取数据" class="headerlink" title="elementAt - 根据索引获取数据"></a>elementAt - 根据索引获取数据</h3><p><code>public final Mono&lt;T&gt; elementAt(int index)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125164749737.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">100</span>,<span class="number">101</span>,<span class="number">102</span>)</span><br><span class="line">        .elementAt(<span class="number">2</span>)</span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>102</p>
+</blockquote>
+<h3 id="takeUntilOther-获取数据直到另一数据流数据到来，则停止该流处理"><a href="#takeUntilOther-获取数据直到另一数据流数据到来，则停止该流处理" class="headerlink" title="takeUntilOther - 获取数据直到另一数据流数据到来，则停止该流处理"></a>takeUntilOther - 获取数据直到另一数据流数据到来，则停止该流处理</h3><p><code>public final Flux&lt;T&gt; takeUntilOther(Publisher&lt;?&gt; other)</code></p>
+<h3 id="skipUntilOther-Publisher-跳过数据直到另一数据流数据到来，才开始该流处理"><a href="#skipUntilOther-Publisher-跳过数据直到另一数据流数据到来，才开始该流处理" class="headerlink" title="skipUntilOther(Publisher) - 跳过数据直到另一数据流数据到来，才开始该流处理"></a>skipUntilOther(Publisher) - 跳过数据直到另一数据流数据到来，才开始该流处理</h3><p><code>public final Flux&lt;T&gt; skipUntilOther(Publisher&lt;?&gt; other)</code></p>
+<p>takeUntilOther与skipUntilOther结合的例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建一个Flux，它发出从0开始增长，并在全局计时器上按指定的时间间隔递增。第一个元素在等于周期的初始延迟之后发出</span></span><br><span class="line">   Flux.interval(Duration.ofMillis(<span class="number">1000</span>))</span><br><span class="line">           .map(item -&gt; <span class="string">"item "</span> + item)</span><br><span class="line">           .doOnNext(System.out::println)</span><br><span class="line">           <span class="comment">//跳过前面的数据，当第三秒mono数据量加入时触发下面的subscribe打印"onNext: " + item</span></span><br><span class="line">           .skipUntilOther(Mono.just(<span class="string">"start"</span>).delayElement(Duration.ofSeconds(<span class="number">3</span>)))</span><br><span class="line">           <span class="comment">//处理数据，当第六秒时停止处理</span></span><br><span class="line">           .takeUntilOther(Mono.just(<span class="string">"end"</span>).delayElement(Duration.ofSeconds(<span class="number">6</span>)))</span><br><span class="line">           .subscribe(</span><br><span class="line">                   item -&gt; System.out.println(<span class="string">"onNext: "</span> + item),</span><br><span class="line">                   ex -&gt; System.err.println(<span class="string">"onError: "</span> + ex),</span><br><span class="line">                   () -&gt; System.out.println(<span class="string">"onCompleted"</span>)</span><br><span class="line">           );</span><br><span class="line">   Thread.sleep(<span class="number">10</span>*<span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>item 0<br>item 1<br>item 2<br>onNext: item 2<br>item 3<br>onNext: item 3<br>item 4<br>onNext: item 4<br>onCompleted</p>
+</blockquote>
+<h3 id="all-全部符合为rue"><a href="#all-全部符合为rue" class="headerlink" title="all - 全部符合为rue"></a>all - 全部符合为rue</h3><p><code>public final Mono&lt;Boolean&gt; all(Predicate&lt;? super T&gt; predicate)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125205639146.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">2</span>,<span class="number">4</span>,<span class="number">6</span>)</span><br><span class="line">        .all(item -&gt; item % <span class="number">2</span> == <span class="number">0</span>)</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>true</p>
+</blockquote>
+<h3 id="any-任一符合为rue"><a href="#any-任一符合为rue" class="headerlink" title="any - 任一符合为rue"></a>any - 任一符合为rue</h3><p><code>public final Mono&lt;Boolean&gt; all(Predicate&lt;? super T&gt; predicate)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125205906914.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>)</span><br><span class="line">        .any(item -&gt; item % <span class="number">2</span> == <span class="number">0</span>)</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>true</p>
+</blockquote>
+<blockquote>
+</blockquote>
+<h3 id="hasElement-是否含有指定元素"><a href="#hasElement-是否含有指定元素" class="headerlink" title="hasElement - 是否含有指定元素"></a>hasElement - 是否含有指定元素</h3><p>操作符检查流中是否包含某个所需的元素。短路逻辑，在元素与值匹配时立即返回true。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>)</span><br><span class="line">        .hasElement(<span class="number">5</span>)</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>true</p>
+</blockquote>
+<h3 id="repeat-重复操作"><a href="#repeat-重复操作" class="headerlink" title="repeat - 重复操作"></a>repeat - 重复操作</h3><p><code>public final Flux&lt;T&gt; repeat()</code>无限订阅</p>
+<p><code>public final Flux&lt;T&gt; repeat(long numRepeat)</code>再原有基础上再订阅numRepeat次</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125213259115.png" style="zoom:50%;" />
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">100</span>)</span><br><span class="line">        .repeat(<span class="number">2</span>)<span class="comment">//再原有基础上再重复订阅2次</span></span><br><span class="line">        .doOnNext(System.out::println)</span><br><span class="line">        .subscribe();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>100<br>100<br>100</p>
+</blockquote>
+<h3 id="去重"><a href="#去重" class="headerlink" title="去重"></a>去重</h3><h4 id="distinctUntilChanged-局部去重"><a href="#distinctUntilChanged-局部去重" class="headerlink" title="distinctUntilChanged - 局部去重"></a>distinctUntilChanged - 局部去重</h4><p><code>public final Flux&lt;T&gt; distinctUntilChanged()</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125214421792.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        .distinctUntilChanged()<span class="comment">//局部范围去重</span></span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1</p>
+<p>2</p>
+<p>3</p>
+<p>1</p>
+<p>2</p>
+</blockquote>
+<h4 id="distinct-全局去重"><a href="#distinct-全局去重" class="headerlink" title="distinct - 全局去重"></a>distinct - 全局去重</h4><p><code>public final Flux&lt;T&gt; distinct()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        .distinct()<span class="comment">//全局去重</span></span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1</p>
+<p>2</p>
+<p>3</p>
+</blockquote>
+<h3 id="组合"><a href="#组合" class="headerlink" title="组合"></a>组合</h3><h4 id="reduce-前一步结果与当前元素组合"><a href="#reduce-前一步结果与当前元素组合" class="headerlink" title="reduce - 前一步结果与当前元素组合"></a>reduce - 前一步结果与当前元素组合</h4><p><code>public final &lt;A&gt; Mono&lt;A&gt; reduce(A initial, BiFunction&lt;A, ? super T, A&gt; accumulator)</code></p>
+<p>使用BiFunction会将前一步的结果（首次为初始值）与当前的元素组合在一起</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125220330299.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">1</span>,<span class="number">5</span>)</span><br><span class="line">    	<span class="comment">//0位初始值</span></span><br><span class="line">        .reduce(<span class="number">0</span>,(item1,item2)-&gt;&#123;</span><br><span class="line">            System.out.println(<span class="string">"item1:"</span> + item1);</span><br><span class="line">            System.out.println(<span class="string">"item2:"</span> + item2);</span><br><span class="line">            System.out.println();</span><br><span class="line">            <span class="keyword">return</span> item1 + item2;</span><br><span class="line">        &#125;).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>item1:0<br>item2:1</p>
+<p>item1:1<br>item2:2</p>
+<p>item1:3<br>item2:3</p>
+<p>item1:6<br>item2:4</p>
+<p>item1:10<br>item2:5</p>
+<p>15</p>
+</blockquote>
+<h4 id="scan-前一步结果与当前元素组合"><a href="#scan-前一步结果与当前元素组合" class="headerlink" title="scan  - 前一步结果与当前元素组合"></a>scan  - 前一步结果与当前元素组合</h4><p>与reduce类似，区别在于scan会将中间结果打印</p>
+<p><code>public final &lt;A&gt; Flux&lt;A&gt; scan(A initial, BiFunction&lt;A, ? super T, A&gt; accumulator)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125220833268.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">1</span>,<span class="number">5</span>)</span><br><span class="line">        .scan(<span class="comment">/*初始值*/</span><span class="number">0</span>,(<span class="comment">/*前一步的结果（首次为初始值）*/</span>num1,<span class="comment">/*新一轮传递过来的值*/</span>num2) -&gt;&#123;</span><br><span class="line">            System.out.println(<span class="string">"num1:"</span> + num1);</span><br><span class="line">            System.out.println(<span class="string">"num2:"</span> + num2);</span><br><span class="line">            <span class="keyword">return</span> num1 + num2;</span><br><span class="line">        &#125;)</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>0<br>num1:0<br>num2:1<br>1<br>num1:1<br>num2:2<br>3<br>num1:3<br>num2:3<br>6<br>num1:6<br>num2:4<br>10<br>num1:10<br>num2:5<br>15</p>
+</blockquote>
+<h4 id="concat-组合多个流，流之间存在顺序"><a href="#concat-组合多个流，流之间存在顺序" class="headerlink" title="concat - 组合多个流，流之间存在顺序"></a>concat - 组合多个流，流之间存在顺序</h4><p>通过向下游转发接收的元素来连接所有数据源。当操作符连接两个流时，它首先消费并重新发送第一个流的所有元素，然后对第二个流执行相同的操作。</p>
+<p><code>public static &lt;T&gt; Flux&lt;T&gt; concat(Publisher&lt;? extends T&gt;... sources)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221126103524182.png" style="zoom: 80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Flux.concat(</span><br><span class="line">        Flux.range(<span class="number">10</span>,<span class="number">5</span>).delayElements(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">        .doOnSubscribe(subscription -&gt; System.out.println(<span class="string">"订阅第一个流"</span>)),</span><br><span class="line">        Flux.range(<span class="number">100</span>,<span class="number">5</span>).delayElements(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">        .doOnSubscribe(subscription -&gt; System.out.println(<span class="string">"订阅第二流"</span>))</span><br><span class="line">).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>订阅第一个流<br>10<br>11<br>12<br>13<br>14<br>订阅第二流<br>100<br>101<br>102<br>103<br>104</p>
+</blockquote>
+<h4 id="merge-组合多个流，流之间无顺序"><a href="#merge-组合多个流，流之间无顺序" class="headerlink" title="merge  - 组合多个流，流之间无顺序"></a>merge  - 组合多个流，流之间无顺序</h4><p>将来自上游序列的数据合并到一个下游序列中。与 concat 操作符不同，上游数据源是立即（<strong>同时</strong>）被订阅的。</p>
+<p><code>public static &lt;T&gt; Flux&lt;T&gt; merge(Publisher&lt;? extends T&gt;... sources)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221126103808707.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Flux.merge(</span><br><span class="line">        Flux.range(<span class="number">10</span>,<span class="number">5</span>).delayElements(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">                .doOnSubscribe(subscription -&gt; System.out.println(<span class="string">"订阅第一个流"</span>)),</span><br><span class="line">        Flux.range(<span class="number">100</span>,<span class="number">5</span>).delayElements(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">                .doOnSubscribe(subscription -&gt; System.out.println(<span class="string">"订阅第二流"</span>))</span><br><span class="line">).subscribe(System.out::println);</span><br><span class="line">Thread.sleep(<span class="number">10</span>*<span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>订阅第一个流<br>订阅第二流<br>100<br>10<br>101<br>11<br>102<br>12<br>103<br>13<br>104<br>14</p>
+</blockquote>
+<h4 id="zip-压缩合并为二元数据"><a href="#zip-压缩合并为二元数据" class="headerlink" title="zip - 压缩合并为二元数据"></a>zip - 压缩合并为二元数据</h4><p>将两个源压缩到一起，也就是说，等待所有源发出一个元素，并将这些元素合并到Tuple2中。操作符将继续这样做，直到任何一个源完成。</p>
+<p><code>public static &lt;T1, T2&gt; Flux&lt;Tuple2&lt;T1, T2&gt;&gt; zip(Publisher&lt;? extends T1&gt; source1, Publisher&lt;? extends T2&gt; source2)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221126104608798.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Flux.zip(</span><br><span class="line">        Flux.range(<span class="number">1</span>,<span class="number">10</span>)</span><br><span class="line">        .delayElements(Duration.ofMillis(<span class="number">10</span>)),</span><br><span class="line">        Flux.range(<span class="number">100</span>,<span class="number">10</span>)</span><br><span class="line">        .delayElements(Duration.ofMillis(<span class="number">10</span>))</span><br><span class="line">        ).subscribe(System.out::println);</span><br><span class="line">        Thread.sleep(<span class="number">10</span>*<span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[1,100]<br>[2,101]<br>[3,102]<br>[4,103]<br>[5,104]<br>[6,105]<br>[7,106]<br>[8,107]<br>[9,108]<br>[10,109]</p>
+</blockquote>
+<h4 id="combineLatest-压缩合并数据，以新值为准使用自定义函数"><a href="#combineLatest-压缩合并数据，以新值为准使用自定义函数" class="headerlink" title="combineLatest - 压缩合并数据，以新值为准使用自定义函数"></a>combineLatest - 压缩合并数据，以新值为准使用自定义函数</h4><p>都是压缩合并数据，与zip不同的是，combineLatest 数据是由来自两个Publisher源的最新发布值的组合生成的。</p>
+<p><code>public static &lt;T1, T2, V&gt; Flux&lt;V&gt; combineLatest(Publisher&lt;? extends T1&gt; source1,Publisher&lt;? extends T2&gt; source2,BiFunction&lt;? super T1, ? super T2, ? extends V&gt; combinator)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221126105655754.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Flux.combineLatest(</span><br><span class="line">        Flux.range(<span class="number">1</span>,<span class="number">10</span>).delayElements(Duration.ofMillis(<span class="number">1000</span>)),</span><br><span class="line">        Flux.range(<span class="number">100</span>,<span class="number">10</span>).delayElements(Duration.ofMillis(<span class="number">2000</span>)),</span><br><span class="line">        ((integer1, integer2) -&gt; integer1 + <span class="string">"=="</span> +integer2)<span class="comment">//聚合函数，它将从每个上游接收最新的值并将该值返回给下游信号</span></span><br><span class="line">).subscribe(System.out::println);</span><br><span class="line">Thread.sleep(<span class="number">10</span>*<span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1==100<br>2==100<br>3==100<br>4==100<br>4==101<br>5==101<br>5==102<br>6==102<br>7==102<br>7==103<br>8==103<br>9==103</p>
+</blockquote>
+<h3 id="批处理"><a href="#批处理" class="headerlink" title="批处理"></a>批处理</h3><h4 id="buffer-达到缓冲区大小时，传递数据"><a href="#buffer-达到缓冲区大小时，传递数据" class="headerlink" title="buffer - 达到缓冲区大小时，传递数据"></a>buffer - 达到缓冲区大小时，传递数据</h4><p>将传入的值收集到多个List缓冲区中，这些缓冲区将在每次达到给定的最大大小或在此Flux完成时由返回的Flux发出。</p>
+<p><code>public final Flux&lt;List&lt;T&gt;&gt; buffer(int maxSize)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221126112534233.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">1</span>,<span class="number">100</span>)</span><br><span class="line">        .buffer(<span class="number">10</span>)</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]<br>[11, 12, 13, 14, 15, 16, 17, 18, 19, 20]<br>[21, 22, 23, 24, 25, 26, 27, 28, 29, 30]<br>[31, 32, 33, 34, 35, 36, 37, 38, 39, 40]<br>[41, 42, 43, 44, 45, 46, 47, 48, 49, 50]<br>[51, 52, 53, 54, 55, 56, 57, 58, 59, 60]<br>[61, 62, 63, 64, 65, 66, 67, 68, 69, 70]<br>[71, 72, 73, 74, 75, 76, 77, 78, 79, 80]<br>[81, 82, 83, 84, 85, 86, 87, 88, 89, 90]<br>[91, 92, 93, 94, 95, 96, 97, 98, 99, 100]</p>
+</blockquote>
+<h4 id="windowUntil-满足窗口条件时传递数据"><a href="#windowUntil-满足窗口条件时传递数据" class="headerlink" title="windowUntil - 满足窗口条件时传递数据"></a>windowUntil - 满足窗口条件时传递数据</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">101</span>, <span class="number">20</span>)</span><br><span class="line">    	<span class="comment">//第一个参数：为true时创建新的窗口</span></span><br><span class="line">    	<span class="comment">//第二个参数：为true时加入新的窗口，false加入旧窗口</span></span><br><span class="line">        .windowUntil(<span class="comment">/**判断是否为质数*/</span>ReactorDemo::isPrime, <span class="keyword">true</span>)</span><br><span class="line">        .subscribe(</span><br><span class="line">                data -&gt; data.collectList()</span><br><span class="line">                        .subscribe(</span><br><span class="line">                                item -&gt; System.out.println(<span class="string">"window:"</span> + item)</span><br><span class="line">                        )</span><br><span class="line">        );</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>第二个参数为true时：<br>window:[]<br>window:[101, 102]<br>window:[103, 104, 105, 106]<br>window:[107, 108]<br>window:[109, 110, 111, 112]<br>window:[113, 114, 115, 116, 117, 118, 119, 120]</p>
+<p>第二个参数为false时：<br>window:[101]<br>window:[102, 103]<br>window:[104, 105, 106, 107]<br>window:[108, 109]<br>window:[110, 111, 112, 113]<br>window:[114, 115, 116, 117, 118, 119, 120]</p>
+</blockquote>
+<h4 id="groupBy"><a href="#groupBy" class="headerlink" title="groupBy"></a>groupBy</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Flux.range(<span class="number">1</span>, <span class="number">7</span>)</span><br><span class="line">        .groupBy(item -&gt; item % <span class="number">2</span> == <span class="number">0</span> ? <span class="string">"偶数"</span> : <span class="string">"奇数"</span>)</span><br><span class="line">        .subscribe(groupFlux -&gt;</span><br><span class="line">                groupFlux.scan(</span><br><span class="line">                                <span class="comment">/*初始值*/</span><span class="keyword">new</span> ArrayList&lt;&gt;(),</span><br><span class="line">                                (<span class="comment">/*前一步的结果（首次为初始值）*/</span>list, <span class="comment">/*新一轮传递过来的值*/</span>element) -&gt; &#123;</span><br><span class="line">                                    list.add(element);</span><br><span class="line">                                    <span class="keyword">return</span> list;</span><br><span class="line">                                &#125;).filter(list -&gt; !list.isEmpty()).</span><br><span class="line">                        subscribe(item -&gt; System.out.println(groupFlux.key() + <span class="string">"======"</span> + item))</span><br><span class="line">        );</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>奇数======[1]<br>偶数======[2]<br>奇数======[1, 3]<br>偶数======[2, 4]<br>奇数======[1, 3, 5]<br>偶数======[2, 4, 6]<br>奇数======[1, 3, 5, 7]</p>
+</blockquote>
+<h3 id="thenMany-触发新流"><a href="#thenMany-触发新流" class="headerlink" title="thenMany - 触发新流"></a>thenMany - 触发新流</h3><img src="/images/响应式编程-ProjectReactor/image-20221125221720220.png" style="zoom: 80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>)</span><br><span class="line">        .doOnNext(item -&gt; System.out.println(item))</span><br><span class="line">        .thenMany(Flux.just(<span class="number">7</span>,<span class="number">8</span>))</span><br><span class="line">        .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8</p>
+</blockquote>
+<h3 id="收集"><a href="#收集" class="headerlink" title="收集"></a>收集</h3><h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h5 id="普通List"><a href="#普通List" class="headerlink" title="普通List"></a>普通List</h5><p>收集此Flux发出的所有元素到一个List中，该List在此序列完成时由结果Mono发出。</p>
+<p><code>public final Mono&lt;List&lt;T&gt;&gt; collectList()</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221126112948110.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">2</span>,<span class="number">36</span>,<span class="number">4</span>,<span class="number">25</span>,<span class="number">6</span>,<span class="number">7</span>)</span><br><span class="line">.collectList()</span><br><span class="line">.subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[1, 2, 36, 4, 25, 6, 7]</p>
+</blockquote>
+<h5 id="排序List"><a href="#排序List" class="headerlink" title="排序List"></a>排序List</h5><p><code>public final Mono&lt;List&lt;T&gt;&gt; collectSortedList(@Nullable Comparator&lt;? super T&gt; comparator)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125172110724.png" style="zoom: 80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">2</span>,<span class="number">36</span>,<span class="number">4</span>,<span class="number">25</span>,<span class="number">6</span>,<span class="number">7</span>)</span><br><span class="line">      <span class="comment">//CollectionSoredList 默认是升序</span></span><br><span class="line">      .collectSortedList(Comparator.reverseOrder())</span><br><span class="line">      .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[36, 25, 7, 6, 4, 2, 1]<br>收集集合中的序列元素可能耗费资源，当序列具有许多元素时这种现象尤为突出。此外，尝试在无限流上收集数据可能消耗所有可用的内存。</p>
+</blockquote>
+<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h5 id="自定义key值"><a href="#自定义key值" class="headerlink" title="自定义key值"></a>自定义key值</h5><p><code>public final &lt;K&gt; Mono&lt;Map&lt;K, T&gt;&gt; collectMap(Function&lt;? super T, ? extends K&gt; keyExtractor)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125173941191.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>)</span><br><span class="line">      .collectMap(item -&gt; <span class="string">"key"</span> + item)</span><br><span class="line">      .subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>{key1=1, key2=2, key5=5, key6=6, key3=3, key4=4}</p>
+</blockquote>
+<h5 id="自定义key、value值"><a href="#自定义key、value值" class="headerlink" title="自定义key、value值"></a>自定义key、value值</h5><p><code>public final &lt;K, V&gt; Mono&lt;Map&lt;K, V&gt;&gt; collectMap(Function&lt;? super T, ? extends K&gt; keyExtractor,Function&lt;? super T, ? extends V&gt; valueExtractor)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125174159354.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>)</span><br><span class="line">  .collectMap(</span><br><span class="line">  item -&gt; <span class="string">"key-"</span> + item,</span><br><span class="line">  item -&gt; <span class="string">"value-"</span> + item</span><br><span class="line">).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>{key-1=value-1, key-5=value-5, key-4=value-4, key-3=value-3, key-2=value-2, key-6=value-6}</p>
+</blockquote>
+<h5 id="自定义key、value值、map工厂"><a href="#自定义key、value值、map工厂" class="headerlink" title="自定义key、value值、map工厂"></a>自定义key、value值、map工厂</h5><p><code>public final &lt;K, V&gt; Mono&lt;Map&lt;K, V&gt;&gt; collectMap(final Function&lt;? super T, ? extends K&gt; keyExtractor,final Function&lt;? super T, ? extends V&gt; valueExtractor,Supplier&lt;Map&lt;K, V&gt;&gt; mapSupplier)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>)</span><br><span class="line">        .collectMap(</span><br><span class="line">                integer -&gt; <span class="string">"key-"</span> + integer,</span><br><span class="line">                integer -&gt; <span class="string">"value-"</span> + integer,</span><br><span class="line">                ()-&gt;&#123;</span><br><span class="line">                    Map&lt;String,String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">                    <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">7</span> ;i &lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">                        map.put(<span class="string">"key:"</span> + i ,<span class="string">"value:"</span> + i);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">return</span> map;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">        ).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>{key-1=value-1, key-5=value-5, key-4=value-4, key-3=value-3, key-2=value-2, key-6=value-6, key:9=value:9, key:8=value:8, key:7=value:7}</p>
+</blockquote>
+<h4 id="Multimap"><a href="#Multimap" class="headerlink" title="Multimap"></a>Multimap</h4><h5 id="多值map，自定义key、value"><a href="#多值map，自定义key、value" class="headerlink" title="多值map，自定义key、value"></a>多值map，自定义key、value</h5><p><code>public final &lt;K, V&gt; Mono&lt;Map&lt;K, Collection&lt;V&gt;&gt;&gt; collectMultimap(Function&lt;? super T, ? extends K&gt; keyExtractor,Function&lt;? super T, ? extends V&gt; valueExtractor)</code></p>
+<img src="/images/响应式编程-ProjectReactor/image-20221125181532025.png" style="zoom:50%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line">        .collectMultimap(</span><br><span class="line">                item -&gt; &#123;</span><br><span class="line">                    <span class="keyword">if</span> (item % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="string">"key-2"</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">return</span> <span class="string">"key-1"</span>;</span><br><span class="line">                &#125;,</span><br><span class="line">                item -&gt; <span class="string">"value-"</span> + item</span><br><span class="line">        ).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>{</p>
+<p>​    key-1=[value-1, value-3, value-5],</p>
+<p>​    key-2=[value-2, value-4]</p>
+<p>}</p>
+</blockquote>
+<h5 id="多值map，自定义key、value、map工厂"><a href="#多值map，自定义key、value、map工厂" class="headerlink" title="多值map，自定义key、value、map工厂"></a>多值map，自定义key、value、map工厂</h5><p><code>public final &lt;K, V&gt; Mono&lt;Map&lt;K, Collection&lt;V&gt;&gt;&gt; collectMultimap(final Function&lt;? super T, ? extends K&gt; keyExtractor,final Function&lt;? super T, ? extends V&gt; valueExtractor,Supplier&lt;Map&lt;K, Collection&lt;V&gt;&gt;&gt; mapSupplier</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line">        .collectMultimap(</span><br><span class="line">                item -&gt; &#123;</span><br><span class="line">                    <span class="keyword">if</span> (item % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="string">"key-2"</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">return</span> <span class="string">"key-1"</span>;</span><br><span class="line">                &#125;,</span><br><span class="line">                item -&gt; <span class="string">"value-"</span> + item,</span><br><span class="line">                <span class="comment">// 扩充</span></span><br><span class="line">                () -&gt; &#123;</span><br><span class="line">                    Map map = <span class="keyword">new</span> HashMap&lt;String, List&gt;();</span><br><span class="line">                    List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) &#123;</span><br><span class="line">                        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; i; j++) &#123;</span><br><span class="line">                            list.add(<span class="string">"ele:"</span> + j);</span><br><span class="line">                        &#125;</span><br><span class="line">                        map.put(i + <span class="string">"-key"</span>, list);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">return</span> map;</span><br><span class="line">                &#125;</span><br><span class="line">        ).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>{</p>
+<p>​    key-1=[value-1, value-3, value-5], </p>
+<p>​    2-key=[ele:0, ele:0, ele:1], </p>
+<p>​    key-2=[value-2, value-4],</p>
+<p>​    0-key=[ele:0, ele:0, ele:1], </p>
+<p>​    1-key=[ele:0, ele:0, ele:1]</p>
+<p>}</p>
+</blockquote>
+<h3 id="转换阻塞结构"><a href="#转换阻塞结构" class="headerlink" title="转换阻塞结构"></a>转换阻塞结构</h3><h4 id="Iterable"><a href="#Iterable" class="headerlink" title="Iterable"></a>Iterable</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Iterable&lt;Integer&gt; integers = Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">        .toIterable();</span><br><span class="line"><span class="keyword">for</span> (Integer num : integers) &#123;</span><br><span class="line">    System.out.println(num);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1<br>2<br>3<br>4</p>
+</blockquote>
+<h4 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; integerStream = Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>).toStream();</span><br><span class="line">integerStream.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1<br>2<br>3</p>
+</blockquote>
+<h4 id="BlockFirst"><a href="#BlockFirst" class="headerlink" title="BlockFirst"></a>BlockFirst</h4><p>阻塞了当前线程，直到上游发出第一个值或完成流为止</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221128095838549.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Integer integer = Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">        .doOnNext(item -&gt; System.out.println(<span class="string">"onNext:"</span> + item))</span><br><span class="line">        .blockFirst();</span><br><span class="line">System.out.println(integer);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>onNext:1<br>1</p>
+</blockquote>
+<h4 id="blockLast"><a href="#blockLast" class="headerlink" title="blockLast"></a>blockLast</h4><p>阻塞当前线程，直到上游发出最后一个值或完成流为止。在 onError的情况下，它会在被阻塞的线程中抛出异常。</p>
+<img src="/images/响应式编程-ProjectReactor/image-20221128101415871.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Integer integer2 = Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">        .doOnNext(item -&gt; System.out.println(<span class="string">"onNext:"</span> + item))</span><br><span class="line">        .blockLast();</span><br><span class="line">System.out.println(integer2);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>onNext:1<br>onNext:2<br>onNext:3<br>3</p>
+</blockquote>
+<h3 id="物化和非物化信号"><a href="#物化和非物化信号" class="headerlink" title="物化和非物化信号"></a>物化和非物化信号</h3><p>将流中的元素封装为Signal对象进行处理。</p>
+<h4 id="正常调用"><a href="#正常调用" class="headerlink" title="正常调用"></a>正常调用</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    Flux.just(1, 2, 3)</span><br><span class="line">            .delayElements(Duration.ofMillis(1000))</span><br><span class="line">            .publishOn(Schedulers.parallel())</span><br><span class="line">            .concatWith(Flux.error(new Exception(&quot;手动异常&quot;)))</span><br><span class="line">            .doOnEach(item -&gt; System.out.println(&quot;是否完成：&quot; + item.isOnComplete()))</span><br><span class="line">            .subscribe(System.out::println);</span><br><span class="line">    Thread.sleep(10 * 1000);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>是否完成：false<br>1<br>是否完成：false<br>2<br>是否完成：false<br>3<br>是否完成：false<br>[ERROR] (parallel-1) Operator called default onErrorDropped - reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.Exception: 手动异常<br>reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.Exception: 手动异常<br>Caused by: java.lang.Exception: 手动异常<br>    at com.yrl.reactor.ReactorDemo.main(ReactorDemo.java:12)</p>
+</blockquote>
+<h4 id="物化调用"><a href="#物化调用" class="headerlink" title="物化调用"></a>物化调用</h4><img src="/images/响应式编程-ProjectReactor/image-20221128145513167.png" style="zoom:80%;" />
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    .delayElements(Duration.ofMillis(<span class="number">1000</span>))</span><br><span class="line">    .publishOn(Schedulers.parallel())</span><br><span class="line">    .concatWith(Flux.error(<span class="keyword">new</span> Exception(<span class="string">"手动异常"</span>)))</span><br><span class="line">    .materialize()</span><br><span class="line">    .doOnEach(item -&gt; System.out.println(<span class="string">"是否完成："</span> + item.isOnComplete()))</span><br><span class="line">    .subscribe(System.out::println);</span><br><span class="line">Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>是否完成：false<br>onNext(1)<br>是否完成：false<br>onNext(2)<br>是否完成：false<br>onNext(3)<br>是否完成：false<br>onError(java.lang.Exception: 手动异常)<br>是否完成：true</p>
+</blockquote>
+<h4 id="非物化调用"><a href="#非物化调用" class="headerlink" title="非物化调用"></a>非物化调用</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Flux.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    .delayElements(Duration.ofMillis(<span class="number">1000</span>))</span><br><span class="line">    .publishOn(Schedulers.parallel())</span><br><span class="line">    .concatWith(Flux.error(<span class="keyword">new</span> Exception(<span class="string">"手动异常"</span>)))</span><br><span class="line">    .materialize()</span><br><span class="line">    .doOnEach(item -&gt; System.out.println(<span class="string">"是否完成："</span> + item.isOnComplete()))</span><br><span class="line">    .dematerialize()<span class="comment">//需要搭配materialize一起使用</span></span><br><span class="line">    .subscribe(System.out::println);</span><br><span class="line">Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>是否完成：false<br>1<br>是否完成：false<br>2<br>是否完成：false<br>3<br>是否完成：false<br>[ERROR] (parallel-1) Operator called default onErrorDropped - reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.Exception: 手动异常<br>reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.Exception: 手动异常<br>Caused by: java.lang.Exception: 手动异常<br>    at com.yrl.reactor.ReactorDemo.main(ReactorDemo.java:12)</p>
+</blockquote>
+<h3 id="冷热数据"><a href="#冷热数据" class="headerlink" title="冷热数据"></a>冷热数据</h3><p>冷发布者：无论订阅者何时出现，都为该订阅者生成所有的序列数据，没有订阅者就不会生成数据。</p>
+<p>热发布者：数据的生成不依赖于订阅者而存在，数据可能在第一个订阅者出现之间就开始产生了。</p>
+<h4 id="冷发布"><a href="#冷发布" class="headerlink" title="冷发布"></a>冷发布</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;String&gt; coldPublisher = Flux.defer(()-&gt;&#123;</span><br><span class="line">    System.out.println(<span class="string">"生成数据"</span>);</span><br><span class="line">    <span class="keyword">return</span> Flux.just(UUID.randomUUID().toString());</span><br><span class="line">&#125;);</span><br><span class="line">System.out.println(<span class="string">"尚未生成数据"</span>);</span><br><span class="line">coldPublisher.subscribe(e -&gt; System.out.println(<span class="string">"onNext:"</span> + e));</span><br><span class="line">coldPublisher.subscribe(e -&gt; System.out.println(<span class="string">"onNext:"</span> + e));</span><br><span class="line">System.out.println(<span class="string">"为两次订阅生成两次数据"</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>尚未生成数据<br>生成数据<br>onNext:1d496bec-d1be-4274-b24a-74ece485e51a<br>生成数据<br>onNext:19ab947e-bfd7-4600-9ffe-0e3a0b91c58c<br>为两次订阅生成两次数据</p>
+</blockquote>
+<h4 id="冷发布同时订阅通知"><a href="#冷发布同时订阅通知" class="headerlink" title="冷发布同时订阅通知"></a>冷发布同时订阅通知</h4><p>使用publish()返回的 ConnectableFlux 可以向几个订阅者多播事件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;String&gt; coldPublisher = Flux.defer(() -&gt; &#123;</span><br><span class="line">    System.out.println(<span class="string">"生成数据"</span>);</span><br><span class="line">    <span class="keyword">return</span> Flux.just(UUID.randomUUID().toString());</span><br><span class="line">&#125;);</span><br><span class="line">System.out.println(<span class="string">"尚未生成数据"</span>);</span><br><span class="line">ConnectableFlux&lt;String&gt; connectableFlux = coldPublisher.publish();</span><br><span class="line">connectableFlux.subscribe(e -&gt; System.out.println(<span class="string">"onNext:"</span> + e));</span><br><span class="line">connectableFlux.subscribe(e -&gt; System.out.println(<span class="string">"onNext:"</span> + e));</span><br><span class="line">System.out.println(<span class="string">"准备建立连接"</span>);</span><br><span class="line">connectableFlux.connect();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>尚未生成数据<br>准备建立连接<br>生成数据<br>onNext:ad8292c5-3d65-488e-9659-cdc7a7a2a559<br>onNext:ad8292c5-3d65-488e-9659-cdc7a7a2a559</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; source = Flux.range(<span class="number">0</span>,<span class="number">3</span>)</span><br><span class="line">        .doOnSubscribe(s -&gt; System.out.println(<span class="string">"对冷发布者的新订阅票据："</span> + s));</span><br><span class="line"><span class="comment">//准备一个ConnectableFlux，它共享此Flux序列，并以反压力感知的方式将值分发给订阅者</span></span><br><span class="line">ConnectableFlux&lt;Integer&gt; conn = source.publish();</span><br><span class="line">conn.subscribe(item -&gt; System.out.println(<span class="string">"[subscriber 1] onNext:"</span> + item));</span><br><span class="line">conn.subscribe(item -&gt; System.out.println(<span class="string">"[subscriber 2] onNext:"</span> + item));</span><br><span class="line">System.out.println(<span class="string">"准备建立连接"</span>);</span><br><span class="line">conn.connect();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>准备建立连接<br>对冷发布者的新订阅票据：reactor.core.publisher.FluxRange$RangeSubscription@22a71081<br>[subscriber 1] onNext:0<br>[subscriber 2] onNext:0<br>[subscriber 1] onNext:1<br>[subscriber 2] onNext:1<br>[subscriber 1] onNext:2<br>[subscriber 2] onNext:2</p>
+</blockquote>
+<h4 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; source = Flux.range(<span class="number">0</span>,<span class="number">5</span>)</span><br><span class="line">        .doOnSubscribe(s -&gt; System.out.println(<span class="string">"冷发布者的新订阅数据"</span>));</span><br><span class="line">Flux&lt;Integer&gt; cacheSource = source.cache(Duration.ofMillis(<span class="number">1000</span>));</span><br><span class="line">cacheSource.subscribe(item -&gt; System.out.println(<span class="string">"[subscribe 1] on Next:"</span> +item));</span><br><span class="line">cacheSource.subscribe(item -&gt; System.out.println(<span class="string">"[subscribe 2] on Next:"</span> +item));</span><br><span class="line">Thread.sleep(<span class="number">1200</span>);<span class="comment">//缓存超时，重新订阅生成数据</span></span><br><span class="line">cacheSource.subscribe(item -&gt; System.out.println(<span class="string">"[subscribe 3] on Next:"</span> +item));</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>冷发布者的新订阅数据<br>[subscribe 1] on Next:0<br>[subscribe 1] on Next:1<br>[subscribe 1] on Next:2<br>[subscribe 1] on Next:3<br>[subscribe 1] on Next:4<br>[subscribe 2] on Next:0<br>[subscribe 2] on Next:1<br>[subscribe 2] on Next:2<br>[subscribe 2] on Next:3<br>[subscribe 2] on Next:4<br>冷发布者的新订阅数据<br>[subscribe 3] on Next:0<br>[subscribe 3] on Next:1<br>[subscribe 3] on Next:2<br>[subscribe 3] on Next:3<br>[subscribe 3] on Next:4</p>
+</blockquote>
+<h4 id="共享-热发布"><a href="#共享-热发布" class="headerlink" title="共享-热发布"></a>共享-热发布</h4><p>使用publish()需要等待订阅者出现才能开始处理。</p>
+<p>share可以将冷发布者转变为热发布者，会为每个新订阅者传播订阅者尚未错过的事件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Flux&lt;Integer&gt; source = Flux.range(<span class="number">0</span>, <span class="number">5</span>)</span><br><span class="line">        .delayElements(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">        .doOnSubscribe(s -&gt; System.out.println(<span class="string">"冷发布者新的订阅票据"</span>));</span><br><span class="line">Flux&lt;Integer&gt; shareSource = source.share();</span><br><span class="line">shareSource.subscribe(item -&gt; System.out.println(<span class="string">"subscribe 1 onNext:"</span> + item));</span><br><span class="line">Thread.sleep(<span class="number">400</span>);</span><br><span class="line">shareSource.subscribe(item -&gt; System.out.println(<span class="string">"subscribe 2 onNext:"</span> + item));</span><br><span class="line">Thread.sleep(<span class="number">10</span>*<span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>冷发布者新的订阅票据<br>subscribe 1 onNext:0<br>subscribe 1 onNext:1<br>subscribe 1 onNext:2<br>subscribe 1 onNext:3<br>subscribe 2 onNext:3<br>subscribe 1 onNext:4<br>subscribe 2 onNext:4</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+              <a href="/tags/webflux/" rel="tag"># webflux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/19/neo4j%E4%B8%8Espringboot%E6%95%B4%E5%90%88/" rel="prev" title="neo4j-与springboot整合">
+      <i class="fa fa-chevron-left"></i> neo4j-与springboot整合
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/29/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/" rel="next" title="响应式编程-WebFlux">
+      响应式编程-WebFlux <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Project-Reactor"><span class="nav-text">Project Reactor</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#响应式概念"><span class="nav-text">响应式概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reactort-概念"><span class="nav-text">reactort 概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#依赖"><span class="nav-text">依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接口定义"><span class="nav-text">接口定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用"><span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建"><span class="nav-text">创建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Mono"><span class="nav-text">Mono</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Flux"><span class="nav-text">Flux</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编程方式创建"><span class="nav-text">编程方式创建</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#generate"><span class="nav-text">generate</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#push"><span class="nav-text">push</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#create"><span class="nav-text">create</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#背压策略"><span class="nav-text">背压策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#订阅"><span class="nav-text">订阅</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基于-Lambda-订阅"><span class="nav-text">基于 Lambda 订阅</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于BaseSubscriber订阅"><span class="nav-text">基于BaseSubscriber订阅</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#using-资源统一处理"><span class="nav-text">using - 资源统一处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Schedulers"><span class="nav-text">Schedulers</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#调度线程池"><span class="nav-text">调度线程池</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#publishOn"><span class="nav-text">publishOn</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#subscribeOn"><span class="nav-text">subscribeOn</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#错误处理"><span class="nav-text">错误处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#doOnError：出错时触发"><span class="nav-text">doOnError：出错时触发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#retry：重试"><span class="nav-text">retry：重试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#onErrorResume：出错使用备用流"><span class="nav-text">onErrorResume：出错使用备用流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#onErrorReturn-存在错误则返回指定值"><span class="nav-text">onErrorReturn - 存在错误则返回指定值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#onErrorMap-对错误进行转换"><span class="nav-text">onErrorMap - 对错误进行转换</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#defaultIfEmpty-为空时使用默认值"><span class="nav-text">defaultIfEmpty - 为空时使用默认值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#defer-延迟执行"><span class="nav-text">defer - 延迟执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#doOnNext"><span class="nav-text">doOnNext</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#doOnComplete"><span class="nav-text">doOnComplete</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#doOnTerminate"><span class="nav-text">doOnTerminate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#log-日志跟踪"><span class="nav-text">log - 日志跟踪</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#map-转换数据"><span class="nav-text">map - 转换数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#扁平化数据"><span class="nav-text">扁平化数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#flatMap-立即订阅，交错处理"><span class="nav-text">flatMap - 立即订阅，交错处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#concatMap-顺序订阅，顺序处理"><span class="nav-text">concatMap- 顺序订阅，顺序处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#flatMapSequential-立即订阅，顺序处理"><span class="nav-text">flatMapSequential - 立即订阅，顺序处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#filter-过滤"><span class="nav-text">filter - 过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#index-增加索引值"><span class="nav-text">index - 增加索引值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#timestamp-增加时间戳"><span class="nav-text">timestamp - 增加时间戳</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skip-跳过"><span class="nav-text">skip - 跳过</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#then"><span class="nav-text">then</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#thenMany"><span class="nav-text">thenMany</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#next-只获取一个数据"><span class="nav-text">next - 只获取一个数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#take-获取前N个数据"><span class="nav-text">take - 获取前N个数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#takeLast-获取后N个数据"><span class="nav-text">takeLast - 获取后N个数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#takeUntil-传递值，直到条件满足则停止"><span class="nav-text">takeUntil - 传递值，直到条件满足则停止</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#elementAt-根据索引获取数据"><span class="nav-text">elementAt - 根据索引获取数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#takeUntilOther-获取数据直到另一数据流数据到来，则停止该流处理"><span class="nav-text">takeUntilOther - 获取数据直到另一数据流数据到来，则停止该流处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skipUntilOther-Publisher-跳过数据直到另一数据流数据到来，才开始该流处理"><span class="nav-text">skipUntilOther(Publisher) - 跳过数据直到另一数据流数据到来，才开始该流处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#all-全部符合为rue"><span class="nav-text">all - 全部符合为rue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#any-任一符合为rue"><span class="nav-text">any - 任一符合为rue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hasElement-是否含有指定元素"><span class="nav-text">hasElement - 是否含有指定元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#repeat-重复操作"><span class="nav-text">repeat - 重复操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#去重"><span class="nav-text">去重</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#distinctUntilChanged-局部去重"><span class="nav-text">distinctUntilChanged - 局部去重</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#distinct-全局去重"><span class="nav-text">distinct - 全局去重</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#组合"><span class="nav-text">组合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#reduce-前一步结果与当前元素组合"><span class="nav-text">reduce - 前一步结果与当前元素组合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scan-前一步结果与当前元素组合"><span class="nav-text">scan  - 前一步结果与当前元素组合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#concat-组合多个流，流之间存在顺序"><span class="nav-text">concat - 组合多个流，流之间存在顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#merge-组合多个流，流之间无顺序"><span class="nav-text">merge  - 组合多个流，流之间无顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#zip-压缩合并为二元数据"><span class="nav-text">zip - 压缩合并为二元数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#combineLatest-压缩合并数据，以新值为准使用自定义函数"><span class="nav-text">combineLatest - 压缩合并数据，以新值为准使用自定义函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#批处理"><span class="nav-text">批处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#buffer-达到缓冲区大小时，传递数据"><span class="nav-text">buffer - 达到缓冲区大小时，传递数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#windowUntil-满足窗口条件时传递数据"><span class="nav-text">windowUntil - 满足窗口条件时传递数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#groupBy"><span class="nav-text">groupBy</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#thenMany-触发新流"><span class="nav-text">thenMany - 触发新流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#收集"><span class="nav-text">收集</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#List"><span class="nav-text">List</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#普通List"><span class="nav-text">普通List</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#排序List"><span class="nav-text">排序List</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Map"><span class="nav-text">Map</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#自定义key值"><span class="nav-text">自定义key值</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#自定义key、value值"><span class="nav-text">自定义key、value值</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#自定义key、value值、map工厂"><span class="nav-text">自定义key、value值、map工厂</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Multimap"><span class="nav-text">Multimap</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#多值map，自定义key、value"><span class="nav-text">多值map，自定义key、value</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多值map，自定义key、value、map工厂"><span class="nav-text">多值map，自定义key、value、map工厂</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#转换阻塞结构"><span class="nav-text">转换阻塞结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Iterable"><span class="nav-text">Iterable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stream"><span class="nav-text">Stream</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BlockFirst"><span class="nav-text">BlockFirst</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#blockLast"><span class="nav-text">blockLast</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#物化和非物化信号"><span class="nav-text">物化和非物化信号</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#正常调用"><span class="nav-text">正常调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#物化调用"><span class="nav-text">物化调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非物化调用"><span class="nav-text">非物化调用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#冷热数据"><span class="nav-text">冷热数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#冷发布"><span class="nav-text">冷发布</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#冷发布同时订阅通知"><span class="nav-text">冷发布同时订阅通知</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存"><span class="nav-text">缓存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#共享-热发布"><span class="nav-text">共享-热发布</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>

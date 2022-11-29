@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="介绍Spring提供了两个并行的技术栈。  Servlet Stack：Spring MVC是建立在Servlet API之上，使用同步阻塞IO架构，实现一个请求一个线程处理的模型。  Reactive Stack，Spring WebFlux是一个从头构建的非阻塞web框架，利用了多核，下一代处理器的优势，可以处理大量的并发连接。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="响应式编程-WebFlux">
+<meta property="og:url" content="http://yrlzero.github.io/2022/11/29/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="介绍Spring提供了两个并行的技术栈。  Servlet Stack：Spring MVC是建立在Servlet API之上，使用同步阻塞IO架构，实现一个请求一个线程处理的模型。  Reactive Stack，Spring WebFlux是一个从头构建的非阻塞web框架，利用了多核，下一代处理器的优势，可以处理大量的并发连接。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/image-20221129103957291.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/image-20221129122026202.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/d1c866faeba84b4e92449da1c6d71ac5.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/image-20221129214830015.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/image-20221129214843976.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/image-20221129214913005.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/image-20221129215903410.png">
+<meta property="article:published_time" content="2022-11-29T14:35:20.319Z">
+<meta property="article:modified_time" content="2022-11-29T14:40:44.848Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="spring">
+<meta property="article:tag" content="webflux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/image-20221129103957291.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/11/29/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>响应式编程-WebFlux | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/11/29/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          响应式编程-WebFlux
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-29 22:35:20 / 修改时间：22:40:44" itemprop="dateCreated datePublished" datetime="2022-11-29T22:35:20+08:00">2022-11-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/webflux/" itemprop="url" rel="index"><span itemprop="name">webflux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>Spring提供了两个并行的技术栈。</p>
+<ul>
+<li><p><strong>Servlet Stack</strong>：<code>Spring MVC</code>是建立在Servlet API之上，使用同步阻塞IO架构，实现一个请求一个线程处理的模型。</p>
+</li>
+<li><p><strong>Reactive Stack</strong>，<code>Spring WebFlux</code>是一个从头构建的非阻塞web框架，利用了多核，下一代处理器的优势，可以处理大量的并发连接。</p>
+<img src="/images/响应式编程-WebFlux/image-20221129103957291.png" style="zoom:80%;" />
+
+</li>
+</ul>
+<a id="more"></a>
+
+<h1 id="并发模型"><a href="#并发模型" class="headerlink" title="并发模型"></a>并发模型</h1><p>在Spring MVC（一般的servlet程序），使用一个大的线程池应对请求处理期间潜在的阻塞。</p>
+<p>在Spring WebFlux（一般的非阻塞程序），使用较小的固定线程池（事件循环组）来处理请求。</p>
+<h1 id="适配"><a href="#适配" class="headerlink" title="适配"></a>适配</h1><p>Spring 框架的整个基础设施都是围绕Servlet API 构建的，它们之间紧密耦合。</p>
+<p>响应式Web内核首先需要使用模拟接口和对请求进行处理的方法替换javax.servlet.Servlet.service 方法，更改相关的类和接口。</p>
+<p>增强和定制 Servlet API 对客户端请求和服务器响应的交互方式</p>
+<ul>
+<li><p>ServerHttpRequest</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.springframework.http.server.reactive;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 请求的封装。</span></span><br><span class="line"><span class="comment">* 获取请求报文体的类型是Flux，表示具备响应式能力。</span></span><br><span class="line"><span class="comment">* DataBuffer是针对字节缓冲区的抽象，便于对特定服务器实现数据交换。</span></span><br><span class="line"><span class="comment">* 除了请求报文体，还有消息头、请求路径、cookie、查询参数等信息，可以在该接口或子接口中提</span></span><br><span class="line"><span class="comment">供。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ServerHttpRequest</span> <span class="keyword">extends</span> <span class="title">HttpRequest</span>, <span class="title">ReactiveHttpInputMessage</span>  </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> org.springframework.http;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ReactiveHttpInputMessage</span> <span class="keyword">extends</span> <span class="title">HttpMessage</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Return the body of the message as a &#123;<span class="doctag">@link</span> Publisher&#125;.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> the body content publisher</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">    <span class="function">Flux&lt;DataBuffer&gt; <span class="title">getBody</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ServerHttpResponse</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.springframework.http.server.reactive;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 响应的封装。</span></span><br><span class="line"><span class="comment"> * writeWith方法接收的参数是Publisher，提供了响应式，并与特定响应式库解耦。</span></span><br><span class="line"><span class="comment"> * 返回值是Mono&lt;Void&gt;，表示向网络发送数据是一个异步的过程。</span></span><br><span class="line"><span class="comment"> * 即，只有当订阅Mono时才会执行发送数据的过程。</span></span><br><span class="line"><span class="comment"> * 接收服务器可以根据传输协议的流控支持背压。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ServerHttpResponse</span> <span class="keyword">extends</span> <span class="title">ReactiveHttpOutputMessage</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> org.springframework.http;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ReactiveHttpOutputMessage</span> <span class="keyword">extends</span> <span class="title">HttpMessage</span> </span>&#123;</span><br><span class="line">   	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Use the given &#123;<span class="doctag">@link</span> Publisher&#125; to write the body of the message to the</span></span><br><span class="line"><span class="comment">	 * underlying HTTP layer.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> body the body content publisher</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> a &#123;<span class="doctag">@link</span> Mono&#125; that indicates completion or error</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function">Mono&lt;Void&gt; <span class="title">writeWith</span><span class="params">(Publisher&lt;? extends DataBuffer&gt; body)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ServerWebExchange</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * HTTP请求-响应的容器。</span></span><br><span class="line"><span class="comment"> * 这是高层接口，除了HTTP交互，还可以保存框架相关信息。</span></span><br><span class="line"><span class="comment"> * 如请求的已恢复的WebSession信息等。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">ServerWebExchange</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="function">ServerHttpRequest <span class="title">getRequest</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">ServerHttpResponse <span class="title">getResponse</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="function">Mono&lt;WebSession&gt; <span class="title">getSession</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>重用 WebMVC 的基础设施，用 Flux 、 Mono 和 Publisher 等响应式类型替换同步通信。</p>
+<p>保留与 Spring Web MVC 相同的 HandlerMapping 和 HandlerAdapter 链，使用基于 Reactor 的响应式交互替换实时命令：</p>
+<ul>
+<li><p>HandlerMapping</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">HandlerMapping</span> </span>&#123;</span><br><span class="line">   <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * HandlerExecutionChain getHandler(HttpServletRequest request)</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">Mono&lt;Object&gt; <span class="title">getHandler</span><span class="params">(ServerWebExchange exchange)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>响应式 HandlerMapping 中，两个方法整体上类似，不同之处在于响应式返回Mono 类型支持响应式。</p>
+</li>
+<li><p>HandlerAdapter</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">HandlerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">supports</span><span class="params">(Object handler)</span></span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler);</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">Mono&lt;HandlerResult&gt; <span class="title">handle</span><span class="params">(ServerWebExchange exchange, Object handler)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>响应式HandlerAdapter 接口中，由于 ServerWebExchange 类同时组合了请求和响应，因此handle 方法的响应式版本更简洁，该方法返回 HandlerResult 的 Mono 而不是 ModelAndView 。</p>
+</li>
+</ul>
+<h1 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h1><img src="/images/响应式编程-WebFlux/image-20221129122026202.png" style="zoom:80%;" />
+
+<p>Spring Boot的WebFlux-Starter模块默认使用Netty作为服务器，可以达到异步、非阻塞的效果。</p>
+<p>Tomcat、Jetty可以与Spring MVC和WebFlux一起使用，但MVC依赖于Servlet阻塞IO；WebFlux依赖于Servlet的非阻塞IO，并结合适配器使用Servlet Api。</p>
+<p>对于Undertow，WebFlux可以直接使用Undertow API，无需Servlet API。</p>
+<h1 id="SpringBoot响应式服务器启动"><a href="#SpringBoot响应式服务器启动" class="headerlink" title="SpringBoot响应式服务器启动"></a>SpringBoot响应式服务器启动</h1><h2 id="寻找web服务器类型"><a href="#寻找web服务器类型" class="headerlink" title="寻找web服务器类型"></a>寻找web服务器类型</h2><blockquote>
+<p>SpringApplication.run(WebFluxApplication.class)</p>
+<p>​    = &gt; 进入run方法 </p>
+<p>​        = &gt;  return new SpringApplication(primarySources).run(args); </p>
+<p>​                =&gt; 进入SpringApplication构造</p>
+<p>​                    =&gt; this.webApplicationType = WebApplicationType.deduceFromClasspath()</p>
+<p>​                        =&gt; 进入<code>deduceFromClasspath</code>方法，寻找web服务器类型</p>
+<p>​                            =&gt; 引入webFlux，存在DispatcherHandler，获取到响应式类型</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> WebApplicationType <span class="title">deduceFromClasspath</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//存在org.springframework.web.reactive.DispatcherHandler &amp;&amp; 不存在org.springframework.web.servlet.DispatcherServlet</span></span><br><span class="line">    <span class="comment">//&amp;&amp; 不存在org.glassfish.jersey.servlet.ServletContainer</span></span><br><span class="line">    <span class="keyword">if</span> (ClassUtils.isPresent(WEBFLUX_INDICATOR_CLASS, <span class="keyword">null</span>) &amp;&amp; !ClassUtils.isPresent(WEBMVC_INDICATOR_CLASS, <span class="keyword">null</span>)</span><br><span class="line">        &amp;&amp; !ClassUtils.isPresent(JERSEY_INDICATOR_CLASS, <span class="keyword">null</span>)) &#123;</span><br><span class="line">        <span class="comment">//返回响应式类型</span></span><br><span class="line">        <span class="keyword">return</span> WebApplicationType.REACTIVE;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//"javax.servlet.Servlet","org.springframework.web.context.ConfigurableWebApplicationContext"</span></span><br><span class="line">    <span class="keyword">for</span> (String className : SERVLET_INDICATOR_CLASSES) &#123;</span><br><span class="line">        <span class="comment">//Servlet和ConfigurableWebApplicationContext都不存在，返回未知类型</span></span><br><span class="line">        <span class="keyword">if</span> (!ClassUtils.isPresent(className, <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> WebApplicationType.NONE;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//返回servlet类型</span></span><br><span class="line">    <span class="keyword">return</span> WebApplicationType.SERVLET;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建响应式服务上下文"><a href="#创建响应式服务上下文" class="headerlink" title="创建响应式服务上下文"></a>创建响应式服务上下文</h2><blockquote>
+<p>SpringApplication.run(WebFluxApplication.class)</p>
+<p>​    = &gt; 进入run方法 </p>
+<p>​        = &gt;  return new SpringApplication(primarySources).run(args); </p>
+<p>​            =&gt; 进入run方法</p>
+<p>​                =&gt; context = reateApplicationContext()</p>
+<p>​                    =&gt; this.applicationContextFactory.create(this.webApplicationType)，根据web服务类型创建服务</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@link</span> ApplicationContextFactory&#125; registered in &#123;<span class="doctag">@code</span> spring.factories&#125; to support</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@link</span> AnnotationConfigReactiveWebServerApplicationContext&#125;.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Factory</span> <span class="keyword">implements</span> <span class="title">ApplicationContextFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> ConfigurableApplicationContext <span class="title">create</span><span class="params">(WebApplicationType webApplicationType)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> (webApplicationType != WebApplicationType.REACTIVE) ? <span class="keyword">null</span></span><br><span class="line">            : <span class="keyword">new</span> AnnotationConfigReactiveWebServerApplicationContext();<span class="comment">//创建注解配置的响应式web服务上下文</span></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建web服务器"><a href="#创建web服务器" class="headerlink" title="创建web服务器"></a>创建web服务器</h2><blockquote>
+<p>refresh()</p>
+<p>=&gt; onRefresh()，调用ReactiveWebServerApplicationContext实现</p>
+<p>​    =&gt; createWebServer()</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReactiveWebServerApplicationContext</span> <span class="keyword">extends</span> <span class="title">GenericReactiveWebApplicationContext</span></span></span><br><span class="line"><span class="class">		<span class="keyword">implements</span> <span class="title">ConfigurableWebServerApplicationContext</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">createWebServer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       WebServerManager serverManager = <span class="keyword">this</span>.serverManager;</span><br><span class="line">       <span class="keyword">if</span> (serverManager == <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="comment">//获取工厂bean的名称</span></span><br><span class="line">          String webServerFactoryBeanName = getWebServerFactoryBeanName();</span><br><span class="line">          <span class="comment">//从IOC容器获取工厂对象，默认NettyReactiveWebServerFactory</span></span><br><span class="line">          ReactiveWebServerFactory webServerFactory = getWebServerFactory(webServerFactoryBeanName);</span><br><span class="line">          <span class="comment">//获取容器是否懒加载初始化标识</span></span><br><span class="line">          <span class="keyword">boolean</span> lazyInit = getBeanFactory().getBeanDefinition(webServerFactoryBeanName).isLazyInit();</span><br><span class="line">          <span class="comment">//创建服务器管理器，用于管理 web服务器和HttpHandler</span></span><br><span class="line">          <span class="keyword">this</span>.serverManager = <span class="keyword">new</span> WebServerManager(<span class="keyword">this</span>, webServerFactory, <span class="comment">/*从IOC获取所有HttpHandler*/</span><span class="keyword">this</span>::getHttpHandler, lazyInit);</span><br><span class="line">          getBeanFactory().registerSingleton(<span class="string">"webServerGracefulShutdown"</span>,</span><br><span class="line">                <span class="keyword">new</span> WebServerGracefulShutdownLifecycle(<span class="keyword">this</span>.serverManager));</span><br><span class="line">          <span class="comment">//spring容器创建完毕，在refresh的finishRefresh()中会调用WebServerStartStopLifecycle的start()，执行this.weServerManager.start()，启动服务器</span></span><br><span class="line">          getBeanFactory().registerSingleton(<span class="string">"webServerStartStop"</span>,</span><br><span class="line">                <span class="keyword">new</span> WebServerStartStopLifecycle(<span class="keyword">this</span>.serverManager));</span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WebServerManager</span> </span>&#123;</span><br><span class="line">    WebServerManager(ReactiveWebServerApplicationContext applicationContext, ReactiveWebServerFactory factory,</span><br><span class="line">			Supplier&lt;HttpHandler&gt; handlerSupplier, <span class="keyword">boolean</span> lazyInit) &#123;</span><br><span class="line">		<span class="keyword">this</span>.applicationContext = applicationContext;</span><br><span class="line">		Assert.notNull(factory, <span class="string">"Factory must not be null"</span>);</span><br><span class="line">		<span class="keyword">this</span>.handler = <span class="keyword">new</span> DelayedInitializationHttpHandler(handlerSupplier, lazyInit);</span><br><span class="line">        <span class="comment">//根据工厂创建web服务器，NettyReactiveWebServerFactory.getWebServer</span></span><br><span class="line">		<span class="keyword">this</span>.webServer = factory.getWebServer(<span class="keyword">this</span>.handler);</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.handler.initializeHandler();</span><br><span class="line">		<span class="keyword">this</span>.webServer.start();</span><br><span class="line">		<span class="keyword">this</span>.applicationContext</span><br><span class="line">				.publishEvent(<span class="keyword">new</span> ReactiveWebServerInitializedEvent(<span class="keyword">this</span>.webServer, <span class="keyword">this</span>.applicationContext));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="启动服务器"><a href="#启动服务器" class="headerlink" title="启动服务器"></a>启动服务器</h2><blockquote>
+<p>refresh()</p>
+<p>​    =&gt; finishRefresh()</p>
+<p>​        =&gt; getLifecycleProcessor().onRefresh();</p>
+<p>​            =&gt; startBeans(true)，WebServerStartStopLifecycle在此处调用</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WebServerStartStopLifecycle</span> <span class="keyword">implements</span> <span class="title">SmartLifecycle</span> </span>&#123;</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//启动web服务器</span></span><br><span class="line">		<span class="keyword">this</span>.weServerManager.start();</span><br><span class="line">		<span class="keyword">this</span>.running = <span class="keyword">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h1><img src="/images/响应式编程-WebFlux/d1c866faeba84b4e92449da1c6d71ac5.png" style="zoom:80%;" />
+
+<ul>
+<li>传入请求，由底层服务器引擎处理。服务器引擎列表不限于基于ServletAPI 的服务器。每个服务器引擎都有自己的响应式适配器，将 HTTP 请求和 HTTP 响应的内部表示映射到ServerHttpRequest 和 ServerHttpResponse 。</li>
+<li>HttpHandler 阶段，该阶段将给定的 ServerHttpRequest 、 ServerHttpResponse 、用户Session 和相关信息组合到 ServerWebExchage 实例中。</li>
+<li>WebFilterChain 阶段，它将定义的 WebFilter 组合到链中。然后， WebFilterChain 会负责执行此链中每个 WebFilter 实例的 WebFilter#filter 方法，以过滤传入的ServerWebExchange 。</li>
+<li>如果满足所有过滤条件， WebFilterChain 将调用 WebHandler 实例。</li>
+<li>查找 HandlerMapping 实例并调用第一个合适的实例。可以是RouterFunctionMapping、也可以是RequestMappingHandlerMapping 。</li>
+<li>handerAdapter阶段，与以前功能相同，使用响应式流来构建响应式流。</li>
+</ul>
+<h1 id="DispatcherHandler"><a href="#DispatcherHandler" class="headerlink" title="DispatcherHandler"></a>DispatcherHandler</h1><p>与Spring MVC类似，Spring WebFlux也是围绕前端控制器模式设计。DispatcherHandler为请求提供共享性算法实际工作委托给组件处理。</p>
+<p>DispatcherHandler是WebHandler的子类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DispatcherHandler</span> <span class="keyword">implements</span> <span class="title">WebHandler</span>, <span class="title">PreFlightRequestHandler</span>, <span class="title">ApplicationContextAware</span> </span>&#123;</span><br><span class="line">    <span class="comment">//处理器映射器</span></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">	<span class="keyword">private</span> List&lt;HandlerMapping&gt; handlerMappings;</span><br><span class="line">	<span class="comment">//处理器适配器</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="keyword">private</span> List&lt;HandlerAdapter&gt; handlerAdapters;</span><br><span class="line">	<span class="comment">//结果处理器</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="keyword">private</span> List&lt;HandlerResultHandler&gt; resultHandlers;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Mono&lt;Void&gt; <span class="title">handle</span><span class="params">(ServerWebExchange exchange)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">this</span>.handlerMappings == <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> createNotFoundError();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (CorsUtils.isPreFlightRequest(exchange.getRequest())) &#123;</span><br><span class="line">			<span class="keyword">return</span> handlePreFlight(exchange);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> Flux.fromIterable(<span class="keyword">this</span>.handlerMappings)</span><br><span class="line">				.concatMap(mapping -&gt; mapping.getHandler(exchange))<span class="comment">//根据处理器映射器寻找handler</span></span><br><span class="line">				.next()<span class="comment">//获取找到的第一个hander</span></span><br><span class="line">				.switchIfEmpty(createNotFoundError())<span class="comment">//为空则返回"No matching handler"错误</span></span><br><span class="line">				.flatMap(handler -&gt; invokeHandler(exchange, handler))<span class="comment">//寻找支持该handler的handlerAdapter调用</span></span><br><span class="line">				.flatMap(result -&gt; handleResult(exchange, result));<span class="comment">//处理结果</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="集成Springboot"><a href="#集成Springboot" class="headerlink" title="集成Springboot"></a>集成Springboot</h1><h2 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;parent&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-boot-starter-parent&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;version&gt;2.7.3&lt;&#x2F;version&gt;</span><br><span class="line">    &lt;relativePath&#x2F;&gt;</span><br><span class="line">&lt;&#x2F;parent&gt;</span><br><span class="line">&lt;dependencies&gt;</span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">        &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;spring-boot-starter-webflux&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">        &lt;groupId&gt;org.projectlombok&lt;&#x2F;groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;lombok&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br><span class="line">&lt;&#x2F;dependencies&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="实体"><a href="#实体" class="headerlink" title="实体"></a>实体</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="meta">@NoArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Order</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PasswordDTO</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 原密码</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String raw;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 加密密码</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String secured;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PasswordDTO</span><span class="params">(@JsonProperty(<span class="string">"raw"</span>)</span> String raw, @<span class="title">JsonProperty</span><span class="params">(<span class="string">"secured"</span>)</span> String secured) </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.raw = raw;</span><br><span class="line">        <span class="keyword">this</span>.secured = secured;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Handler"><a href="#Handler" class="headerlink" title="Handler"></a>Handler</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yrl.handler;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.yrl.bean.Order;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.reactive.function.server.ServerRequest;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.reactive.function.server.ServerResponse;</span><br><span class="line"><span class="keyword">import</span> reactor.core.publisher.Mono;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.net.URI;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Collectors;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderHandler</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, Order&gt; orderMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建订单</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> serverRequest</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Mono&lt;ServerResponse&gt; <span class="title">create</span><span class="params">(ServerRequest serverRequest)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> serverRequest.bodyToMono(Order<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">                .<span class="title">doOnNext</span>(<span class="title">order</span> -&gt; </span>&#123;</span><br><span class="line">                    orderMap.put(order.getId(), order);</span><br><span class="line">                &#125;)</span><br><span class="line">                .flatMap(order -&gt; ServerResponse.created(URI.create(<span class="string">"/order/"</span> + order.getId())).build());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取订单信息</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> request</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Mono&lt;ServerResponse&gt; <span class="title">get</span><span class="params">(ServerRequest request)</span> </span>&#123;</span><br><span class="line">        String id = request.pathVariable(<span class="string">"id"</span>);</span><br><span class="line">        Order order1 = orderMap.get(id);</span><br><span class="line">        <span class="keyword">return</span> Mono.just(order1)</span><br><span class="line">                .flatMap(order -&gt; ServerResponse.ok().syncBody(order)).switchIfEmpty(ServerResponse.notFound().build());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取订单列表</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> request</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Mono&lt;ServerResponse&gt; <span class="title">list</span><span class="params">(ServerRequest request)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Mono.just(orderMap.values().stream().collect(Collectors.toList()))</span><br><span class="line">                .flatMap(order -&gt; ServerResponse.ok().syncBody(order))</span><br><span class="line">                .switchIfEmpty(ServerResponse.notFound().build());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="路由配置"><a href="#路由配置" class="headerlink" title="路由配置"></a>路由配置</h2><ul>
+<li><code>RouterFunctions.nest(RequestPredicate predicate, RouterFunction&lt;T&gt; routerFunction)</code>：包含两个参数，参数一：测试条件是否通过、参数二：参数一通过，执行路由函数</li>
+<li><code>RouterFunctions.route(RequestPredicate predicate, HandlerFunction&lt;T&gt; handlerFunction)</code>：参数一：测试条件是否通过、参数二：参数一通过，执行处理器函数</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> RouterFunction&lt;ServerResponse&gt; <span class="title">routes</span><span class="params">(OrderHandler orderHandler)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> RouterFunctions.nest(</span><br><span class="line">            <span class="comment">// 判断请求路径是否匹配指定的前缀</span></span><br><span class="line">            path(<span class="string">"/orders"</span>),</span><br><span class="line">            <span class="comment">//如果匹配成功，则路由到这个函数</span></span><br><span class="line">            RouterFunctions.nest(</span><br><span class="line">                            <span class="comment">//判断请求报文头字段accept是否匹配APPLICATION_JSON</span></span><br><span class="line">                            RequestPredicates.accept(MediaType.APPLICATION_JSON),</span><br><span class="line">                            <span class="comment">//如果匹配则路由到下面的路由函数 ，将/orders/&#123;id&#125; 路由到handler的get</span></span><br><span class="line">                            RouterFunctions.route(</span><br><span class="line">                                    RequestPredicates.GET(<span class="string">"/&#123;id&#125;"</span>),</span><br><span class="line">                                    orderHandler::get</span><br><span class="line">                            )</span><br><span class="line">                    )</span><br><span class="line">                    <span class="comment">// 如果get请求 /orders ，则路由到orderhandler.list</span></span><br><span class="line">                    .andRoute(</span><br><span class="line">                            RequestPredicates.method(HttpMethod.GET),</span><br><span class="line">                            orderHandler::list)</span><br><span class="line">                    <span class="comment">// 如果contentType匹配，并路径匹配orders,则路由到这个函数</span></span><br><span class="line">                    .andNest(</span><br><span class="line">                            RequestPredicates.contentType(MediaType.APPLICATION_JSON),</span><br><span class="line">                            <span class="comment">//如果是POST请求/orders，则路由到handler的create方法</span></span><br><span class="line">                            RouterFunctions.route(</span><br><span class="line">                                    RequestPredicates.POST(<span class="string">"/"</span>),</span><br><span class="line">                                    orderHandler::create</span><br><span class="line">                            )</span><br><span class="line">                    )</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="请求"><a href="#请求" class="headerlink" title="请求"></a>请求</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><img src="/images/响应式编程-WebFlux/image-20221129214830015.png" style="zoom:50%;" />
+
+<h3 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h3><img src="/images/响应式编程-WebFlux/image-20221129214843976.png" style="zoom:50%;" />
+
+<h3 id="指定id查询"><a href="#指定id查询" class="headerlink" title="指定id查询"></a>指定id查询</h3><img src="/images/响应式编程-WebFlux/image-20221129214913005.png" style="zoom:50%;" />
+
+<h1 id="单机启动"><a href="#单机启动" class="headerlink" title="单机启动"></a>单机启动</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yrl;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.yrl.bean.PasswordDTO;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.HttpStatus;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.server.reactive.HttpHandler;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.reactive.function.server.RequestPredicates;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.reactive.function.server.RouterFunction;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.reactive.function.server.RouterFunctions;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.reactive.function.server.ServerResponse;</span><br><span class="line"><span class="keyword">import</span> reactor.netty.DisposableServer;</span><br><span class="line"><span class="keyword">import</span> reactor.netty.http.server.HttpServer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StandaloneApplication</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> Logger LOGGER = LoggerFactory.getLogger(StandaloneApplication<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">        <span class="comment">// 调用Routes方法，然后将RouteFunction转化为HttpHandler</span></span><br><span class="line">        HttpHandler handler = RouterFunctions.toHttpHandler(routes(</span><br><span class="line">                <span class="comment">// BCryt算法进行18次散列， 这里需要耗时几秒</span></span><br><span class="line">                <span class="keyword">new</span> BCryptPasswordEncoder(<span class="number">18</span>)</span><br><span class="line">        ));</span><br><span class="line">        <span class="comment">// 内置HttpHandler适配器</span></span><br><span class="line">        ReactorHttpHandlerAdapter reactorAdapter = <span class="keyword">new</span> ReactorHttpHandlerAdapter(handler);</span><br><span class="line">        <span class="comment">// 创建HTTPServer实例，它是ReatorNettyAPI一部分</span></span><br><span class="line">        DisposableServer server = HttpServer.create()</span><br><span class="line">                .host(<span class="string">"localhost"</span>)</span><br><span class="line">                .port(<span class="number">8080</span>) <span class="comment">// 配置端口</span></span><br><span class="line">                .handle(reactorAdapter)  <span class="comment">// 指定handler</span></span><br><span class="line">                .bindNow();<span class="comment">// 调用bindNow 启动服务</span></span><br><span class="line">        LOGGER.info(<span class="string">"started in"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);</span><br><span class="line">        <span class="comment">// 为了使应用程序保持活动状态，阻塞Thread,并监听服务器处理事件</span></span><br><span class="line">        server.onDispose().block();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RouterFunction&lt;?&gt; routes(BCryptPasswordEncoder passwordEncoder) &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">                <span class="comment">//匹配请求POST 并且路径是password</span></span><br><span class="line">                RouterFunctions.route(RequestPredicates.POST(<span class="string">"password"</span>),</span><br><span class="line">                        reqeust -&gt; reqeust</span><br><span class="line">                                .bodyToMono(PasswordDTO<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line">                                .doOnNext(System.out::println)</span><br><span class="line">                                <span class="comment">// BCryptPasswordEncoder检查已加密的原始密码，加密密码</span></span><br><span class="line">                                .map(p -&gt; passwordEncoder.matches(p.getRaw(), p.getSecured()))</span><br><span class="line">                                <span class="comment">// 如果密码匹配成功过 则OK</span></span><br><span class="line">                                <span class="comment">// 否则EXPECTATION_FAILED</span></span><br><span class="line">                                .flatMap(isMatched -&gt; isMatched ? ServerResponse.ok().build() :</span><br><span class="line">                                        ServerResponse.status(HttpStatus.EXPECTATION_FAILED).build()));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-WebFlux/image-20221129215903410.png" alt=""></p>
+<h1 id="WebClient非阻塞请求"><a href="#WebClient非阻塞请求" class="headerlink" title="WebClient非阻塞请求"></a>WebClient非阻塞请求</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">WebClient</span><br><span class="line">    	<span class="comment">//创建客户端，指定</span></span><br><span class="line">        .create(<span class="string">"http://localhost:8080"</span>)</span><br><span class="line">    	<span class="comment">//指定请求方法为get</span></span><br><span class="line">        .get() 		</span><br><span class="line">    	<span class="comment">//指定uri，传送变量</span></span><br><span class="line">        .uri(<span class="string">"/orders/&#123;id&#125;"</span>, <span class="number">123</span>)</span><br><span class="line">	    <span class="comment">//指定结果处理方式</span></span><br><span class="line">        .retrieve()			</span><br><span class="line">    	<span class="comment">//将响应结果反序列化</span></span><br><span class="line">        .bodyToMono(Order<span class="class">.<span class="keyword">class</span>)	</span></span><br><span class="line"><span class="class">    	//处理结果</span></span><br><span class="line">        .map(Order::getId)	</span><br><span class="line">    	<span class="comment">//订阅输出，只有通过 subscribe 方法， WebClient 才会建立连接并开始发送数据到远程服务器</span></span><br><span class="line">        .subscribe(item -&gt; System.out.println(<span class="string">"subscribe："</span> + item));</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+              <a href="/tags/webflux/" rel="tag"># webflux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/29/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B-ProjectReactor/" rel="prev" title="响应式编程-ProjectReactor">
+      <i class="fa fa-chevron-left"></i> 响应式编程-ProjectReactor
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#介绍"><span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#并发模型"><span class="nav-text">并发模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#适配"><span class="nav-text">适配</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#服务器"><span class="nav-text">服务器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SpringBoot响应式服务器启动"><span class="nav-text">SpringBoot响应式服务器启动</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#寻找web服务器类型"><span class="nav-text">寻找web服务器类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建响应式服务上下文"><span class="nav-text">创建响应式服务上下文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建web服务器"><span class="nav-text">创建web服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动服务器"><span class="nav-text">启动服务器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流程图"><span class="nav-text">流程图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DispatcherHandler"><span class="nav-text">DispatcherHandler</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#集成Springboot"><span class="nav-text">集成Springboot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#依赖"><span class="nav-text">依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实体"><span class="nav-text">实体</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Handler"><span class="nav-text">Handler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由配置"><span class="nav-text">路由配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#请求"><span class="nav-text">请求</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建"><span class="nav-text">创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#列表"><span class="nav-text">列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指定id查询"><span class="nav-text">指定id查询</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#单机启动"><span class="nav-text">单机启动</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WebClient非阻塞请求"><span class="nav-text">WebClient非阻塞请求</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
