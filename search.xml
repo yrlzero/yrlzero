@@ -7135,6 +7135,7 @@
 ]]></content>
       <categories>
         <category>分布式</category>
+        <category>分布式事务</category>
         <category>LCN</category>
       </categories>
       <tags>
@@ -7237,6 +7238,7 @@
 ]]></content>
       <categories>
         <category>分布式</category>
+        <category>分布式事务</category>
         <category>Seata</category>
       </categories>
       <tags>
@@ -7359,7 +7361,7 @@
 ]]></content>
       <categories>
         <category>分布式</category>
-        <category>多种理论模式</category>
+        <category>分布式事务</category>
       </categories>
       <tags>
         <tag>事务</tag>
