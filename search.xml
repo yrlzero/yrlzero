@@ -11997,4 +11997,82 @@
         <tag>webflux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>分布式ID</title>
+    <url>/2022/11/30/%E5%88%86%E5%B8%83%E5%BC%8FID/</url>
+    <content><![CDATA[<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8FID/image-20221130171447838.png" alt=""></p>
+<a id="more"></a>
+
+<h1 id="UUID"><a href="#UUID" class="headerlink" title="UUID"></a>UUID</h1><p>随机无序</p>
+<p>不适合Innodb引擎的使用，新增数据造成随机写、B+树页分页等情况</p>
+<h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><p>原子性自增返回数值</p>
+<ul>
+<li><p>优点：简单、性能高</p>
+</li>
+<li><p>缺点：暴露业务增长量</p>
+</li>
+</ul>
+<h1 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h1><h2 id="主键自增"><a href="#主键自增" class="headerlink" title="主键自增"></a>主键自增</h2><p>基于数据库表主键自增获取id</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t_sequence_id (</span><br><span class="line">	<span class="keyword">id</span> <span class="built_in">BIGINT</span>(<span class="number">20</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT, </span><br><span class="line">	stub <span class="built_in">CHAR</span>(<span class="number">10</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">''</span> <span class="keyword">COMMENT</span> <span class="string">'并未具体意义，方便插入数据产生自增id'</span>,</span><br><span class="line">	PRIMARY <span class="keyword">KEY</span> (<span class="keyword">id</span>),</span><br><span class="line">	<span class="keyword">UNIQUE</span> <span class="keyword">KEY</span> stub (stub)</span><br><span class="line">);</span><br><span class="line"><span class="comment">-- replace会先看是否存在stub冲突的数据，如果存在则先delete再insert，如果不存在则直接insert</span></span><br><span class="line"><span class="keyword">REPLACE</span> <span class="keyword">INTO</span> t_sequence_id (stub) <span class="keyword">VALUES</span> (<span class="string">'anyword'</span>);</span><br></pre></td></tr></table></figure>
+
+<p>缺点：并发性能差，暴露业务增长量</p>
+<h2 id="多库跨步长取号"><a href="#多库跨步长取号" class="headerlink" title="多库跨步长取号"></a>多库跨步长取号</h2><ul>
+<li><p>第一台数据库</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">set</span> @@auto_increment_offset = <span class="number">1</span>;     <span class="comment">-- 起始值</span></span><br><span class="line"><span class="keyword">set</span> @@auto_increment_increment = <span class="number">2</span>;  <span class="comment">-- 步长</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第二台数据库</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">set</span> @@auto_increment_offset = <span class="number">2</span>;     <span class="comment">-- 起始值</span></span><br><span class="line"><span class="keyword">set</span> @@auto_increment_increment = <span class="number">2</span>;  <span class="comment">-- 步长</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>相比于单机数据库，并发性能通过增加数据库实例解决。</p>
+<p>缺点：但无法动态增加，新增取号数据库需要手动修改步长，修改期间不停服可能造成重复ID出现。</p>
+<h2 id="号段"><a href="#号段" class="headerlink" title="号段"></a>号段</h2><p>每次从数据库获取ID时，就获取一个号段，比如(1,1000]，这个范围表示了1000个ID，业务系统缓存号段数据。</p>
+<p>当前号段数据使用达到一定阈值时，回库再取。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> id_generator (</span><br><span class="line">  <span class="keyword">id</span> <span class="built_in">int</span>(<span class="number">10</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  current_max_id <span class="built_in">bigint</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">COMMENT</span> <span class="string">'当前最大id,被申请的号段的最后一个值'</span>,</span><br><span class="line">  increment_step <span class="built_in">int</span>(<span class="number">10</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">COMMENT</span> <span class="string">'号段的长度'</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>)</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8;</span><br></pre></td></tr></table></figure>
+
+<p>业务系统获取时通过分布式锁或者版本号机制保证并发安全，修改数据库数据，获取号段数据缓存在jvm内存，提供给用户访问</p>
+<h1 id="雪花算法"><a href="#雪花算法" class="headerlink" title="雪花算法"></a>雪花算法</h1><h2 id="原始雪花算法"><a href="#原始雪花算法" class="headerlink" title="原始雪花算法"></a>原始雪花算法</h2><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8FID/image-20221130161239356.png" alt=""></p>
+<ul>
+<li>1bit - 无符号位：在java中由于long的最高位是符号位，正数是0，负数是1，一般生成的ID为正数，所以固定为0。</li>
+<li>41bit - 时间戳：毫秒级的时间，一般实现上不会存储当前的时间戳，而是时间戳的差值（当前时间-固定的开始时间），这样可以使产生的ID从更小值开始；41位的时间戳可以使用69年，(1L &lt;&lt; 41) / (1000L * 60 * 60 * 24 * 365) = 69年。</li>
+<li>10bit - 机器id：取决于用户如何使用，可以使用前5位作为数据中心机房标识，后5位作为单机房机器标识，可以部署1024个节点。</li>
+<li>12bit - 序列号：支持同一毫秒内同一个节点可以生成4096个ID。</li>
+</ul>
+<p>无符号位+时间戳+机器号+序列号，会出现时间回拨问题</p>
+<h2 id="百度-uid-generator"><a href="#百度-uid-generator" class="headerlink" title="百度 - uid-generator"></a><a href="https://github.com/baidu/uid-generator/blob/master/README.zh_cn.md" target="_blank" rel="noopener">百度 - uid-generator</a></h2><p>使用雪花算法模式，又跟原始的雪花算法不同</p>
+<p>可以自己去定义workId的生成策略，默认提供的策略是：应用启动时由数据库分配。</p>
+<p>应用在启动时会往数据库表(uid-generator需要新增一个WORKER_NODE表)中去插入一条数据，数据插入成功后返回的该数据对应的自增唯一id就是该机器的workId，而数据由host，port组成。</p>
+<ul>
+<li>sign(1bit)<br>固定1bit符号标识，即生成的UID为正数。</li>
+<li>delta seconds (28 bits)<br>当前时间，相对于时间基点”2016-05-20”的增量值，单位：秒，最多可支持约8.7年</li>
+<li>worker id (22 bits)<br>机器id，最多可支持约420w次机器启动。内置实现为在启动时由数据库分配，默认分配策略为用后即弃，后续可提供复用策略。</li>
+<li>sequence (13 bits)<br>每秒下的并发序列，13 bits可支持每秒8192个并发。</li>
+</ul>
+<h2 id="美团-leaf"><a href="#美团-leaf" class="headerlink" title="美团 - leaf"></a>美团 - leaf</h2><p>支持号段、雪花算法模式</p>
+<p>解决雪花算法时间回拨问题</p>
+<blockquote>
+<p>服务启动向zk注册两节点</p>
+<ul>
+<li>持久节点，存储当前服务器时间，定时更新</li>
+<li>临时节点，存入当前服务器ip+port</li>
+</ul>
+<p>检查当前时间是否小于之间持久节点存储的时间，小于则启动失败</p>
+<p>获取临时节点地址，请求他们的服务器时间取平均值与当前时间相见，偏差值超过阈值则启动失败</p>
+</blockquote>
+<h1 id="Mongodb-ObjectId"><a href="#Mongodb-ObjectId" class="headerlink" title="Mongodb - ObjectId"></a><a href="https://www.mongodb.com/docs/manual/reference/method/ObjectId/" target="_blank" rel="noopener">Mongodb - ObjectId</a></h1><p>12 字节的<a href="https://www.mongodb.com/docs/manual/reference/bson-types/#std-label-objectid" target="_blank" rel="noopener">ObjectId</a></p>
+<ul>
+<li>一个 4 字节的时间戳，表示 ObjectId 的创建，以自 Unix 纪元以来的秒数为单位。</li>
+<li>每个进程生成一次的 5 字节随机值。这个随机值对于机器和过程是唯一的。</li>
+<li>一个 3 字节递增计数器，初始化为一个随机值。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>分布式</category>
+        <category>分布式ID</category>
+      </categories>
+      <tags>
+        <tag>ID</tag>
+      </tags>
+  </entry>
 </search>
