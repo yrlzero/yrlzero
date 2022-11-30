@@ -6893,7 +6893,7 @@
       </tags>
   </entry>
   <entry>
-    <title>共识性算法</title>
+    <title>共识性算法（一致性算法）</title>
     <url>/2022/02/08/%E5%85%B1%E8%AF%86%E6%80%A7%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<h1 id="一、paxos"><a href="#一、paxos" class="headerlink" title="一、paxos"></a>一、paxos</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>一种基于消息传递且具有高度容错性的共识性算法。</p>
 <p>解决分布式共识性问题，即一个分布式系统中各个进程如何进某个值（决议）通过共识达成一致。</p>
@@ -7064,7 +7064,7 @@
 ]]></content>
       <categories>
         <category>分布式</category>
-        <category>共识性算法</category>
+        <category>共识性算法（一致性算法）</category>
       </categories>
       <tags>
         <tag>paxos</tag>
