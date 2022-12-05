@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、计算机网络体系结构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络编程-网络体系">
+<meta property="og:url" content="http://yrlzero.github.io/2022/12/05/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="一、计算机网络体系结构">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/e2756b4c1b244b9d862e1eba6e4e80ef.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/b844f5a8acdb4f3ba77a8cb67eafff30.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/image-20221204165751105.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/image-20221204165759319.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/1b32f919f9a245369e56542ac6c89cae.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/91fdba580fea42278cc5b83989260b4c.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/23504ea18c834ebc8f510bbccc61243d.gif">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/8b5fe4d2c549488ebf4bf85df83edf95.gif">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/2d9c035a96f047dc8365d514662581be.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/6be3b1149ffa4640948b7803fa44e859.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/3d3beb5089e24c3da336b85b25ede0fd.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/80f2954c7be444f2b82c9dc5dc4f91a1.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/28087c89f5064d9eb5260ba32ccb9e47.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/c117eb47d7c14ca092fa9700d055c0cb.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/34569f396b4946b1be876697e73c7dc9.png">
+<meta property="og:image" content="d:/Downloads/22d90f1eb3d442a2a98d019e0f1bedc0.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/453f687f13da443c841af18a50812b65.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/4b711c41092649eb8e426d59fb178618.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/1d2c97131cc3466eab199bb965ce7aa8.gif">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/ab8ac756b833450aac48e0ca272410b5.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/c41ad929dadc4d92a26cf68a7a9d2139.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/3e0b09b0f2734ede8248842253c75be8.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/8c5afaae80d24a2b9130a2440cc80e8d.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/4c9bb345081742f0b323ede915fd81db.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/acca62e431994803bf8a385783927a40.gif">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/c021328943174d60bb7a810fb2507654.gif">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/454f6a4545d14d129dc0c1aeb6d538f1.gif">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/80e9ab14efee4497bd47a5f67d0de5e9.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/83e4adf17560421a8ece390f97488cae.gif">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/4d214d084357421fb3715f41cee0e73a.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/8f898a1bafd0463ea91e45d10fafa3d6.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/bad45fd1097c46439538d4e775dc9330.gif">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/e8aed8f8e204465286478ce215d5578f.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/cc5e2eccc2d1450daf1168a36c462a68.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/6464fc4fe345420e8947b63e1c5127ff.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205105757139.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205111209007.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205151926948.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205152116062.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205155326946.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205155426057.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205155520706.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205160510775.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/image-20221205160812624.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/5d719a58afbb4b33870fdf7b48645552.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/74c187924a954a20b17c0e2be9be8ae7.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/1fa492a5203a4e3e81e95fdb663dd989.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/81f103348f44489ca28910a60dda06ba.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/ac640d017ed242c995ec60898751cfbf.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/0e59eaf8ddc34256889d3ebaf941473c.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/6a8fa94e8e6249e09d21fcff4035332e.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/1af7ec03c9754fc6b106836f0289e92f.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/793e45ed3eb84af59a97785c1d246c50.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/612745a6ede640d6afd93607b4bafc50.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/79377238a89043919e018374f3d2ffd3.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/67c3d16955764a238dabe8c3825f1148.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/9c0c0912b4dc4ad39587fd9c9a72d685.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/25de6ea226184a57a6a730cf818b2d71.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/984f2cb9f75549c2a6e4e1f249170816.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/4435eed3d6ea419fb434761a876bc276.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/35de417d8a074dfb898629ff42762bed.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/c3e695530ec4467db6883a5d8f664711.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/c48154d2fc544ceeadd960656632e024-1670236276270.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/fd34cda6cf984c2a9a0fd954588e4154.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/1635157ce88b4a5490fe330274ea253d.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/60f25c753f3545c4931ad4018307698d.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/2a6ce72a806c44679a6f2bb7b31862e4.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/3bbe482d02224af2a10b1878d3c20d2d.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/e07d69f9129d47d4970fa4b45f340dad.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/461b23d584c0464995a45a3fa1576713.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/94702c93213041f7b4d74d25995dcd13.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/1a6be778013148e2af24f50725672040.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/d44e97c3a3b74fb0872e118d5f235858.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/0c34cec48016474689abbe7c127ddac0.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/59232102df5d4d7e8a6d0f5e454eab69.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/93c80a9a5be54627824624e16e7cb9ee.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/d33e35b5176645018a4328e80c931235.png">
+<meta property="article:published_time" content="2022-12-05T14:39:44.465Z">
+<meta property="article:modified_time" content="2022-12-05T14:46:54.409Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="网络">
+<meta property="article:tag" content="协议">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/e2756b4c1b244b9d862e1eba6e4e80ef.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/12/05/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>网络编程-网络体系 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/12/05/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          网络编程-网络体系
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-12-05 22:39:44 / 修改时间：22:46:54" itemprop="dateCreated datePublished" datetime="2022-12-05T22:39:44+08:00">2022-12-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">网络编程</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、计算机网络体系结构"><a href="#一、计算机网络体系结构" class="headerlink" title="一、计算机网络体系结构"></a>一、计算机网络体系结构</h1><img src="/images/网络编程-网络设计/e2756b4c1b244b9d862e1eba6e4e80ef.png" style="zoom:67%;" />
+
+<a id="more"></a>
+
+<h2 id="OSI"><a href="#OSI" class="headerlink" title="OSI"></a>OSI</h2><p>OSI是一个<strong>七层协议</strong>的体系结构：从下往上依次是<strong>物理层、数据链路层、网络层、运输层、会话层、表示层、应用层。</strong></p>
+<p>由于OSI国际标准指定出来时，基于TCP/IP 的互联网已抢先在全球相当大的范围成功地运行了，而与此同时却几乎找不到有什么厂家生产出符合OSI标准的商用产品。因此OSI 只获得了一些理论研究的成果，市场化方面却失败了，<strong>现今规模最大的、覆盖全球的、基于TCP/IP的互联网并未使用OSI标准。</strong></p>
+<img src="/images/网络编程-网络设计/b844f5a8acdb4f3ba77a8cb67eafff30.png" style="zoom:67%;" />
+
+<h2 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP/IP"></a>TCP/IP</h2><img src="/images/网络编程-网络设计/image-20221204165751105.png" style="zoom:67%;" />
+
+<p>TCP/IP是一个<strong>四层</strong>的体系结构，它包含<strong>应用层、运输层、网际层（网络层）、网络接口层</strong>。</p>
+<h2 id="五层协议"><a href="#五层协议" class="headerlink" title="五层协议"></a>五层协议</h2><img src="/images/网络编程-网络设计/image-20221204165759319.png" style="zoom:67%;" />
+
+<p>在学习计算机网络的原理时往往采取折中的办法，即综合OSI和TCP/IP 的优点，<strong>采用一种只有五层协议的体系结构</strong>，这样既简洁又能将概念阐述清楚。有时为了方便，也可把最底下两层称为<strong>网络接口层</strong>。</p>
+<h3 id="应用层（application-layer）"><a href="#应用层（application-layer）" class="headerlink" title="应用层（application layer）"></a><strong>应用层（application layer）</strong></h3><ul>
+<li>应用层是体系结构中的最高层。应用层的任务是通过应用进程间的交互来完成特定网络应用。应用层协议定义的是应用进程间通信和交互的规则。这里的进程就是指主机中正在运行的程序。对于<strong>不同的网络应用需要有不同的应用层协议</strong>。在互联网中的应用层协议很多，如<strong>域名系统DNS，支持万维网应用的 HTTP 协议，支持电子邮件的SMTP协议</strong>，等等。<strong>我们把应用层交互的数据单元称为报文(message)。</strong></li>
+</ul>
+<h3 id="运输层（transport-layer）"><a href="#运输层（transport-layer）" class="headerlink" title="运输层（transport layer）"></a><strong>运输层（transport layer）</strong></h3><ul>
+<li>运输层的任务就是负责<strong>向两台主机中进程之间的通信提供通用的数据传输服务</strong>。</li>
+<li>运输层主要使用以下两种协议:<ul>
+<li><strong>传输控制协议TCP (Transmission Control Protocol)</strong>：提供面向连接的、可靠的数据传输服务</li>
+<li><strong>用户数据报协议UDP (User Datagram Protocol）</strong>：提供无连接的、尽最大努力(best-effort)的数据传输服务（不保证数据传输的可靠性)</li>
+</ul>
+</li>
+<li>TCP和UDP协议都有固定的格式，数据在经过运输层时会根据所选择的运输协议在应用层传递过来的数据基础上加上对应协议的头部。</li>
+</ul>
+<h3 id="网络层（network-layer）"><a href="#网络层（network-layer）" class="headerlink" title="网络层（network layer）"></a><strong>网络层（network layer）</strong></h3><ul>
+<li>主要作用是实现<strong>两个网络系统之间的数据透明传送</strong>，具体包括<strong>路由选择，拥塞控制和网际互连</strong>等。</li>
+<li>在发送数据时，网络层把运输层产生的报文段或用户数据报封装成分组或包进行传送。在TCP/IP体系中，由于网络层使用IP协议，因此分组也叫做<strong>IP数据报</strong>，简称为<strong>数据报</strong>。</li>
+<li>数据在经过网络层时会加上IP协议的头部</li>
+</ul>
+<h3 id="数据链路层（data-link-layer）"><a href="#数据链路层（data-link-layer）" class="headerlink" title="数据链路层（data link layer）"></a><strong>数据链路层（data link layer）</strong></h3><ul>
+<li>数据链路层常简称为链路层。我们知道，两台主机之间的数据传输，总是在一段一段的链路上传送的，这就需要使用专门的链路层的协议。在两个相邻结点之间传送数据时，数据链路层将网络层交下来的IP数据报<strong>组装成帧(framing)</strong>，在两个相邻结点间的链路上<strong>传送帧(frame)</strong>。每一帧包括数据和必要的<strong>控制信息（如同步信息、地址信息、差错控制等）。</strong></li>
+</ul>
+<h3 id="物理层（physical-layer）"><a href="#物理层（physical-layer）" class="headerlink" title="物理层（physical layer）"></a><strong>物理层（physical layer）</strong></h3><ul>
+<li>利用传输介质为数据链路层提供物理连接，实现比特流的透明传输。</li>
+<li><strong>物理层上所传输数据的单位是比特。</strong></li>
+</ul>
+<img src="/images/网络编程-网络设计/1b32f919f9a245369e56542ac6c89cae.png" style="zoom: 80%;" />
+
+<h1 id="二、物理层"><a href="#二、物理层" class="headerlink" title="二、物理层"></a>二、物理层</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><ul>
+<li><p>物理层主要解决在各种传输媒体上传输比特0和1的问题，进而给数据链路层提供透明传输比特流的服务</p>
+</li>
+<li><p>由于传输媒体的种类太多（例如<strong>同轴电缆</strong>、<strong>光纤</strong>、<strong>无线电波</strong>等），物理连接方式也有很多例如点<strong>对点连接</strong>、<strong>广播连接</strong>等，因此物理层协议种类也比较多。但是物理层为了解决在各种传输媒体上传输比特0和1的问题，无论是那种物理层协议都需要满足主以下四个任务：</p>
+<ul>
+<li>机械特性：指明接口所用接线器的形状和尺寸、引脚数目和排列、固定和锁定装置。</li>
+<li>电气特性：指明在接口电缆的各条线上出现的电压范围。</li>
+<li>功能特性：指明某条线上出现的某一电平的电压表示何种意义。</li>
+<li>过程特性：指明对于不同功能的各种可能事件出现的顺序。</li>
+</ul>
+</li>
+</ul>
+<h2 id="传输媒体"><a href="#传输媒体" class="headerlink" title="传输媒体"></a>传输媒体</h2><ul>
+<li>导引型传输媒体：电磁波被导引沿着固体媒体传播<ul>
+<li><strong>同轴电缆</strong></li>
+<li><strong>双绞线</strong></li>
+<li><strong>光纤</strong><ul>
+<li>非导引型传输媒体：非导引型传输媒体是指自由空间</li>
+<li><strong>无线电波</strong></li>
+<li><strong>微波</strong></li>
+<li><strong>红外线</strong></li>
+<li><strong>可见光</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="三、数据链路层"><a href="#三、数据链路层" class="headerlink" title="三、数据链路层"></a>三、数据链路层</h1><h2 id="概念-1"><a href="#概念-1" class="headerlink" title="概念"></a>概念</h2><p>从五层协议原理体系结构的角度来看，主机应该具有体系结构中的各个层次，而路由器只需要具有体系结构中的网络层、数据链路层、物理层。</p>
+<img src="/images/网络编程-网络体系结构/91fdba580fea42278cc5b83989260b4c.png" style="zoom:80%;" />
+
+<p>网络中的各个设备通过传输媒体进行互连，主机H1将需要发送的数据<strong>逐层封装</strong>后通过物理层将构成数据包的各个比特转换为电信号发送到传输媒体，数据包进入到路由器后，<strong>从下网上逐层解封到网络层</strong>，路由器根据数据包的<strong>目的网络地址</strong>和<strong>自身的转发表</strong>确定数据包的转发端口，然后从网络层向下逐层封装数据包，最后通过物理层将数据包发送到传输媒体，最后到达主机H2，主机H2在接收到数据包后再逐层解封。</p>
+<p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/23504ea18c834ebc8f510bbccc61243d.gif" alt=""></p>
+<p>所谓的<strong>链路(Link)</strong>就是从一个结点到相邻结点的一段物理线路，而中间没有任何其他的交换结点。</p>
+<p>要在链路上传输数据，仅有链路还不够，还需要一些通信协议来控制这些数据的传输，如果把实现这些协议的硬件和软件加到链路上就构成了<strong>数据链路</strong>（Data Link）。</p>
+<p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/8b5fe4d2c549488ebf4bf85df83edf95.gif" alt=""></p>
+<p>在数据链路上传输的数据包，又称为<strong>帧</strong>。</p>
+<blockquote>
+<p>数据链路层是以帧作为单位传输和处理的</p>
+</blockquote>
+<img src="/images/网络编程-网络体系结构/2d9c035a96f047dc8365d514662581be.png" style="zoom:80%;" />
+
+<p>数据链路层的协议有很多种，但是有三个基本问题是共同的。这三个基本问题就是：<strong>封装成帧、透明传输和差错检测。</strong></p>
+<h2 id="封装帧"><a href="#封装帧" class="headerlink" title="封装帧"></a>封装帧</h2><p>封装成帧是指数据链路层给上层交付的协议数据单元添加<strong>帧头</strong>和<strong>帧尾</strong>使之成为帧。</p>
+<p><strong>帧头和帧尾中包含有重要的控制信息</strong>。</p>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>PPP帧</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="/images/网络编程-网络体系结构/6be3b1149ffa4640948b7803fa44e859.png" style="zoom:80%;" /></td>
+</tr>
+<tr>
+<td align="center"><strong>MAC帧</strong></td>
+</tr>
+<tr>
+<td align="center"><img src="/images/网络编程-网络体系结构/3d3beb5089e24c3da336b85b25ede0fd.png" style="zoom:80%;" /></td>
+</tr>
+</tbody></table>
+<p>帧头和帧尾作用之一就是<strong>帧定界</strong>。</p>
+<p>PPP帧的第一个字节和最后一个字节就是帧定界，通过这两个字节就能够从物理层交付的比特流中提取出一个一个的帧。</p>
+<img src="/images/网络编程-网络体系结构/80f2954c7be444f2b82c9dc5dc4f91a1.png" style="zoom:80%;" />
+
+
+
+<p><strong>但并不是每种数据链路层协议的帧都包含有帧定界标志</strong>，例如MAC帧在帧头和帧尾中是没有包含帧定界的标志的。</p>
+<p>数据链路层封装好MAC帧，将其交付给物理层，物理层在MAC帧的前面添加8字节的<strong>前导码</strong>，前导码的<strong>前7个字节</strong>为<strong>前同步码</strong>，其作用是使接收方的时钟同步，之后的1个字节为帧开始定界符，表明其后紧跟着的就是MAC帧。</p>
+<img src="/images/网络编程-网络体系结构/28087c89f5064d9eb5260ba32ccb9e47.png" style="zoom:80%;" />
+
+<h2 id="透明传输"><a href="#透明传输" class="headerlink" title="透明传输"></a>透明传输</h2><ol>
+<li>透明传输是指数据链路层对上层交付的传输数据没有任何限制，就好像数据链路层不存在一样。</li>
+</ol>
+<p>当数据帧中的数据是帧定界标志时</p>
+<ul>
+<li><p>当物理链路提供的是面向<strong>字符</strong>的传输服务时（物理链路以字符为单位传输数据）</p>
+<img src="/images/网络编程-网络体系结构/c117eb47d7c14ca092fa9700d055c0cb.png" style="zoom:67%;" />
+
+<p>数据链路层在交付数据给物理层时，对帧进行扫描，首先扫描到SOH，然后每扫描到一个SOH或者EOT就在前面加<strong>转义字符ESC</strong>，直至扫描到最后一个EOT，这种方式称之为：<strong>字节填充(byte stuffing)</strong>或<strong>字符填充(character stuffing)</strong></p>
+<img src="/images/网络编程-网络体系结构/34569f396b4946b1be876697e73c7dc9.png" style="zoom:80%;" />
+
+<p>接收端的数据链路层在将数据送往网络层之前删除插入的转义字符。</p>
+</li>
+<li><p>当物理链路提供的是面向<strong>比特</strong>的传输服务时（物理链路以比特为单位传输数据）</p>
+<p><img src="D:/Downloads/22d90f1eb3d442a2a98d019e0f1bedc0.png" alt=""></p>
+<p>采用<strong>零比特填充法</strong>：对数据进行扫描，每5个连续的比特1后面就插入1个比特0</p>
+</li>
+</ul>
+<p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/453f687f13da443c841af18a50812b65.png" alt=""></p>
+<h3 id="MTU"><a href="#MTU" class="headerlink" title="MTU"></a>MTU</h3><p>考虑到差错控制等多种因素，每一种数据链路层协议都规定了帧的数据部分的长度上限，即最大传送单元<strong>MTU(Maximum Transfer Unit)</strong>。</p>
+<img src="/images/网络编程-网络体系结构/4b711c41092649eb8e426d59fb178618.png" style="zoom:80%;" />
+
+<h2 id="差错校验"><a href="#差错校验" class="headerlink" title="差错校验"></a>差错校验</h2><p>实际的通信链路都不是理想的，比特流在传输过程中由于受到各种干扰可能会产生差错: 1可能会变成0,而0也可能变成1。这称为<strong>比特差错</strong>，或者称为<strong>误码</strong>。</p>
+<img src="/images/网络编程-网络体系结构/1d2c97131cc3466eab199bb965ce7aa8.gif" style="zoom:80%;" />
+
+
+
+<p>一段时间内，传输错误的比特占所传输比特总数的比率称为<strong>误码率（Bit Error Rate）</strong></p>
+<p>接收方是如何知道数据在传输的过程中出现差错了呢？使用<strong>差错检测码</strong>来检测数据在传输过程中是否产生了比特差错，是数据链路层所要解决的重要问题之一。</p>
+<p>在封装好的帧中利用若干个字节表示帧校验序列FCS字段。</p>
+<p><em>FCS</em> :Frame Check Sequence(帧校验序列)。FCS字段由一些差错校验算法计算得出，常用的校验算法为：<strong>循环冗余校验CRC(Cyclic Redundancy Check)。</strong></p>
+<p>接收方在接收到数据后计算出一个FCS，然后将计算得出的FCS与接收到的数据帧中的FCS进行比较。</p>
+<img src="/images/网络编程-网络体系结构/ab8ac756b833450aac48e0ca272410b5.png" style="zoom:80%;" />
+
+<p>由于判断FCS是否正确只能检测出帧在传输过程中出现了差错，但并不能定位错误，因此<strong>无法纠正错误</strong>。接收方可以通过<strong>检错重传</strong>方式来纠正传输中的差错,或者仅仅是<strong>丢弃检测到差错的帧</strong>，这取决于数据链路层向其上层提供的是<strong>可靠传输服务</strong>还是<strong>不可靠传输服务</strong>。</p>
+<h1 id="四、以太网"><a href="#四、以太网" class="headerlink" title="四、以太网"></a>四、以太网</h1><h2 id="概念-2"><a href="#概念-2" class="headerlink" title="概念"></a>概念</h2><p>IEEE 802.3 定义了以太网的<strong>物理层</strong>和<strong>数据链路层</strong>的介质访问控制部分，其中物理层由两个组件组成：<strong>线缆</strong>和<strong>设备</strong>，数据链路层可以分为两部分：<strong>逻辑链路控制（LLC）</strong>、<strong>介质访问控制（MAC）</strong>。</p>
+<img src="/images/网络编程-网络体系结构/c41ad929dadc4d92a26cf68a7a9d2139.png" style="zoom:80%;" />
+
+<ul>
+<li>物理层<ul>
+<li>线缆：以太网的通信线缆由最先的同轴电缆发展到今天的双绞线和光纤。</li>
+<li>设备：以太网设备由计算机、打印机等具有网络接口卡的设备所组成，常用的以太网设备有<strong>路由器、交换机、网桥</strong>，而工作在数据链路层上的设备为交换机、网桥，路由器工作在五层体系结构中的网络层。</li>
+</ul>
+</li>
+<li>数据链路层<ul>
+<li>逻辑链路控制LLC：为网络层提供统一的接口以便数据在设备间传输。很多厂商生产的适配器上就仅装有 MAC 协议而没有 LLC 协议。</li>
+<li>介质访问控制MAC：使用分配给网络接口卡的硬件地址来标识特定的计算机或设备接口，通过这种方法来表示数据传输的源地址和目的地址。</li>
+</ul>
+</li>
+</ul>
+<h2 id="以太网-MAC地址"><a href="#以太网-MAC地址" class="headerlink" title="以太网-MAC地址"></a>以太网-MAC地址</h2><h3 id="概念-3"><a href="#概念-3" class="headerlink" title="概念"></a>概念</h3><p>Media Access Control Address ，直译为<strong>媒体存取控制位址</strong> ，也称为<strong>局域网地址</strong> （LAN Address），<strong>MAC位址</strong> ，<strong>以太网地址</strong> （Ethernet Address）或<strong>物理地址</strong> （Physical Address），它是一个用来确认网络设备位置的位址。</p>
+<ul>
+<li><p>IEEE 的<strong>注册管理机构 RA</strong> 负责向厂家分配地址字段的<strong>前三个字节(即高位 24 位)</strong>。地址字段中的后三个字节(即低位 24 位)由<strong>厂家自行指派</strong>，称为<strong>扩展标识符</strong>，必须保证生产出的适配器没有重复地址。世界上凡要生产局域网适配器的厂家都必须向IEEE购买由这三个字节构成的这个号（即地址块)，这个号的正式名称是组织唯一标识符。</p>
+<img src="/images/网络编程-网络体系结构/3e0b09b0f2734ede8248842253c75be8.png" style="zoom: 50%;" />
+</li>
+<li><p>一个地址块可以生成<strong>2^24</strong>个（二百八十多万亿个）不同的地址。这种 48 位地址称为<strong>MAC-48</strong>，它的通用名称是<strong>EUI-48</strong>。</p>
+</li>
+<li><p>一般情况下，用户主机会包含两个网络适配器：<strong>有线局域网适配器（有线网卡）</strong>和<strong>无线局域网适配器（无线网卡)</strong>。每个网络适配器都有一个全球唯一的MAC地址。而<strong>交换机和路由器往往拥有更多的网络接口，所以会拥有更多的MAC地址</strong>。综上所述，严格来说，MAC地址是对网络上各接口的唯一标识，而不是对网络上各设备的唯一标识。</p>
+</li>
+<li><p>我们可以在<strong>DOS窗口</strong>输入命令：<strong>ipconfig /all</strong> ， 查看本机网卡的MAC地址。</p>
+</li>
+</ul>
+<h3 id="含义"><a href="#含义" class="headerlink" title="含义"></a>含义</h3><p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/8c5afaae80d24a2b9130a2440cc80e8d.png" alt=""></p>
+<h3 id="MAC帧的格式"><a href="#MAC帧的格式" class="headerlink" title="MAC帧的格式"></a>MAC帧的格式</h3><p>数据链路层在网络层交付的IP数据包前面加上“<strong>目的地址</strong>”、“<strong>源地址</strong>”、“<strong>类型</strong>”字段，并且在最后加入4字节的<strong>FCS</strong>字段，组成一个<strong>以太网MAC帧</strong>，然后再交付给物理层</p>
+<ul>
+<li><p>目的地址：接收主机的MAC地址</p>
+</li>
+<li><p>源地址：发送主机的MAC地址</p>
+</li>
+<li><p>类型：类型字段标志上一层使用的是什么<strong>协议</strong>，以便把收到的 MAC 帧的数据上交给上一层的这个协议。</p>
+<img src="/images/网络编程-网络体系结构/4c9bb345081742f0b323ede915fd81db.png" style="zoom:80%;" />
+
+</li>
+</ul>
+<blockquote>
+<p>当数据字段的长度小于 46 字节时，应在数据字段的后面加入整数字节的填充字段，以保证以太网的 MAC 帧长不小于 64 字节。</p>
+</blockquote>
+<h3 id="MAC地址的识别"><a href="#MAC地址的识别" class="headerlink" title="MAC地址的识别"></a>MAC地址的识别</h3><p>当多个主机连接到同一个广播信道上，要实现两个主机之间的通信，每个主机发送的帧中包含了目的地址和源地址。</p>
+<p>广播信道上的每一台主机都能够收到该帧，接收到帧的主机将帧中的目的地址与保存在网络适配器的电可擦除可编程只读存储器<strong>EEPROOM</strong>中的MAC地址进行比较，如果匹配则接受该帧，否则就丢弃该帧。</p>
+<p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/acca62e431994803bf8a385783927a40.gif" alt=""></p>
+<p>根据MAC地址为单播MAC地址还是广播MAC地址还是多播MAC地址，在计算机网络中“<strong>发往本站（本主机）的帧</strong>”分为三种：<strong>单播(unicast)帧（一对一）、广播(broadcast)帧（一对全体）、多播(multicast)帧（一对多）。</strong></p>
+<ul>
+<li><p><strong>单播MAC地址</strong></p>
+<img src="/images/网络编程-网络体系结构/c021328943174d60bb7a810fb2507654.gif" style="zoom: 50%;" />
+</li>
+<li><p><strong>广播MAC地址</strong></p>
+<img src="/images/网络编程-网络体系结构/454f6a4545d14d129dc0c1aeb6d538f1.gif" style="zoom: 50%;" />
+</li>
+<li><p><strong>多播MAC地址</strong></p>
+<img src="/images/网络编程-网络体系结构/80e9ab14efee4497bd47a5f67d0de5e9.png" style="zoom: 50%;" />
+</li>
+<li><p><strong>随机MAC地址</strong></p>
+<p>据斯诺登介绍，美国国家安全局有一套系统通过监视电子设备的MAC地址来跟踪城市中每个人的行动，因此苹果率先在<strong>ios</strong>系列设备扫描网络时采用随机MAC地址技术，随后<strong>Windows10</strong>，<strong>安卓6.0</strong>以及<strong>内核版本3.18的Linux</strong>系统也提供随机MAC地址功能。 目前大多数移动设备都采用了随机MAC地址技术。</p>
+</li>
+</ul>
+<h2 id="以太网-交换机"><a href="#以太网-交换机" class="headerlink" title="以太网-交换机"></a>以太网-交换机</h2><p>以太网交换机是基于<strong>以太网传输数据</strong>的交换机，以太网交换机通常都有多个接口，每个接口都可以直接与一台主机或另一个以太网交换机相连，一般都工作在<strong>全双工方式</strong>。</p>
+<p>以太网交换机具有并行性，能同时连通多对接口，使多对主机能同时通信。</p>
+<p><strong>以太网交换机工作在数据链路层（也包括物理层)</strong>，它收到帧后，在帧交换表中查找帧的目的MAC地址所对应的接口号，然后通过该接口转发帧。</p>
+<img src="/images/网络编程-网络体系结构/83e4adf17560421a8ece390f97488cae.gif" style="zoom: 50%;" />
+
+<h3 id="帧的两种转发方式"><a href="#帧的两种转发方式" class="headerlink" title="帧的两种转发方式"></a>帧的两种转发方式</h3><ul>
+<li>存储转发：交换机在转发之前必须<strong>接收整个帧</strong>，并进行<strong>错误校检</strong>，如无错误再将这一帧发往目的地址。帧通过交换机的转发时延随帧长度的不同而变化。</li>
+<li>直接交换：采用基于硬件的<strong>交叉矩阵</strong>（交换机只要检查到帧头中所包含的目的地址就立即转发该帧，而无需等待帧全部的被接收，也不进行错误校验。由于以太网帧头的长度总是固定的，因此帧通过交换机的转发时延也保持不变。）</li>
+</ul>
+<h3 id="交换机自学习和转发帧的流程"><a href="#交换机自学习和转发帧的流程" class="headerlink" title="交换机自学习和转发帧的流程"></a>交换机自学习和转发帧的流程</h3><p>交换机是一种即插即用设备，其内部的<strong>帧交换表</strong>是通过<strong>自学习算法</strong>自动的逐渐建立起来的。</p>
+<p>刚开始交换机内部的帧交换表是空的，随着网络中各主机间的通信，通过<strong>自学习算法</strong>自动的逐渐建立起来<strong>帧交换表</strong>。</p>
+<img src="/images/网络编程-网络体系结构/4d214d084357421fb3715f41cee0e73a.png" style="zoom: 67%;" />
+
+<ul>
+<li>主机A发送数据给主机B</li>
+<li>数据帧从交换机1的接口1进入交换机，交换机1将该数据帧的源MAC地址与接口1的映射关系记录到帧交换表中，以上登记工作称之为交换机的自学习</li>
+<li>交换机1对数据帧进行转发，从交换表中未查到目标主机B的MAC地址所对应的端口，此时会对所有端口都进行转发</li>
+<li>主机B收到数据帧之后比对目标MAC地址与自身MAC地址是否匹配，匹配上则接收数据，其他匹配不上的主机则丢弃数据</li>
+<li>数据帧通过端口4，经过交换机2的端口2进入交换机2，此时交换机2将源MAC地址与端口2的映射关系登记到帧交换表中</li>
+<li>交换机2在它的交换表找不到目标MAC地址对应关系，会向其他端口转发</li>
+<li>其他主机对比自身MAC地址与目标MAC地址，不匹配则丢弃</li>
+</ul>
+<h3 id="树协议STP"><a href="#树协议STP" class="headerlink" title="树协议STP"></a>树协议STP</h3><p>添加<strong>冗余链路</strong>可以提高以太网的可靠性：在交换机B和C之间添加冗余链路。但是冗余链路也会带来负面效应—-<strong>形成网络环路。</strong></p>
+<img src="/images/网络编程-网络体系结构/8f898a1bafd0463ea91e45d10fafa3d6.png" style="zoom:80%;" />
+
+<p>网络环路带来的问题：</p>
+<p><strong>广播风暴</strong></p>
+<ul>
+<li>广播帧在各个交换机之间反复转发，分别按顺时针和逆时针方向同时兜圈。广播风暴会大量消耗网络资源，使得网络无法正常转发其他数据帧。</li>
+<li><strong>主机收到反复的广播帧</strong>，会大量消耗主机的资源。</li>
+<li><strong>交换机的帧交换表震荡</strong>：同一个MAC地址的记录在其他错误记录之间反复震荡。</li>
+</ul>
+<p>以太网交换机使用<strong>生成树协议STP</strong>(Spanning Tree Protocol)可以在增加冗余链路来提高网络可靠性的同时又<strong>避免网络环路带来的各种问题</strong>。</p>
+<p>不论交换机之间采用怎样的物理连接，交换机都能够<strong>自动计算并构建一个逻辑上没有环路的网络</strong>，其逻辑拓扑结构必须是<strong>树型</strong>的（无逻辑环路)。最终生成的树型逻辑拓扑要<strong>确保连通整个网络</strong>：</p>
+<img src="/images/网络编程-网络体系结构/bad45fd1097c46439538d4e775dc9330.gif" style="zoom:50%;" />
+
+<p>当首次连接交换机或网络<strong>物理拓扑发生变化</strong>时(有可能是人为改变或故障)，交换机都将进行<strong>生成树的重新计算</strong>。</p>
+<h1 id="五、网络层"><a href="#五、网络层" class="headerlink" title="五、网络层"></a>五、网络层</h1><p>网络层的主要任务是实现<strong>网络互连</strong>，进而<strong>实现数据包在各网络之间的传输</strong>。</p>
+<p><strong>因特网(Internet)</strong>是目前全世界用户数量最多的互联网，它使用<strong>TCP/IP协议栈</strong>。由于TCP/IP协议栈的网络层使用<strong>网际协议IP</strong>，它是整个协议栈的核心协议，因此在TCP/IP协议栈中网络层常称为<strong>网际层</strong>。</p>
+<img src="/images/网络编程-网络体系结构/e8aed8f8e204465286478ce215d5578f.png" style="zoom: 50%;" />
+
+<h2 id="IPv4"><a href="#IPv4" class="headerlink" title="IPv4"></a>IPv4</h2><p>在因特网中，为了实现计算机之间的相互通信，通常需要为每台计算机分配一个IP地址。在互联网的发展过程中主要有两个版本的互联网协议，分别是<strong>IPv4</strong>（Internet Protocol version 4）和 <strong>IPv6</strong>（Internet Protocol version 6）。</p>
+<img src="/images/网络编程-网络体系结构/cc5e2eccc2d1450daf1168a36c462a68.png" style="zoom:50%;" />
+
+<ul>
+<li><p>IPv4 的IP地址就是给因特网(Internet)上的每一台主机(或路由器)）的每一个接口分配一个在全世界范围内是唯一的<strong>32比特</strong>的标识符，地址总数为<strong>2^32</strong>个。</p>
+</li>
+<li><p>IPv6 的 IP地址采用<strong>128比特</strong>地址长度，地址总数为<strong>2^128</strong>个。</p>
+</li>
+<li><p>P地址由<strong>因特网名字和数字分配机构ICANN</strong>(Internet Corporation for Assigned Names and Numbers)进行分配。我国用户可向<strong>亚太网络信息中心APNIC</strong>(Asia Pacific Network Information Center)申请IP地址，需要<strong>缴费</strong>。</p>
+</li>
+<li><p>由于32比特的IPv4地址不方便阅读、记录以及输入等，因此IPv4地址采用<strong>点分十进制</strong>表示方法以方便用户使用，例如：192.168.1.100</p>
+</li>
+</ul>
+<h2 id="IPv4-地址的分类"><a href="#IPv4-地址的分类" class="headerlink" title="IPv4 地址的分类"></a>IPv4 地址的分类</h2><p>IPv4 的IP地址由<strong>网络号</strong>（指定主机所属的网络）和 <strong>主机号</strong>（指定被寻址的子网中的某个节点）组成，IP地址可以分为A、B、C、D、E五类。</p>
+<img src="/images/网络编程-网络体系结构/6464fc4fe345420e8947b63e1c5127ff.png" style="zoom:67%;" />
+
+<ul>
+<li>A、B、C类地址可以分配给网络中的主机或路由器等设备接口</li>
+<li>主机号二进制<strong>“全0”</strong>的地址为网络地址，不能分配</li>
+<li>主机号二进制<strong>“全1”</strong>的地址是广播地址，不能分配</li>
+</ul>
+<h3 id="A类地址"><a href="#A类地址" class="headerlink" title="A类地址"></a>A类地址</h3><img src="/images/网络编程-网络体系结构/image-20221205105757139.png" style="zoom:50%;" />
+
+<ul>
+<li><p>取值范围</p>
+<ul>
+<li>A类地址网络号比特位以<strong>0</strong>开头，网络号8个bit；主机号24个bit</li>
+<li>最小网络号：<strong>0</strong>，保留不指派</li>
+<li>第一个可指派的网络号：<strong>1</strong></li>
+<li>最大网络号：<strong>127</strong>，作为本地回环地址，不指派</li>
+<li>最后一个可指派网络号：<strong>126</strong></li>
+</ul>
+</li>
+<li><p>A类地址可指派网络数量：网络号占8个bit，最高位固定为0，所以网络号有2^7=128种组合，因为最小网络号<strong>0（保留）</strong>和最大网络号<strong>127（本地回环地址）</strong>不能指派，所以最终可指派网络号数量为：</p>
+</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/image-20221205111209007.png" style="zoom:50%;" />
+
+<ul>
+<li>A类地址每个网络号可指派地址数量：主机号24个bit，2^24 = 16777216种组合，排除比特位全0的网络地址、比特位全为1的广播地址，剩余16777214个组合可以指派</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/image-20221205151926948.png" style="zoom:50%;" />
+
+<h3 id="B类地址"><a href="#B类地址" class="headerlink" title="B类地址"></a>B类地址</h3><img src="/images/网络编程-网络体系结构/image-20221205152116062.png" style="zoom:50%;" />
+
+<ul>
+<li><p>取值范围</p>
+<ul>
+<li>B类地址，网络号比特位以<strong>10</strong>开头，网络号16个bit，主机号16个bit</li>
+<li>最小网络号：<strong>128.0</strong></li>
+<li>最大网络号：<strong>191.255</strong></li>
+</ul>
+</li>
+<li><p>B类地址可指派网络号数量：网络号占16个bit，最高位固定为10，所以网络号有2^(16-2) = 16384种组合</p>
+<img src="/images/网络编程-网络体系结构/image-20221205155326946.png" style="zoom:50%;" />
+</li>
+<li><p>B类地址每个网络号可指派地址数量：主机号占16个bit，有2^16 = 65536种组合，排除比特位全0的网络地址、比特位全为1的广播地址，剩余65534个地址可以指派</p>
+<img src="/images/网络编程-网络体系结构/image-20221205155426057.png" style="zoom:50%;" />
+
+</li>
+</ul>
+<h3 id="C类地址"><a href="#C类地址" class="headerlink" title="C类地址"></a>C类地址</h3><img src="/images/网络编程-网络体系结构/image-20221205155520706.png" style="zoom:50%;" />
+
+<ul>
+<li><p>取值范围</p>
+<ul>
+<li>C类地址，网络号比特位以<strong>110</strong>开头，网络号占24个bit，主机号占8个bit</li>
+<li>最小网络号：<strong>192.0.0</strong></li>
+<li>最大网络号：<strong>223.255.255</strong></li>
+</ul>
+</li>
+<li><p>C类地址可指派网络号数量：网络号占24个bit，最高位为110，所以网络号有2^(24-3) = 2097152种组合</p>
+<img src="/images/网络编程-网络体系结构/image-20221205160510775.png" style="zoom:50%;" />
+</li>
+<li><p>C类地址每个网络号可指派地址数量：主机号占8个bit，有2^8=256种组合，排除比特位全0的网络地址、比特位全为1的广播地址，剩余254个地址可以指派</p>
+<img src="/images/网络编程-网络体系结构/image-20221205160812624.png" style="zoom:50%;" />
+
+</li>
+</ul>
+<h3 id="D、E类地址"><a href="#D、E类地址" class="headerlink" title="D、E类地址"></a>D、E类地址</h3><p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/5d719a58afbb4b33870fdf7b48645552.png" alt=""></p>
+<h2 id="特殊IP"><a href="#特殊IP" class="headerlink" title="特殊IP"></a>特殊IP</h2><ul>
+<li><p><strong>127.0.0.1</strong></p>
+<p>回环地址，该地址还有 一个别名叫 “localhost”，无论是哪个程序，一旦使用该地址发送数据，协议软件会立即返回，不进行任何网络传输，除非出错，包含该网络号的分组是不能够出现 在任何网络上的。</p>
+</li>
+<li><p><strong>10.*.*.*，172.16.*.*――172.31.*.*，192.168.*.*</strong></p>
+<p>上面三个网段是私有地址，可以用于自己组网使用，这些地址主要用于企业内部网络中，但不能够在Internet网上使用，Internet网没有这些地址 的路由，而使用这三个网段的计算机要上网必须要通过网络地址转换(NAT)，将私有地址翻译成公用合法的IP地址。</p>
+</li>
+<li><p><strong>255.255.255.255</strong></p>
+<p>受限制的广播地址，对本机来说，这个地址指本网段内(同一个广播域)的所有主机，该地址用于主机配置过程中IP数据包的目的地址，这时主机可能还不知道它 所在网络的网络掩码，甚至连它的IP地址也还不知道。在任何情况下，路由器都会禁止转发目的地址为受限的广播地址的数据包，这样的数据包仅会出现在本地网络中。</p>
+</li>
+<li><p><strong>224.0.0.0—239.255.255.255</strong></p>
+<p>组播地址</p>
+</li>
+<li><p><strong>169.254.*.*</strong></p>
+<p>如果你的主机使用了DHCP功能自动获得一个ip地址，那么当你的DHCP服务器发生故障或响应时间太长而超出系统规定的一个时间，windows系统会为你分配这样一个地址。如果你发现你的主机ip地址是个诸如此类的地址，很不幸，十有八九是你的网络不能正常运行了。</p>
+</li>
+<li><p><strong>114.114.114.114</strong></p>
+<p>中国电信DNS</p>
+</li>
+<li><p><strong>8.8.8.8</strong></p>
+<p>谷歌DNS</p>
+</li>
+</ul>
+<h2 id="子网"><a href="#子网" class="headerlink" title="子网"></a>子网</h2><h3 id="子网掩码"><a href="#子网掩码" class="headerlink" title="子网掩码"></a>子网掩码</h3><ul>
+<li>子网掩码(subnet mask)是一个<strong>32位</strong>地址，又叫网络掩码、地址掩码，它用来<strong>指明一个IP地址的哪些位标识的是主机所在的子网，以及哪些位标识的是主机</strong>。子网掩码不能单独存在，它必须结合IP地址一起使用。子网掩码<strong>将某个IP地址划分成网络地址和主机地址两部分</strong>。</li>
+</ul>
+<p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/74c187924a954a20b17c0e2be9be8ae7.png" alt=""></p>
+<ul>
+<li><p>左边是网络号位，用连续的二进制数字“1”表示，1的数目等于网络位的长度；右边是主机位，用二进制数字“0”表示，0的数目等于主机位的长度。这样做的目的是为了让掩码与IP地址做按位与运算时用0遮住原主机数，而不改变原网络段数字，而且很容易通过0的位数确定子网的主机数。</p>
+</li>
+<li><p>子网掩码的两个功能：</p>
+<ul>
+<li><strong>屏蔽IP地址的一部分以区别网络标识和主机标识</strong></li>
+<li><strong>将一个大的IP网络划分为若干小的子网络</strong></li>
+</ul>
+</li>
+<li><p>子网掩码的工作流程：将32位的子网掩码与IP地址进行二进制形式的按位逻辑“与”运算，得到该IPv4地址所在的网络地址</p>
+<img src="/images/网络编程-网络体系结构/1fa492a5203a4e3e81e95fdb663dd989.png" style="zoom:67%;" />
+
+</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/81f103348f44489ca28910a60dda06ba.png" style="zoom:67%;" />
+
+<h3 id="子网的划分"><a href="#子网的划分" class="headerlink" title="子网的划分"></a>子网的划分</h3><p>子网掩码是在IPv4地址资源紧缺的背景下为了解决lP地址分配而产生的<strong>虚拟lP技术</strong>。</p>
+<p>通过子网掩码将A、B、C三类地址划分为<strong>若干子网</strong>，从而显著<strong>提高了IP地址的分配效率</strong>，有效解决了IP地址资源紧张的局面。</p>
+<p>另一方面，在企业内网中为了更好地管理网络，网管人员也利用子网掩码的作用，人为地<strong>将一个较大的企业内部网络划分为更多个小规模的子网</strong>，再利用三层交换机的路由功能实现子网互联，从而有效<strong>解决了网络广播风暴和网络病毒</strong>等诸多网络管理方面的问题。</p>
+<img src="/images/网络编程-网络体系结构/ac640d017ed242c995ec60898751cfbf.png"  />
+
+<h3 id="子网掩码的CIDR斜线记法"><a href="#子网掩码的CIDR斜线记法" class="headerlink" title="子网掩码的CIDR斜线记法"></a>子网掩码的<strong>CIDR斜线记法</strong></h3><p><strong>格式：IP地址/n</strong></p>
+<blockquote>
+<p><strong>说明：n表示子网掩码所使用的bit数，表示子网掩码中网络号的长度，通过n的个数确定子网的主机数=2^(32-n)-2</strong></p>
+</blockquote>
+<h2 id="IP-协议"><a href="#IP-协议" class="headerlink" title="IP 协议"></a>IP 协议</h2><ul>
+<li><p><strong>用户数据</strong>在网络层（网际层）中使用<strong>IP协议</strong>进行封装，然后交付给数据链路层。IP协议提供<strong>不可靠无连接</strong>的<strong>数据报传输服务。</strong></p>
+</li>
+<li><p>使用IP协议封装的数据我们称之为<strong>IP数据报</strong>。</p>
+</li>
+<li><p>IP数据报的首部：IP数据报的首部由20个字节组成，IP数据报的首部常以32个比特为单位进行描述，下图中的每一行都由32个比特（也就是4个字节）构成，每个小格子称为字段或者域。</p>
+<img src="/images/网络编程-网络体系结构/0e59eaf8ddc34256889d3ebaf941473c.png" style="zoom:80%;" />
+
+</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/6a8fa94e8e6249e09d21fcff4035332e.png" style="zoom:80%;" />
+
+<ul>
+<li><p>版本：占4比特，表示IP协议的版本</p>
+</li>
+<li><p>首部长度：占4比特，表示IP数据报首部的长度。该字段的取值以4字节为单位。最小十进制取值为5，表示lP数据报首部只有20字节固定部分，最大十进制取值为15，表示IP数据报首部包含20字节固定部分和最大40字节可变部分</p>
+</li>
+<li><p>区分服务：8比特，一般不使用</p>
+</li>
+<li><p>总长度：占16比特，表示IP数据报的总长度（首部+数据载荷)。最大取值为十进制的65535，以字节为单位（实际使用中不会传输这么长的IP数据报）。</p>
+</li>
+<li><p>标识、标志、片偏移：这三个字段共同用于IP数据报分片，以太网中数据链路层规定MTU的值为1500字节，如果某个IP数据报总长度超过MTU，需要将原IP数据报分片成多个小的数据报，再将每个小的数据报封装成帧。</p>
+<img src="/images/网络编程-网络体系结构/1af7ec03c9754fc6b106836f0289e92f.png" style="zoom:67%;" />
+* 标识：占16比特，属于同一个数据报的各分片数据报应该具有相同的标识。IP软件维持一个计数器，每产生一个数据报，计数器值加1，并将此值赋给标识字段。
+* 标志：占3比特，各比特含义如下：
+  * DF位：1表示不允许分片,0表示允许分片
+  * MF位：1表示“后面还有分片”，0表示“这是最后一个分片”
+  * 保留位：必须为0
+* 片偏移：占13比特，指出分片数据报的数据载荷部分偏移其在原数据报的位置有多少个单位，片偏移以8个字节为单位。
+
+<table>
+<thead>
+<tr>
+<th align="center">IP数据报分片举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="/images/网络编程-网络体系结构/793e45ed3eb84af59a97785c1d246c50.png"  /></td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<ul>
+<li><p>生存时间：占8比特，最初以秒为单位，最大生存周期为255秒。路由器转发IP数据报时将IP数据报首部中的该字段的值减去IP数据报在本路由器上所耗费的时间，若不为0就转发，否则就丢弃。现在以“跳数”为单位，路由器转发IP数据报时，将IP数据报首部中的该字段的值减1，若不为0就转发，否则就丢弃。</p>
+<ul>
+<li><p>TTL作用可以防止IP数据报再网络中永久兜圈</p>
+<img src="/images/网络编程-网络体系结构/612745a6ede640d6afd93607b4bafc50.png" style="zoom:50%;" />
+</li>
+</ul>
+</li>
+<li><p>协议：占8比特，指明IPv4数据报的数据部分是何种协议数据单元。常用的一些协议和相应的协议字段值如下。</p>
+<p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/79377238a89043919e018374f3d2ffd3.png" alt=""></p>
+</li>
+</ul>
+<ul>
+<li>首部检验和：占16比特，用来检测首部在传输过程中是否出现差错。比CRC检验码简单，称为因特网检验和。IP数据报每经过一个路由器，路由器都要重新计算首部检验和，因为某些字段（生存时间、标志片偏移等)的取值可能发生变化。</li>
+<li>源IP地址：占32比特，表示发送主机的IP地址。</li>
+<li>目的IP地址：占32比特，表示目的主机的IP地址。</li>
+</ul>
+<h2 id="IP数据报的发送和转发过程"><a href="#IP数据报的发送和转发过程" class="headerlink" title="IP数据报的发送和转发过程"></a>IP数据报的发送和转发过程</h2><p>IP数据报的发送和转发过程包含两部分：<strong>主机发送IP数据报</strong>、<strong>路由器转发数据报</strong>。</p>
+<p>同一个网络中的主机是可以直接通信的， 这叫做<strong>直接交付</strong>，而不同网络中间的主机是不能直接通信的，需要通过路由器进行中转，这属于<strong>间接交付</strong>。</p>
+<p>源主机IP与子网掩码进行与运算得到网络地址，目标主机IP与子网掩码与运算，两者网络地址如果相等则处于同一个子网，可以直接通信，否则需要将数据发送给默认网关（路由器）</p>
+<p>再由路由器根据路由表选取主机进行转发</p>
+<ul>
+<li>首先<strong>检查lP数据报首部是否出错</strong>：若出错，则直接丢弃该lP数据报并通告源主机，若没有出错，则进行转发</li>
+<li>然后<strong>根据IP数据报的目的地址在路由表中查找匹配的条目</strong>：若找到匹配的条目，则转发给条目中指示的下一跳若找不到，则丢弃该IP数据报并通告源主机</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/67c3d16955764a238dabe8c3825f1148.png" style="zoom:80%;" />
+
+<h2 id="路由表"><a href="#路由表" class="headerlink" title="路由表"></a>路由表</h2><ul>
+<li><p><strong>路由就是报文从源端到目的端的路径</strong>。当报文从路由器到目的网段有多条路由可达时，路由器可以根据路由表中最佳路由进行转发。</p>
+</li>
+<li><p>在计算机网络中，路由表（routing table）是一个<strong>存储在路由器或者联网计算机中的电子表格（文件）或类数据库</strong>。<strong>路由表存储着指向特定网络地址的路径</strong>。<strong>路由表建立的主要目标是为了实现路由协议和静态路由选择。路由表就相当于一张地图告诉数据报该如何去往目的地。</strong></p>
+</li>
+<li><p>路由器会根据路由表进行数据包的转发</p>
+<ul>
+<li>在ubuntu系统下我们可以使用<strong>route -n</strong> 命令查看系统的路由表</li>
+<li>在windows下可以使用 <strong>route print</strong> 命令查看系统的路由表</li>
+<li>ubuntu和windows系统的路由表中都有一条特殊的路由：目标地址为全网地址0.0.0.0 ，子网掩码为0.0.0.0，对应下一跳的地址为网关地址<ul>
+<li>这条路由是默认路由，是对IP数据包中的目的地址找不到存在的其他路由时，路由器所选择的路由。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>路由表的类型</p>
+<ul>
+<li><strong>动态路由</strong>：动态路由是指动态路由协议(如RIP)自动建立路由，并且能够根据实际情况的变化适时地进行调整。<ul>
+<li>动态路由之所以能根据网络的情况自动计算路由、选择转发路径，是由于当网络发生变化时，路由器之间彼此交换的路由信息会告知对方网络的这种变化，通过信息扩散使所有路由器都能得知网络变化。</li>
+<li>路由器根据某种路由算法（不同的动态路由协议算法不同）把收集到的路由信息加工成路由表，供路由器在转发IP报文时查阅</li>
+<li>常见的动态路由协议有：RIP、OSPF、IS-IS、BGP、IGRP/EIGRP</li>
+</ul>
+</li>
+<li><strong>静态路由</strong>：由网络管理员手动配置的路由。<ul>
+<li>Linux系统静态路由操作：<ul>
+<li>添加路由：<strong>route -n add -net 目标地址/子网掩码位数 gw 下一跳</strong>，例如：route -n add -net 192.168.1.0/24 192.168.33.2</li>
+<li>添加默认路由：<strong>route add default gw IP</strong></li>
+<li>删除路由：<strong>route delete -net 目标地址/子网掩码位数</strong>，例如：route  delete -net 192.168.1.0/24</li>
+<li><strong>注意：参数-net 表示操作某个网段，如果操作的数具体某台主机的地址则使用-host选项</strong></li>
+</ul>
+</li>
+<li>路由器静态路由操作：<ul>
+<li>添加路由：<strong>ip route 目标地址 子网掩码 下一跳地址</strong>，例如：ip route 192.168.3.0 255.255.255.0 192.168.1.1</li>
+<li>删除路由：<strong>no ip route 目标地址 子网掩码 下一跳地址</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="ARP高速缓存表"><a href="#ARP高速缓存表" class="headerlink" title="ARP高速缓存表"></a>ARP高速缓存表</h2><p>如果网络中的主机需要互相通信，那么源主机必须要知道目的主机的IP地址和MAC地址，因为在数据链路层封装的MAC帧中需要封装目的地址和源地址。当已知目的主机的IP地址时，可以<strong>通过ARP协议获得目的主机的MAC地址</strong>。</p>
+<p>ARP高速缓存(ARP cache)，由最近的ARP项组成的一张临时表，表中记录了<strong>主机IP地址和MAC地址的对应关系</strong>。</p>
+<img src="/images/网络编程-网络体系结构/9c0c0912b4dc4ad39587fd9c9a72d685.png" style="zoom: 80%;" />
+
+<p>ARP请求报文封装在MAC帧中，目的地址为FF-FF-FF-FF，并且以广播的形式发送的。</p>
+<img src="/images/网络编程-网络体系结构/25de6ea226184a57a6a730cf818b2d71.png" style="zoom:50%;" />
+
+
+
+<img src="/images/网络编程-网络体系结构/984f2cb9f75549c2a6e4e1f249170816.png" style="zoom:80%;" />
+
+<p>ARP报文只能在发送主机所在的广播域中被使用</p>
+<h2 id="ARP欺骗"><a href="#ARP欺骗" class="headerlink" title="ARP欺骗"></a>ARP欺骗</h2><p>ARP 欺骗是一种以 <strong>ARP 地址解析协议为基础</strong>的一种网络攻击方式。</p>
+<p>ARP欺骗的原理：利用<strong>ARP协议没有安全认证机制</strong>，攻击者发送假的ARP数据包到网上，尤其是送到网关上。其目的是要让送至特定的IP地址的流量被错误送到攻击者所取代的地方。因此攻击者可将这些流量另行转送到真正的网关（被动式数据包嗅探，passive sniffing）或是篡改后再转送（中间人攻击，man-in-the-middle attack）。</p>
+<p>ARP欺骗分为两种：</p>
+<ul>
+<li><strong>主机型欺骗</strong>：攻击者向其他主机发送ARP响应包，攻击者在响应包中填入网关的IP地址和自己MAC地址，这样主机A应该发送给网关的数据包会被网关转发给主机B</li>
+<li><strong>网关型欺骗</strong>：攻击者向网关发送ARP响应包，攻击者在响应包中填入被攻击主机的IP地址和自己MAC地址，这样网关接收到互联网中发给主机A的数据时也会转发给主机B</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/4435eed3d6ea419fb434761a876bc276.png" style="zoom:50%;" />
+
+<p>ARP欺骗的危害：</p>
+<ul>
+<li>信息安全收到威胁</li>
+<li>网络延迟增加</li>
+<li>网络通信中断</li>
+</ul>
+<p>ARP欺骗防范方法：</p>
+<ul>
+<li>安装补丁</li>
+<li>静态绑定：网内的主机与网关做IP和MAC绑定</li>
+<li>使用ARP防火墙</li>
+<li>不要点开通讯工具中的一些可疑链接、图片、文件等。</li>
+</ul>
+<h1 id="六、运输层"><a href="#六、运输层" class="headerlink" title="六、运输层"></a>六、运输层</h1><p>物理层、数据链路层以及网络层它们共同解决了将主机通过异构网络互联起来所面临的问题，实现了主机到主机的通信。</p>
+<img src="/images/网络编程-网络体系结构/35de417d8a074dfb898629ff42762bed.png" style="zoom:50%;" />
+
+<p>两个主机进行通信实际上就是两个主机中的<strong>应用进程互相通信</strong>，应用进程之间的通信又称为<strong>端到端的通信</strong>。</p>
+<p>当网络的边缘部分中的两个主机使用网络的核心部分的功能进行端到端的通信时，只有位于<strong>网络边缘部分的主机</strong>的协议栈才有运输层，而网络核心部分中的路由器在转发分组时都只用到下三层（物理层、数据链路层、网络层）的功能。</p>
+<p><strong>如何为运行在不同主机上的应用进程提供直接的通信服务是运输层的任务。</strong></p>
+<p>运输层提供的是应用进程间的<strong>逻辑通信</strong>，“逻辑通信”的意思是：运输层之间的通信好像是沿水平方向传送数据。但事实上这两个运输层之间并没有一条水平方向的物理连接。</p>
+<p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/c3e695530ec4467db6883a5d8f664711.png" alt=""></p>
+<p>根据应用需求的不同，因特网的运输层为应用层提供了两种不同的运输协议，即<strong>面向连接的TCP</strong>和<strong>无连接的UDP</strong>。</p>
+<h2 id="端口号"><a href="#端口号" class="headerlink" title="端口号"></a>端口号</h2><p>TCP/IP体系的运输层使用<strong>端口号</strong>来区分应用层的不同应用进程。</p>
+<ul>
+<li><p>端口号使用<strong>16比特</strong>表示，取值范围0~65535</p>
+</li>
+<li><p>熟知端口号：0~1023，IANA把这些端口号指派给了TCP/IP体系中最重要的一些应用协议，例如：<strong>FTP使用21/20，HTTP使用80，DNS使用53</strong>。</p>
+</li>
+<li><p>登记端口号:1024~49151，为没有熟知端口号的应用程序使用。使用这类端口号必须在IANA按照规定的手续登记，以防止重复。例如：Microsoft RDP微软远程桌面使用的端口是3389。</p>
+</li>
+<li><p>短暂端口号:49152~65535，留给客户进程选择暂时使用。当服务器进程收到客户进程的报文时，就知道了客户进程所使用的动态端口号。通信结束后，这个端口号可供其他客户进程以后使用。</p>
+</li>
+<li><p>常用端口号及对应的网络应用程序表格如下：</p>
+<img src="/images/网络编程-网络体系结构/c48154d2fc544ceeadd960656632e024-1670236276270.png" style="zoom: 67%;" />
+</li>
+</ul>
+<ul>
+<li><p>在Linux中/etc/service文件中保存了知名的服务器端口号</p>
+<img src="/images/网络编程-网络体系结构/fd34cda6cf984c2a9a0fd954588e4154.png" style="zoom: 67%;" />
+</li>
+<li><p><strong>端口号只具有本地意义</strong>，即端口号只是为了标识本计算机应用层中的各进程，在因特网中,不同计算机中的相同端口号是没有联系的。</p>
+</li>
+</ul>
+<h2 id="传输控制协议TCP"><a href="#传输控制协议TCP" class="headerlink" title="传输控制协议TCP"></a>传输控制协议TCP</h2><p>传输控制协议 TCP (Transmission Control Protocol)一种<strong>基于连接的可靠的稳定的无重复的传输协议</strong>。</p>
+<h3 id="TCP头部信息"><a href="#TCP头部信息" class="headerlink" title="TCP头部信息"></a>TCP头部信息</h3><img src="/images/网络编程-网络体系结构/1635157ce88b4a5490fe330274ea253d.png" style="zoom:50%;" />
+
+<img src="/images/网络编程-网络体系结构/60f25c753f3545c4931ad4018307698d.png" style="zoom:50%;" />
+
+<ul>
+<li><strong>16位源端口号（Source Port）</strong>：发送主机中进程的端口号</li>
+<li><strong>16位目的端口号（Destination Port）</strong>：接收主机中进程的端口号</li>
+<li><strong>32位序列号（Sequence Number）</strong>：每一个包中都包含序列号，序列号被系统初始化为某个随机值ISN。后续的TCP报文段中序号加上该报文段所携带数据的第一个字节在整个字节流中的偏移。例如，某个TCP报文段传送的数据是字节流中的第1025～2048字节，那么该报文段的序号值就是ISN+1025</li>
+<li><strong>32位确认号（Acknowledgment Number）</strong>：目的主机返回确认号，使源主机知道某个或几个报文段已被接收</li>
+<li><strong>四位首部长度（Header Length）</strong>：由于TCP首部包含一个长度可变的选项部分，所以需要这么一个值来指定这个TCP报文段到底有多长</li>
+<li><strong>URG标志</strong>：表示紧急指针（urgent pointer）是否有效</li>
+<li><strong>ACK标志</strong>：表示确认号是否有效。我们称携带ACK标识的TCP报文段为确认报文段</li>
+<li><strong>PSH标志</strong>：提示接收端应用程序应该立即从TCP接收缓冲区中读走数据，为接收后续数据腾出空间（如果应用程序不将接收到的数据读走，它们就会一直停留在TCP接收缓冲区中）</li>
+<li><strong>RST标志</strong>：表示要求对方重新建立连接。我们称携带RST标志的TCP报文段为复位报文段</li>
+<li><strong>SYN标志</strong>：表示请求建立一个连接。我们称携带SYN标志的TCP报文段为同步报文段</li>
+<li><strong>FIN标志</strong>：表示通知对方本端要关闭连接了。我们称携带FIN标志的TCP报文段为结束报文段</li>
+<li>1<strong>6位窗口大小（window size）</strong> ：是TCP流量控制的一个手段。这里说的窗口，指的是接收通告窗口（Receiver Window，RWND）。它告诉对方本端的TCP接收缓冲区还能容纳多少字节的数据，这样对方就可以控制发送数据的速度</li>
+<li><strong>16位校验和（TCP check sum）：</strong> 由发送端填充，接收端对TCP报文段执行CRC算法以检验TCP报文段在传输过程中是否损坏。注意，这个校验不仅包括TCP头部，也包括数据部分。这也是TCP可靠传输的一个重要保障。</li>
+<li><strong>16位紧急指针（urgent pointer）</strong> ：是一个正的偏移量。它和序号字段的值相加表示最后一个紧急数据的下一字节的序号。因此，确切地说，这个字段是紧急指针相对当前序号的偏移，不妨称之为紧急偏移。TCP的紧急指针是发送端向接收端发送紧急数据的方法。</li>
+<li><strong>TCP头部选项</strong> ：TCP头部的最后一个选项字段（options）是可变长的可选信息。这部分最多包含40字节</li>
+</ul>
+<h3 id="TCP运输连接的阶段"><a href="#TCP运输连接的阶段" class="headerlink" title="TCP运输连接的阶段"></a>TCP运输连接的阶段</h3><p>TCP连接的建立需要解决以下三个问题：</p>
+<ul>
+<li>使TCP双方能够确知对方的存在</li>
+<li>使TCP双方能够协商一些参数（如最大窗口值、是否使用窗口扩大选项和时间戳选项以及服务质量等)</li>
+<li>使TCP双方能够对运输实体资源（如缓存大小、连接表中的项目等)进行分配</li>
+</ul>
+<h4 id="三次握手建立连接"><a href="#三次握手建立连接" class="headerlink" title="三次握手建立连接"></a><strong>三次握手建立连接</strong></h4><ul>
+<li>由客户端的某个进程主动发起TCP连接建立，最初两端的TCP进程都处于<strong>关闭状态</strong></li>
+<li>TCP服务器被动等待客户进程的TCP请求，所以TCP服务器进入<strong>监听状态</strong></li>
+<li>TCP客户进程向TCP服务器进程发送TCP建接请求报文段，并且进入<strong>同步已发送状态</strong></li>
+<li>TCP连接请求报文段首部中的同步位<strong>SYN</strong>被设置为1，表明这是一个TCP连接请求报文段，32位序列号字段<strong>seq</strong>被设置了一个初始值x，作为TCP客户进程所选择的初始序号。</li>
+<li>TCP服务器进程接收到TCP连接请求报文段后，如果同意建立连接，则向TCP客户进程发送TCP连接请求确认报文段，并且进入<strong>同步已接收状态</strong>，该报文段首部中的同步位<strong>SYN和确认位ACK都设置为1</strong>，表明这是一个TCP连接请求确认报文段。<strong>序号字段seq被设置了一个初始值y</strong>，作为TCP服务器进进程选择的初始序号，确认号字段<strong>ack的值被设置成x+1</strong>，表明接收到了TCP客户进程序号为x的报文。</li>
+<li>TCP客户进程收到TCP连接请求确认报文段后，还要向TCP服务器进程发送一个普通的TCP确认报文段，并且进入连接已建立状态，报文段首部中的<strong>确认位ACK设置为1</strong>，表明这是一个普通的TCP确认报文段。序列号字段<strong>seq</strong>设置为x+1，确认号字段<strong>ack的值被设置成y+1</strong>，表明接收到了TCP服务进程序号为y的报文，TCP服务器进程收到该确认报文段后也进入<strong>连接已建立状态</strong>。</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/2a6ce72a806c44679a6f2bb7b31862e4.png" style="zoom: 50%;" />
+
+<h4 id="使用两次握手而不是三次握手？"><a href="#使用两次握手而不是三次握手？" class="headerlink" title="使用两次握手而不是三次握手？"></a>使用两次握手而不是三次握手？</h4><ul>
+<li><p>假设TCP客户进程发送了一个TCP请求报文段，但是该报文段在网络结点中被长时间滞留了，TCP客户采用超时重传机制重发TCP请求报文段并且被TCP服务进程接收，TCP服务进程发送一个TCP连接请求确认报文段，然后TCP服务进程和客户进程可以进行数据的传输，数据传输完成以后双方都处于关闭状态。</p>
+</li>
+<li><p>随后滞留在网络结点中的那个失效的TCP请求报文段被TCP服务进程接收，TCP服务进程又发送一个TCP连接请求确认报文段，并且进入连接已建立状态，由于TCP客户进程并没有发起新的TCP连接请求，并且已经处于关闭状态了，因此不会理会TCP服务器发送的报文段，但是TCP服务器进程已经进入了连接已建立状态，他认为新的TCP连接已经建立好了，就会一直等待TCP客户进程发来数据，将会浪费TCP服务器主机的很多资源。</p>
+<img src="/images/网络编程-网络体系结构/3bbe482d02224af2a10b1878d3c20d2d.png" style="zoom:50%;" />
+
+</li>
+</ul>
+<h4 id="四次挥手断开连接"><a href="#四次挥手断开连接" class="headerlink" title="四次挥手断开连接"></a><strong>四次挥手断开连接</strong></h4><p>TCP通过四次挥手来释放连接，数据通信结束后，TCP双方都可以释放连接</p>
+<ul>
+<li>假设由客户进程主动关闭TCP连接</li>
+<li><strong>客户进程发送连接释放报文段</strong>，并且进入<strong>终止等待1状态</strong>，该报文段中的首部终止位FIN设置位1，ACK设置为1，表明这是一个连接释放报文段，同时也对之前接收打报文段进行确认，seq=u表示TCP客户进程之前已发送过的数据的最后一个字节的序号+1，ack=v表示客户进程之前已收到的数据的最后一个字节的序号+1</li>
+<li>服务器进程接收到TCP连接释放报文段后，会<strong>发送一个普通的TCP确认报文段并且进入关闭等待状态</strong>，此时TCP客户进程到服务器进程这个方向的连接就释放了，这时的TCP连接属于<strong>半关闭状态</strong>，也就是TCP客户进程已经没有数据要发送了，但是TCP服务器进程如果还有数据需要发送，客户进程则还需要接收，这个状态可能会持续一段时间，直到TCP服务器进程将数据发送完毕。</li>
+<li><strong>TCP客户进程</strong>收到TCP确认报文段后就进入<strong>终止等待2状态</strong>，等待TCP服务器进程发出的TCP连接释放报文段。</li>
+<li>当TCP服务器进程的没有数据要发送了后，释放连接（被动关闭），<strong>TCP服务器进程发送TCP连接释放报文段并进入最后确认状态</strong>。FIN=1，ACK=1表明这是一个连接释放报文段，seq=w，ack=u+1同时也对之前收到的报文段进行确认。思考：为什么seq=w，而不是seq=v+1呢？</li>
+<li>TCP客户进程收到TCP连接释放报文段后，必须针对该报文段发送普通的TCP确认报文段，之后进入时间等待状态</li>
+<li>TCP服务器进程收到该报文段后就进入关闭状态</li>
+<li>而TCP客户进程还需要经过<strong>2MSL</strong>后才能进入关闭状态。MSL(Maximum Segment Lifetime)意思是<strong>最长报文段寿命</strong>，RFC793建议为<strong>2分钟</strong>。</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/e07d69f9129d47d4970fa4b45f340dad.png" style="zoom:50%;" />
+
+<h4 id="为什么TCP客户进程还需要经过2MSL后才能进入关闭状态？"><a href="#为什么TCP客户进程还需要经过2MSL后才能进入关闭状态？" class="headerlink" title="为什么TCP客户进程还需要经过2MSL后才能进入关闭状态？"></a>为什么TCP客户进程还需要经过<strong>2MSL</strong>后才能进入关闭状态？</h4><p>假设TCP客户进程收到TCP连接释放报文段，并且针对该报文段发送普通的TCP确认报文段后马上进入关闭状态，但是该确认报文段丢失了，TCP服务器进程无法收到该确认报文段，TCP服务器程序就会以为之前发送的TCP连接释放报文段TCP客户进程没有收到，然后TCP服务器进程会对之前所发送的TCP连接释放报文段超时重传，并仍处于最后确认状态。由于TCP客户进程已经处于关闭状态了，不会处理TCP服务器进程发送的连接释放报文段，这样就会造成TCP服务器反复发送TCP连接释放报文段，并且一直处于最后确认状态而无法进入关闭状态。因此客户端等待2MSL可以确保服务器进程收到最后一个TCP确认报文。</p>
+<img src="/images/网络编程-网络体系结构/461b23d584c0464995a45a3fa1576713.png" style="zoom:50%;" />
+
+<h3 id="TCP可靠传输的实现"><a href="#TCP可靠传输的实现" class="headerlink" title="TCP可靠传输的实现"></a>TCP可靠传输的实现</h3><ul>
+<li><strong>分段传输</strong>：应用数据根据MSS（Maxitum Segment Size 最大分段大小，这个值TCP协议在实现的时候往往用MTU值代替（需要减去IP数据包包头的大小20Bytes和TCP数据段的包头20Bytes）所以往往MSS为1460 ）值被分割成TCP认为最适合发送的数据段。</li>
+</ul>
+<blockquote>
+<p>注意：在运输层的分段传输（分组传输）和网络层的IP数据报分片传输的区别：分段传输只有TCP协议才有的，并且分段的依据为MSS，分片传输的依据为MTU。</p>
+</blockquote>
+<ul>
+<li><p><strong>超时重传</strong>：当TCP发出一个段后，它启动一个定时器，等待目的端确认收到这个报文段。如果不能及时收到一个确认，将重发这个报文段。</p>
+</li>
+<li><p><strong>CRC校验和</strong>：TCP将保持它首部和数据的检验和如果收到段的检验和有差错，TCP将丢弃这个报文段和不确认收到此报文段。</p>
+</li>
+<li><p><strong>流量控制</strong>：TCP 提供一种机制可以让「发送方」根据「接收方」的实际接收能力控制发送的数据量，这就是所谓的流量控制。TCP连接的每一方都有固定大小的缓冲空间，TCP的接收端只允许发送端发送接收端缓冲区能接纳的数据。当接收方来不及处理发送方的数据，能提示发送方降低发送的速率，防止包丢失。TCP使用的流量控制协议是<strong>可变大小的滑动窗口协议</strong>。接收方有即时窗口（滑动窗口），随ACK报文发送。（<strong>TCP 利用滑动窗口实现流量控制）</strong></p>
+</li>
+<li><p><strong>滑动窗口</strong>：</p>
+<ul>
+<li><p><strong>应答机制</strong>：假如TCP 每发送一个数据报，都要进行一次确认应答。当上一个数据包收到了应答了， 再发送下一个，这个模式就有点像我和你面对面聊天，你一句我一句。这样的传输方式有一个缺点：<strong>数据包的往返时间越长，通信的效率就越低</strong>。为解决这个问题，我们可以使用累计应答。</p>
+<img src="/images/网络编程-网络体系结构/94702c93213041f7b4d74d25995dcd13.png" style="zoom: 33%;" />
+</li>
+<li><p><strong>累计应答</strong>：接收方在接收到多个数据包后再根据接收到的数据包进行应答，也称为<strong>累计确认</strong>。</p>
+</li>
+<li><p><strong>窗口</strong>：窗口的实现实际上是操作系统开辟的一个<strong>缓存空间</strong>，接收方根据实际情况在应答数据包中告知自己的接收窗口大小。<strong>窗口大小就是指无需等待确认应答，而可以继续发送数据的最大值（以字节为单位）</strong>。发送方主机在等到确认应答返回之前，必须在缓冲区（<strong>发送窗口</strong>）中保留已发送的数据。如果按期收到确认应答，此时数据就可以从缓存区清除。</p>
+</li>
+<li><p><strong>滑动窗口</strong>：如果发送窗口左部的字节已经发送并且收到了确认，那么就将发送窗口向右滑动一定距离，直到左部第一个字节不是已发送并且已确认的状态；接收窗口的滑动类似，接收窗口左部字节已经发送确认并交付主机，就向右滑动接收窗口。</p>
+<ul>
+<li>假设主机A发送数据给主机B，在建立TCP连接时，主机B在确认报文中将自己的接收窗口rwnd告知主机A。（假设接收窗口大小为400）</li>
+<li>主机A根据主机B的接收窗口大小创建自己的发送窗口（在内存上开辟一块空间缓存一个接收窗口大小的数据），并且假设每个数据包中载荷数据为100Bytes</li>
+<li>主机A分别将第一组数据（为了方便讲解假设seq=1，实际上应该为seq=ISN+1）, 第二组数据(seq=101)、第三组数据(seq=201)、第四组数据(seq=301)发送给主机B，中间不需要等待主机B的应答数据报（累计应答）</li>
+<li>假设第三组数据（seq=201）在输出过程中被丢失了，尽管主机B接收到了第四组数据，但是因为累计应答时只应答最大连续报文，所以应答数据包中ack=201表示序号201之前的所有数据全部正确接收。假设主机B将接收窗口大小调整为300，在应答报文中rwnd=300</li>
+<li>主机A接收到应答数据报后，将自己发送窗口中的序号1~200的数据删除，发送窗口往前（向右）移动并且将大小重新设置为300（开辟接收窗口大小的缓存序号为201-500的数据）</li>
+<li>主机B将序号为201，301，401的数据报发送给主机B</li>
+<li>假设以上三组数据报没有丢失，主机B在接收到所有数据后发送应答数据报，ack=501，并且将窗口调整为100，rwnd=100A</li>
+<li>主机A接收到应答数据报后，将自己发送窗口中的序号201~500的数据删除，发送窗口往前（向右）移动并且将大小重新设置为100（开辟接收窗口大小的缓存序号为501-600的数据）</li>
+<li>主机A将序号位600的数据报发送给主机B ，按照以上逻辑知道数据发送完毕。</li>
+</ul>
+</li>
+</ul>
+<img src="/images/网络编程-网络体系结构/1a6be778013148e2af24f50725672040.png" style="zoom:80%;" />
+- **接收窗口为0的处理**：当发送窗口被调整为0后，发送方就不能再发送数据了，假如接收方的接收窗口调整为大于0了，如果不采取特殊措施发送方是不知道的，因为接收方不会主动告知发送方自己接收窗口的大小。这时就需要**持续计数器**了，当发送方接收到接收窗口为0的应答报文时马上启动一个持续计时器，当定时达到时主动向接收方发送一个**零窗口探测报文**，该报文只携带一个字节的数据，然后这种逻辑直到接收方回复的接收窗口大于0。
+
+  <img src="/images/网络编程-网络体系结构/d44e97c3a3b74fb0872e118d5f235858.png" style="zoom:67%;" />
+
+</li>
+</ul>
+<h3 id="TCP的长连接和短链接"><a href="#TCP的长连接和短链接" class="headerlink" title="TCP的长连接和短链接"></a>TCP的长连接和短链接</h3><ul>
+<li><p><strong>长连接</strong>：TCP通信双方在建立好连接后，在较长一段时间内保持连接，直至某一方主动关闭连接。<strong>长连接多用于操作频繁，点对点的通讯</strong>，例如在物联网开发中某下位机需要定时地频繁向服务发送数据等。</p>
+</li>
+<li><p><strong>短链接</strong>：通信双方有数据交互时，就建立一个TCP连接，数据发送完成后，则断开此TCP连接。短连接多用于操作不频繁，点对点的通讯，例如：在HTTP/1.0中默认使用短连接。也就是说，客户端和服务器每进行一次HTTP操作，就建立一次连接，任务结束就中断连接。</p>
+<table>
+<thead>
+<tr>
+<th>连接</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>长连接</strong></td>
+<td>传输速度快，Server可以主动发送数据给Client</td>
+<td>保持的链接会占用系统资源，后台设计相对复杂</td>
+</tr>
+<tr>
+<td><strong>短连接</strong></td>
+<td>占用系统资源少，Server可以处理更多Client的链接</td>
+<td>频繁创建断开连接，Server无法主动发送数据</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h2 id="用户数据报协议UDP"><a href="#用户数据报协议UDP" class="headerlink" title="用户数据报协议UDP"></a>用户数据报协议UDP</h2><p>User Datagram Protocol，用户数据包协议。</p>
+<p>UDP是一种无连接的不可靠的传输协议（不需要进行三次握手和四次挥手）。</p>
+<p>UDP不提供数据包分组、组装和不能对数据包进行排序的缺点，也就是说，当报文发送之后，是无法得知其是否安全完整到达的，因此适合实时数据传输，例如：<strong>IP电话、网络视频会议</strong>等实时应用。</p>
+<img src="/images/网络编程-网络体系结构/0c34cec48016474689abbe7c127ddac0.png" style="zoom: 50%;" />
+
+<h3 id="UDP的头部"><a href="#UDP的头部" class="headerlink" title="UDP的头部"></a>UDP的头部</h3><img src="/images/网络编程-网络体系结构/59232102df5d4d7e8a6d0f5e454eab69.png" style="zoom:50%;" />
+
+<h3 id="单播、多播和广播"><a href="#单播、多播和广播" class="headerlink" title="单播、多播和广播"></a><strong>单播、多播和广播</strong></h3><p><strong>单播应用：DNS域名解析</strong>，域名系统是因特网上作为域名和IP(Internet Protocol Address)地址相互映射的一个分布式数据库。</p>
+<ul>
+<li>浏览器如何通过域名去查询URL对应的IP（对应服务器地址）呢？<ul>
+<li>浏览器缓存：浏览器会按照一定的频率缓存DNS记录。</li>
+<li>操作系统缓存：如果浏览器缓存中找不到需要的DNS记录，那就去操作系统中找。</li>
+<li>路由缓存：路由器也有DNS缓存。</li>
+<li>ISP的DNS服务器：ISP是互联网服务提供商(Internet Service Provider)的简称，ISP有专门的DNS服务器应对DNS查询请求</li>
+<li>根服务器：ISP的DNS服务器还找不到的话，它就会向根服务器发出请求，进行递归查询</li>
+<li><strong>当两个网络应用进程间需要快速传输大文件（音视频文件、图片文件等）时也可以使用UDP单播</strong>。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>多播应用：网络视频会议、教学，视频监控等</strong>。IP多播（也称多址广播或组播）技术，是一种允许一台或多台主机（多播源）发送单一数据包到多台主机（一次的，同时的）的TCP/IP网络技术。IP多播通信必须依赖于IP多播地址，在IPv4中它是一个D类IP地址，范围从<strong>224.0.0.0</strong>到<strong>239.255.255.255</strong>。</li>
+<li>广播的应用：ARP数据报广播</li>
+</ul>
+<p>在进行UDP编程时，UDP包的大小可以达到64k，但实际上MTU大小只有1k多，如果直接发一个超过MTU大小的包，就会在网络层被分片，这样的问题是，<strong>如果只要有一个分片在传输中出错了即校验不正确（这是较容易发生的），整个传输的udp包就被丢弃</strong>。注意是整个而不是单个分片。这就是为什么<strong>发送UDP包通常也是1k多</strong>大小的原因。</p>
+<h2 id="TCP和UDP的区别"><a href="#TCP和UDP的区别" class="headerlink" title="TCP和UDP的区别"></a>TCP和UDP的区别</h2><img src="/images/网络编程-网络体系结构/93c80a9a5be54627824624e16e7cb9ee.png" style="zoom:80%;" />
+
+<p>TCP传输协议时，一旦建立好TCP连接后，系统需要实时的维护该连接，所以TCP所消耗的系统资源比UDP要多。</p>
+<p>另外因为TCP的可靠性传输机制导致TCP传输数据时比UDP要慢的多。</p>
+<h1 id="七、应用层"><a href="#七、应用层" class="headerlink" title="七、应用层"></a>七、应用层</h1><p>应用层是网络体系结构中的最上层，所有的网络应用程序和服务都工作在应用层。</p>
+<p>位于传输层之上，主要提供两个终端设备上的应用程序之间信息交换的服务，定义了信息交换的格式，消息会交给下一层传输层来传输。</p>
+<h2 id="HTTP协议"><a href="#HTTP协议" class="headerlink" title="HTTP协议"></a>HTTP协议</h2><p><strong>超文本传输协议HTTP</strong>(HyperText Transfer Protocol)定义了浏览器(即万维网客户进程)怎样向万维网服务器请求万维网文档，以及万维网服务器怎样把万维网文档传送给浏览器。是处理<strong>客户端</strong>和<strong>服务端</strong>之间的通信</p>
+<h3 id="HTTP-1-0"><a href="#HTTP-1-0" class="headerlink" title="HTTP/1.0"></a>HTTP/1.0</h3><p>HTTP/1.0采用<strong>非持续连接</strong>方式。在该方式下，每次浏览器要请求一个文件都要与服务器建立TCP连接,当收到响应后就立即关闭连接。每请求一个文档就要有两倍的RTT的开销。若一个网页上有很多引用对象（例如图片等)<br>那么请求每一个对象都需要花费2RTT的时间。</p>
+<p>为了减小时延，浏览器通常会建立多个并行的TCP连接同时请求多个对象。但是，这会大量占用万维网服务器的资源，特别是万维网服务器往往要同时服务于大量客户的请求，这会使其负担很重。</p>
+<img src="/images/网络编程-网络体系结构/d33e35b5176645018a4328e80c931235.png" style="zoom:50%;" />
+
+<h3 id="HTTP-1-1"><a href="#HTTP-1-1" class="headerlink" title="HTTP/1.1"></a>HTTP/1.1</h3><p>HTTP/1.1采用<strong>持续连接</strong>方式。在该方式下，万维网服务器在发送响应后仍然保持这条连接，使同一个客户（浏览器）和该服务器可以继续在这条连接上传送后续的HTTP请求报文和响应报文。这并不局限于传送同一个页面上引用的对象，而是只要这些文档都在同一个服务器上就行。</p>
+<p>为了进一步提高效率，HTTP/1.1的持续连接还可以使用<strong>流水线方式工作</strong>，即浏览器在收到HTTP的响应报文之前就能够连续发送多个请求报文。这样的一个接一个的请求报文到达服务器后，服务器就发回一个接一个的响应报文。这样就节省了很多个RTT时间，使TCP连接中的空闲时间减少，提高了下载文档的效率。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"># 网络</a>
+              <a href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag"># 协议</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/30/%E5%88%86%E5%B8%83%E5%BC%8FID/" rel="prev" title="分布式ID">
+      <i class="fa fa-chevron-left"></i> 分布式ID
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/05/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/" rel="next" title="网络编程-简述网络设计">
+      网络编程-简述网络设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、计算机网络体系结构"><span class="nav-text">一、计算机网络体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#OSI"><span class="nav-text">OSI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-IP"><span class="nav-text">TCP&#x2F;IP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五层协议"><span class="nav-text">五层协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#应用层（application-layer）"><span class="nav-text">应用层（application layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运输层（transport-layer）"><span class="nav-text">运输层（transport layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络层（network-layer）"><span class="nav-text">网络层（network layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据链路层（data-link-layer）"><span class="nav-text">数据链路层（data link layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#物理层（physical-layer）"><span class="nav-text">物理层（physical layer）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、物理层"><span class="nav-text">二、物理层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传输媒体"><span class="nav-text">传输媒体</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、数据链路层"><span class="nav-text">三、数据链路层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念-1"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#封装帧"><span class="nav-text">封装帧</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#透明传输"><span class="nav-text">透明传输</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MTU"><span class="nav-text">MTU</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#差错校验"><span class="nav-text">差错校验</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、以太网"><span class="nav-text">四、以太网</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念-2"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#以太网-MAC地址"><span class="nav-text">以太网-MAC地址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概念-3"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#含义"><span class="nav-text">含义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MAC帧的格式"><span class="nav-text">MAC帧的格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MAC地址的识别"><span class="nav-text">MAC地址的识别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#以太网-交换机"><span class="nav-text">以太网-交换机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#帧的两种转发方式"><span class="nav-text">帧的两种转发方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#交换机自学习和转发帧的流程"><span class="nav-text">交换机自学习和转发帧的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#树协议STP"><span class="nav-text">树协议STP</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、网络层"><span class="nav-text">五、网络层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IPv4"><span class="nav-text">IPv4</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPv4-地址的分类"><span class="nav-text">IPv4 地址的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#A类地址"><span class="nav-text">A类地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B类地址"><span class="nav-text">B类地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C类地址"><span class="nav-text">C类地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#D、E类地址"><span class="nav-text">D、E类地址</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#特殊IP"><span class="nav-text">特殊IP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#子网"><span class="nav-text">子网</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#子网掩码"><span class="nav-text">子网掩码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#子网的划分"><span class="nav-text">子网的划分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#子网掩码的CIDR斜线记法"><span class="nav-text">子网掩码的CIDR斜线记法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IP-协议"><span class="nav-text">IP 协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IP数据报的发送和转发过程"><span class="nav-text">IP数据报的发送和转发过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由表"><span class="nav-text">路由表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ARP高速缓存表"><span class="nav-text">ARP高速缓存表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ARP欺骗"><span class="nav-text">ARP欺骗</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#六、运输层"><span class="nav-text">六、运输层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#端口号"><span class="nav-text">端口号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传输控制协议TCP"><span class="nav-text">传输控制协议TCP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP头部信息"><span class="nav-text">TCP头部信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP运输连接的阶段"><span class="nav-text">TCP运输连接的阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#三次握手建立连接"><span class="nav-text">三次握手建立连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用两次握手而不是三次握手？"><span class="nav-text">使用两次握手而不是三次握手？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四次挥手断开连接"><span class="nav-text">四次挥手断开连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么TCP客户进程还需要经过2MSL后才能进入关闭状态？"><span class="nav-text">为什么TCP客户进程还需要经过2MSL后才能进入关闭状态？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP可靠传输的实现"><span class="nav-text">TCP可靠传输的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP的长连接和短链接"><span class="nav-text">TCP的长连接和短链接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用户数据报协议UDP"><span class="nav-text">用户数据报协议UDP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UDP的头部"><span class="nav-text">UDP的头部</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单播、多播和广播"><span class="nav-text">单播、多播和广播</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP和UDP的区别"><span class="nav-text">TCP和UDP的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#七、应用层"><span class="nav-text">七、应用层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP协议"><span class="nav-text">HTTP协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-1-0"><span class="nav-text">HTTP&#x2F;1.0</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-1-1"><span class="nav-text">HTTP&#x2F;1.1</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">104</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">52</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
