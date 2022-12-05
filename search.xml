@@ -12079,7 +12079,7 @@
       </tags>
   </entry>
   <entry>
-    <title>网络编程-简述网络设计</title>
+    <title>网络编程-网络设计推导简述</title>
     <url>/2022/12/05/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/</url>
     <content><![CDATA[<h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><h2 id="MAC地址"><a href="#MAC地址" class="headerlink" title="MAC地址"></a>MAC地址</h2><p>MAC地址也叫物理地址、硬件地址，长度为 48 位，它是由网络设备制造商生产时烧录在网卡的EPROM（一种闪存芯片，通常可以通过程序擦写）。</p>
 <ul>
@@ -12087,6 +12087,8 @@
 <li>后 24 位（AE-3C-40）是该厂家自己分配的，一般表示系列号。</li>
 <li>只要不更改自己的 MAC 地址，MAC 地址在世界是唯一的。</li>
 </ul>
+<a id="more"></a>
+
 <h2 id="三张表"><a href="#三张表" class="headerlink" title="三张表"></a>三张表</h2><h3 id="MAC地址表"><a href="#MAC地址表" class="headerlink" title="MAC地址表"></a>MAC地址表</h3><img src="/images/网络编程-网络设计/image-20221201142609358.png" style="zoom:50%;" />
 
 <ul>
@@ -12097,7 +12099,7 @@
 <li>发送时，没有目标MAC地址映射关系则将数据包发送给所有端口，即发送给所有设备</li>
 <li>设备接收到自己的数据包，做出响应，响应数据从哪个端口进入，此端口和目标MAC的映射关系会被记录</li>
 </ul>
-<a id="more"></a></li>
+</li>
 <li><p>来源：以太网各个节点之间通过交换机通信，不断完善缓存起来</p>
 </li>
 </ul>
