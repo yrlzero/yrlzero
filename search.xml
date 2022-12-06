@@ -12111,8 +12111,8 @@
 <li>作用：设备和路由器中，用来保存IP地址和MAC地址的映射关系</li>
 <li>来源：不断通过ARP协议请求逐步完善</li>
 </ul>
-<h2 id="hub-集线器（物理层）"><a href="#hub-集线器（物理层）" class="headerlink" title="hub-集线器（物理层）"></a>hub-集线器（物理层）</h2><p>将电信号转发到所有出口（广播），不做任何处理，解决多机通讯。</p>
-<h2 id="交换机（数据链路层）"><a href="#交换机（数据链路层）" class="headerlink" title="交换机（数据链路层）"></a>交换机（数据链路层）</h2><p><code>集线器</code>只能进行广播，无法指定根据<code>目标MAC</code>进行发送，使用<code>交换机</code>能对指定目标发送数据。</p>
+<h2 id="hub-集线器"><a href="#hub-集线器" class="headerlink" title="hub-集线器"></a>hub-集线器</h2><p>将电信号转发到所有出口（广播），不做任何处理，解决多机通讯。</p>
+<h2 id="交换机"><a href="#交换机" class="headerlink" title="交换机"></a>交换机</h2><p><code>集线器</code>只能进行广播，无法指定根据<code>目标MAC</code>进行发送，使用<code>交换机</code>能对指定目标发送数据。</p>
 <p><code>交换机</code>根据自身维护的<code>MAC地址表</code>，找到对应的端口将数据发送出去。</p>
 <h2 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h2><p>数据到达交换机，<code>交换机</code>内部通过自己维护的<code>MAC地址表</code>找到<code>目标MAC</code>映射的端口，把数据通过对应端口发送给对应的设备。</p>
 <p>这种传输方式组成的小范围网络叫做以太网。</p>
@@ -12227,7 +12227,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="交换机"><a href="#交换机" class="headerlink" title="交换机"></a>交换机</h2><ul>
+<h2 id="交换机-1"><a href="#交换机-1" class="headerlink" title="交换机"></a>交换机</h2><ul>
 <li>数据包必须含有目标MAC地址</li>
 <li>通过MAC地址表查询MAC地址对应的端口<ul>
 <li>存在端口，按照该端口发送</li>
