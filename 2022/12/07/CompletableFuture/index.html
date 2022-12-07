@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="实现了异步非阻塞的效果，任务执行完毕会主动通知，不需要调用方主动获取。  使用栈结构存储后续任务  无法保证后续任务执行顺序，任务是异步执行的，后续任务在放入栈之前，前置任务如果执行完则不需要放入栈中，直接执行；否则弹栈执行  在异步情况下，如果不指定线程池，异步任会交给ForkJoinPool执行  ForkJoinPool内部是守护线程，守护线程在主线程结束后就不干活了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CompletableFuture使用">
+<meta property="og:url" content="http://yrlzero.github.io/2022/12/07/CompletableFuture/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="实现了异步非阻塞的效果，任务执行完毕会主动通知，不需要调用方主动获取。  使用栈结构存储后续任务  无法保证后续任务执行顺序，任务是异步执行的，后续任务在放入栈之前，前置任务如果执行完则不需要放入栈中，直接执行；否则弹栈执行  在异步情况下，如果不指定线程池，异步任会交给ForkJoinPool执行  ForkJoinPool内部是守护线程，守护线程在主线程结束后就不干活了">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-12-07T08:53:42.363Z">
+<meta property="article:modified_time" content="2022-12-07T08:57:27.716Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="多线程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/12/07/CompletableFuture/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CompletableFuture使用 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/12/07/CompletableFuture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CompletableFuture使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-12-07 16:53:42 / 修改时间：16:57:27" itemprop="dateCreated datePublished" datetime="2022-12-07T16:53:42+08:00">2022-12-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/CompletableFuture/" itemprop="url" rel="index"><span itemprop="name">CompletableFuture</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <ul>
+<li><p>实现了<strong>异步非阻塞</strong>的效果，任务执行完毕会主动通知，不需要调用方主动获取。</p>
+</li>
+<li><p>使用<strong>栈</strong>结构存储后续任务</p>
+</li>
+<li><p>无法保证后续任务执行顺序，任务是异步执行的，后续任务在放入<strong>栈</strong>之前，前置任务如果执行完则不需要放入<strong>栈</strong>中，直接执行；否则弹栈执行</p>
+</li>
+<li><p>在异步情况下，如果不指定线程池，异步任会交给ForkJoinPool执行</p>
+</li>
+<li><p>ForkJoinPool内部是守护线程，守护线程在主线程结束后就不干活了</p>
+</li>
+</ul>
+<a id="more"></a>
+
+<h1 id="一、生成异步任务"><a href="#一、生成异步任务" class="headerlink" title="一、生成异步任务"></a>一、生成异步任务</h1><h2 id="1-1、supplyAsync"><a href="#1-1、supplyAsync" class="headerlink" title="1.1、supplyAsync"></a>1.1、supplyAsync</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Integer&gt; resultCompletableFuture = CompletableFuture</span><br><span class="line">        <span class="comment">//开启异步CompletableFuture任务</span></span><br><span class="line">        .supplyAsync(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"CompletableFuture线程："</span> + Thread.currentThread().getName());</span><br><span class="line">            <span class="keyword">return</span> <span class="number">111</span>;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-2、runAsync"><a href="#1-2、runAsync" class="headerlink" title="1.2、runAsync"></a>1.2、runAsync</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture</span><br><span class="line">        .runAsync(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">"异步执行run"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="二、前一个任务执行完，再执行后续操作"><a href="#二、前一个任务执行完，再执行后续操作" class="headerlink" title="二、前一个任务执行完，再执行后续操作"></a>二、前一个任务执行完，再执行后续操作</h1><h2 id="2-1、thenApply"><a href="#2-1、thenApply" class="headerlink" title="2.1、thenApply"></a>2.1、thenApply</h2><p>获取上一个CompletableFuture任务的处理结果，处理后返回新结果</p>
+<p>t异步使用thenAcceptAsync，有时前一个任务执行完线程空闲ForkJoinPool直接拿来复用，控制台打印的话体现为同一个线程，可以通过制定线程池让结果看起来更明显</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Integer result = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"supplyAsync线程："</span> + Thread.currentThread().getName());</span><br><span class="line">            <span class="keyword">return</span> <span class="number">111</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">//上一个CompletableFuture任务执行完再执行</span></span><br><span class="line">        .thenApply((preResult -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"thenApply线程："</span> + Thread.currentThread().getName());</span><br><span class="line">            <span class="keyword">return</span> preResult + <span class="number">222</span>;</span><br><span class="line">        &#125;))</span><br><span class="line">        .get();</span><br><span class="line">    System.out.println(<span class="string">"result："</span> + result);</span><br><span class="line">    <span class="comment">//supplyAsync线程：ForkJoinPool.commonPool-worker-9</span></span><br><span class="line">    <span class="comment">//thenApply线程：ForkJoinPool.commonPool-worker-9</span></span><br><span class="line">    <span class="comment">//result：333</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2、thenAccept"><a href="#2-2、thenAccept" class="headerlink" title="2.2、thenAccept"></a>2.2、thenAccept</h2><p>接受上一个任务结果进行处理，没有返回结果;异步使用thenAcceptAsync</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">    	<span class="comment">//接受上一个任务结果进行处理，没有返回结果;异步使用thenAcceptAsync</span></span><br><span class="line">        .thenAccept(result -&gt; System.out.println(result + <span class="number">222</span>));</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3、thenRun"><a href="#2-3、thenRun" class="headerlink" title="2.3、thenRun"></a>2.3、thenRun</h2><p>没有入参和反参，当之前completableFuture执行完后，运行runnable任务；异步使用thenRunAsync</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"supplyAsync"</span> + Thread.currentThread().getName());<span class="comment">//supplyAsyncForkJoinPool.commonPool-worker-9</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">111</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">//没有入参和反参，当之前completableFuture执行完后，运行runnable任务；异步使用thenRunAsync</span></span><br><span class="line">        .thenRun(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"thenRun:"</span> + Thread.currentThread().getName());<span class="comment">//thenRun:main</span></span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-4、thenCombine"><a href="#2-4、thenCombine" class="headerlink" title="2.4、thenCombine"></a>2.4、thenCombine</h2><p>与thenApply类似，返回类型为CompletableFuture；异步使用thenComposeAsync</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Integer join = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        <span class="comment">//与thenApply类似，前一个任务处理完的结果作为入参，返回一个CompletableFuture任务类型</span></span><br><span class="line">        .thenCompose(result -&gt;</span><br><span class="line">                &#123;</span><br><span class="line">                    System.out.println(<span class="string">"thenCompose："</span> + result);<span class="comment">//thenCompose：111</span></span><br><span class="line"></span><br><span class="line">                    <span class="keyword">return</span> CompletableFuture.supplyAsync(() -&gt; result + <span class="number">222</span>);</span><br><span class="line">                &#125;</span><br><span class="line">        ).join();</span><br><span class="line">System.out.println(join);<span class="comment">//333</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="三、两个任务执行完，再执行后续操作"><a href="#三、两个任务执行完，再执行后续操作" class="headerlink" title="三、两个任务执行完，再执行后续操作"></a>三、两个任务执行完，再执行后续操作</h1><h2 id="3-1、thenCombine"><a href="#3-1、thenCombine" class="headerlink" title="3.1、thenCombine"></a>3.1、thenCombine</h2><p>两个任务一起执行，获取两个任务执行结果，处理后返回；异步使用thenCombineAsync</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Integer result = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        <span class="comment">//两个任务一起执行，获取执行结果在一起处理</span></span><br><span class="line">        .thenCombine(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>),</span><br><span class="line">                <span class="comment">//BiFunction,两个CompletableFuture任务结果作为入参，处理返回</span></span><br><span class="line">                (preResult1, preResult2) -&gt;</span><br><span class="line">                &#123;</span><br><span class="line">                    System.out.println(<span class="string">"thenCombine BiFunction，thread："</span> + Thread.currentThread().getName() + <span class="string">"，preResult1："</span> + preResult1 + <span class="string">"，preResult2："</span> + preResult2);</span><br><span class="line">                    <span class="comment">//thenCombine BiFunction，preResult1：111，preResult2：222</span></span><br><span class="line">                    <span class="keyword">return</span> preResult1 + preResult2 + <span class="number">333</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        )</span><br><span class="line">        .join();</span><br><span class="line">System.out.println(<span class="string">"thenCombine result:"</span> + result);</span><br><span class="line"><span class="comment">//thenCombine result:666</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2、thenAcceptBoth"><a href="#3-2、thenAcceptBoth" class="headerlink" title="3.2、thenAcceptBoth"></a>3.2、thenAcceptBoth</h2><p>两个任务一起执行，获取两个任务执行结果处理，无返回结果；异步使用thenAcceptBothAsync</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Void join = CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        .thenAcceptBoth(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>),</span><br><span class="line">                <span class="comment">//BiConsumer,把两个CompletableFuture任务的结果作为入参，没有返回值</span></span><br><span class="line">                (preResult1, preResult2) -&gt; &#123;</span><br><span class="line">                    System.out.println(<span class="string">"thenCombine BiConsumer，thread："</span> + Thread.currentThread().getName() + <span class="string">"，preResult1："</span> + preResult1 + <span class="string">"，preResult2："</span> + preResult2);</span><br><span class="line">                    <span class="comment">//thenCombine BiConsumer，thread：main，preResult1：111，preResult2：222</span></span><br><span class="line">                &#125;</span><br><span class="line">        ).join();</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3、runAfterBoth"><a href="#3-3、runAfterBoth" class="headerlink" title="3,3、runAfterBoth"></a>3,3、runAfterBoth</h2><p>两个任务一起执行完调用Runnable任务；异步使用runAfterBothAsync</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        <span class="comment">//等待两个CompletableFuture执行完，运行runnable任务</span></span><br><span class="line">        .runAfterBoth(CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>), <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">"run："</span> + Thread.currentThread().getName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="四、两个任务任一执行完，再执行后续操作"><a href="#四、两个任务任一执行完，再执行后续操作" class="headerlink" title="四、两个任务任一执行完，再执行后续操作"></a>四、两个任务任一执行完，再执行后续操作</h1><h2 id="4-1、applyToEither"><a href="#4-1、applyToEither" class="headerlink" title="4.1、applyToEither"></a>4.1、applyToEither</h2><p>两个CompletableFuture一起执行，当有一个任务处理完，则获取结果值传入Function执行后续处理，返回处理结果；异步使用applyToEitherAsync</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Integer join = CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        .applyToEither(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>),</span><br><span class="line">                (preResult) -&gt; &#123;</span><br><span class="line">                    System.out.println(<span class="string">"applyToEither preResult:"</span> + preResult); <span class="comment">//applyToEither preResult:111</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="number">333</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        ).join();</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-2、acceptEither"><a href="#4-2、acceptEither" class="headerlink" title="4.2、acceptEither"></a>4.2、acceptEither</h2><p>两个CompletableFuture一起执行，当有一个任务处理完，则获取结果值执行后续处理，无返回；异步使用acceptEitherAsync</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        .acceptEither(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>),</span><br><span class="line">                (preResult) -&gt;</span><br><span class="line">                        System.out.println(<span class="string">"acceptEither:"</span> + preResult)</span><br><span class="line">        );</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-3、runAfterEither"><a href="#4-3、runAfterEither" class="headerlink" title="4.3、runAfterEither"></a>4.3、runAfterEither</h2><p>两个CompletableFuture一起执行，当有任一任务处理完，则执行Runnable，无入参无返回</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture &#x3D; CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; 111)</span><br><span class="line">        .runAfterEither(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; 222),</span><br><span class="line">                new Runnable() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public void run() &#123;</span><br><span class="line">                        System.out.println(&quot;run:&quot; + Thread.currentThread().getName());</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="五、异常处理"><a href="#五、异常处理" class="headerlink" title="五、异常处理"></a>五、异常处理</h1><h2 id="exceptionally"><a href="#exceptionally" class="headerlink" title="exceptionally"></a>exceptionally</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Integer join = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="number">1</span> / <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">111</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">//捕获前面任务的异常信息进行处理，返回异常默认值，不提供异步操作</span></span><br><span class="line">        .exceptionally(ex -&gt; &#123;</span><br><span class="line">            System.out.println(ex);<span class="comment">//java.util.concurrent.CompletionException: java.lang.ArithmeticException: / by zero</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">222</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">        .join();</span><br><span class="line">System.out.println(<span class="string">"join："</span> + join);<span class="comment">//join：222</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="六、获取结果"><a href="#六、获取结果" class="headerlink" title="六、获取结果"></a>六、获取结果</h1><h2 id="6-1、join"><a href="#6-1、join" class="headerlink" title="6.1、join"></a>6.1、join</h2><p>join抛出的是unchecked Exception 不会要求开发者try…catch</p>
+<h2 id="6-2、get"><a href="#6-2、get" class="headerlink" title="6.2、get"></a>6.2、get</h2><p>get需要捕获处理异常</p>
+<h1 id="七、结果处理"><a href="#七、结果处理" class="headerlink" title="七、结果处理"></a>七、结果处理</h1><h2 id="7-1、whenComplete"><a href="#7-1、whenComplete" class="headerlink" title="7.1、whenComplete"></a>7.1、whenComplete</h2><p>任务结果和异常处理，不影响最终结果的返回</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Integer result = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        <span class="comment">//获取上一个任务已完成的结果（对此值操作不影响最终结果的返回）和异常</span></span><br><span class="line">        .whenComplete((preResult, ex) -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"preResult："</span> + preResult + <span class="string">"，ex："</span> + ex);<span class="comment">//preResult：111，ex：null</span></span><br><span class="line">        &#125;).join();</span><br><span class="line">System.out.println(<span class="string">"result："</span> + result);<span class="comment">//result：111</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="7-2、handle"><a href="#7-2、handle" class="headerlink" title="7.2、handle"></a>7.2、handle</h2><p>任务结果和异常处理，带结果返回</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Integer result = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        .handle((preResult, ex) -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"preResult："</span> + preResult + <span class="string">"，ex："</span> + ex);<span class="comment">//preResult：111，ex：null</span></span><br><span class="line">            <span class="keyword">return</span> preResult + <span class="number">222</span>;</span><br><span class="line">        &#125;).join();</span><br><span class="line">System.out.println(<span class="string">"result："</span> + result);<span class="comment">//result：333</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="八、多个任务执行"><a href="#八、多个任务执行" class="headerlink" title="八、多个任务执行"></a>八、多个任务执行</h1><h2 id="8-1、allOf"><a href="#8-1、allOf" class="headerlink" title="8.1、allOf"></a>8.1、allOf</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; allOf = CompletableFuture</span><br><span class="line">        .allOf(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>),</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>)</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">"allOf："</span> + allOf.join());</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-2、anyOf"><a href="#8-2、anyOf" class="headerlink" title="8,2、anyOf"></a>8,2、anyOf</h2><p>等待任一任务完成获取结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Object&gt; anyOf = CompletableFuture</span><br><span class="line">        .anyOf(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>),</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>)</span><br><span class="line">        );</span><br><span class="line">System.out.println(<span class="string">"anyOf："</span> + anyOf.join());<span class="comment">//anyOf：111</span></span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"># 多线程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/05/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/" rel="prev" title="网络编程-网络设计推导简述">
+      <i class="fa fa-chevron-left"></i> 网络编程-网络设计推导简述
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、生成异步任务"><span class="nav-text">一、生成异步任务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1、supplyAsync"><span class="nav-text">1.1、supplyAsync</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2、runAsync"><span class="nav-text">1.2、runAsync</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、前一个任务执行完，再执行后续操作"><span class="nav-text">二、前一个任务执行完，再执行后续操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1、thenApply"><span class="nav-text">2.1、thenApply</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2、thenAccept"><span class="nav-text">2.2、thenAccept</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3、thenRun"><span class="nav-text">2.3、thenRun</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4、thenCombine"><span class="nav-text">2.4、thenCombine</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、两个任务执行完，再执行后续操作"><span class="nav-text">三、两个任务执行完，再执行后续操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1、thenCombine"><span class="nav-text">3.1、thenCombine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2、thenAcceptBoth"><span class="nav-text">3.2、thenAcceptBoth</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3、runAfterBoth"><span class="nav-text">3,3、runAfterBoth</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、两个任务任一执行完，再执行后续操作"><span class="nav-text">四、两个任务任一执行完，再执行后续操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1、applyToEither"><span class="nav-text">4.1、applyToEither</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2、acceptEither"><span class="nav-text">4.2、acceptEither</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3、runAfterEither"><span class="nav-text">4.3、runAfterEither</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、异常处理"><span class="nav-text">五、异常处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#exceptionally"><span class="nav-text">exceptionally</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#六、获取结果"><span class="nav-text">六、获取结果</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1、join"><span class="nav-text">6.1、join</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2、get"><span class="nav-text">6.2、get</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#七、结果处理"><span class="nav-text">七、结果处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1、whenComplete"><span class="nav-text">7.1、whenComplete</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2、handle"><span class="nav-text">7.2、handle</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#八、多个任务执行"><span class="nav-text">八、多个任务执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1、allOf"><span class="nav-text">8.1、allOf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-2、anyOf"><span class="nav-text">8,2、anyOf</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">52</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>

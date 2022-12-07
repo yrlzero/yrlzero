@@ -40,7 +40,7 @@
 <p>AQS中还有另外一个非常重要的内部类ConditionObject，它实现了Condition接口，主要用于实现条件锁。<br>ConditionObject中也维护了一个队列，这个队列主要用于等待条件的成立，当条件成立时，其他线程将signal这个队列的元素，将其移动到AQS的队列中，等待占有锁的线程释放锁后被唤醒<br>Condition典型的运用场景是在BlockingQueue中实现，当队列为空时，获取元素的线程阻塞在notEmpty条件上，一旦队列中添加了一个元素，将通知notEmpty条件，将其队列中的元素移动到AQS队列中等待被唤醒。</p>
 ]]></content>
       <categories>
-        <category>多线程</category>
+        <category>并发编程</category>
         <category>AQS</category>
       </categories>
       <tags>
@@ -7394,7 +7394,7 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">NIO有个DirectByteBuffer是用来操作堆外内存的，堆外内存由操作系统管理，gc无法回收，当DirectByteBuffer为null时，可以通过虚引用的方式检测到，此时Reference&lt;? extends M&gt; poll &#x3D; QUEUE.poll();可以获得GC回收的通知，进而去执行自定义的逻辑清理堆外内存。</span><br><span class="line"></span><br><span class="line">堆外内存操作：</span><br><span class="line">Unsafe类</span><br><span class="line">	&#x2F;&#x2F;分配内存</span><br><span class="line">	public long allocateMemory(long bytes)&#123;</span><br><span class="line">		return theInternalUnsafe.allocateMemory(bytes);</span><br><span class="line">	&#125;</span><br><span class="line">	&#x2F;&#x2F;回收内存</span><br><span class="line">	public void freeMemory(long address)&#123;</span><br><span class="line">		theInternalUnsafe.freeMemory(address);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
-        <category>多线程</category>
+        <category>并发编程</category>
       </categories>
       <tags>
         <tag>强软弱虚</tag>
@@ -7424,7 +7424,7 @@
 
 ]]></content>
       <categories>
-        <category>多线程</category>
+        <category>并发编程</category>
         <category>线程池</category>
       </categories>
       <tags>
@@ -7692,7 +7692,7 @@
 <p><img src="/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B/worker%E8%8E%B7%E5%8F%96%E9%94%81.png" alt=""></p>
 ]]></content>
       <categories>
-        <category>多线程</category>
+        <category>并发编程</category>
         <category>线程池</category>
       </categories>
       <tags>
@@ -7773,7 +7773,8 @@
 
 ]]></content>
       <categories>
-        <category>多线程</category>
+        <category>并发编程</category>
+        <category>队列</category>
       </categories>
       <tags>
         <tag>queue</tag>
@@ -12143,7 +12144,7 @@
 <h3 id="引入集线器"><a href="#引入集线器" class="headerlink" title="引入集线器"></a>引入集线器</h3><p>因此引入了一个<code>中间设备（集线器-hub）</code>，需要将网线插到<code>中间设备（集线器-hub）</code>，由这个设备进行转发，让彼此通信。</p>
 <p><img src="/images/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1/115037fi4rar1rfa6ew7ia.gif" alt=""></p>
 <blockquote>
-<p>集线器-hub（物理层），将电信号转发到所有出口（广播），不做任何处理，解决多机通讯。</p>
+<p>集线器-hub，将电信号转发到所有出口（广播），不做任何处理，解决多机通讯。</p>
 </blockquote>
 <p>所有连接到集线器的设备都有一个全局唯一的标识-<code>MAC地址</code>。当发送数据时，只要在头部拼接上<code>源MAC地址</code>和<code>目标MAC地址</code>，就知道要发送给谁。</p>
 <p>接收到数据的机器判断<code>目标MAC地址</code>是否为自己，是则接收，否则抛弃。</p>
@@ -13015,6 +13016,80 @@
       <tags>
         <tag>网络</tag>
         <tag>协议</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CompletableFuture使用</title>
+    <url>/2022/12/07/CompletableFuture/</url>
+    <content><![CDATA[<ul>
+<li><p>实现了<strong>异步非阻塞</strong>的效果，任务执行完毕会主动通知，不需要调用方主动获取。</p>
+</li>
+<li><p>使用<strong>栈</strong>结构存储后续任务</p>
+</li>
+<li><p>无法保证后续任务执行顺序，任务是异步执行的，后续任务在放入<strong>栈</strong>之前，前置任务如果执行完则不需要放入<strong>栈</strong>中，直接执行；否则弹栈执行</p>
+</li>
+<li><p>在异步情况下，如果不指定线程池，异步任会交给ForkJoinPool执行</p>
+</li>
+<li><p>ForkJoinPool内部是守护线程，守护线程在主线程结束后就不干活了</p>
+</li>
+</ul>
+<a id="more"></a>
+
+<h1 id="一、生成异步任务"><a href="#一、生成异步任务" class="headerlink" title="一、生成异步任务"></a>一、生成异步任务</h1><h2 id="1-1、supplyAsync"><a href="#1-1、supplyAsync" class="headerlink" title="1.1、supplyAsync"></a>1.1、supplyAsync</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Integer&gt; resultCompletableFuture = CompletableFuture</span><br><span class="line">        <span class="comment">//开启异步CompletableFuture任务</span></span><br><span class="line">        .supplyAsync(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"CompletableFuture线程："</span> + Thread.currentThread().getName());</span><br><span class="line">            <span class="keyword">return</span> <span class="number">111</span>;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-2、runAsync"><a href="#1-2、runAsync" class="headerlink" title="1.2、runAsync"></a>1.2、runAsync</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture</span><br><span class="line">        .runAsync(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">"异步执行run"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="二、前一个任务执行完，再执行后续操作"><a href="#二、前一个任务执行完，再执行后续操作" class="headerlink" title="二、前一个任务执行完，再执行后续操作"></a>二、前一个任务执行完，再执行后续操作</h1><h2 id="2-1、thenApply"><a href="#2-1、thenApply" class="headerlink" title="2.1、thenApply"></a>2.1、thenApply</h2><p>获取上一个CompletableFuture任务的处理结果，处理后返回新结果</p>
+<p>t异步使用thenAcceptAsync，有时前一个任务执行完线程空闲ForkJoinPool直接拿来复用，控制台打印的话体现为同一个线程，可以通过制定线程池让结果看起来更明显</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer result = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"supplyAsync线程："</span> + Thread.currentThread().getName());</span><br><span class="line">            <span class="keyword">return</span> <span class="number">111</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">//上一个CompletableFuture任务执行完再执行</span></span><br><span class="line">        .thenApply((preResult -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"thenApply线程："</span> + Thread.currentThread().getName());</span><br><span class="line">            <span class="keyword">return</span> preResult + <span class="number">222</span>;</span><br><span class="line">        &#125;))</span><br><span class="line">        .get();</span><br><span class="line">    System.out.println(<span class="string">"result："</span> + result);</span><br><span class="line">    <span class="comment">//supplyAsync线程：ForkJoinPool.commonPool-worker-9</span></span><br><span class="line">    <span class="comment">//thenApply线程：ForkJoinPool.commonPool-worker-9</span></span><br><span class="line">    <span class="comment">//result：333</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2、thenAccept"><a href="#2-2、thenAccept" class="headerlink" title="2.2、thenAccept"></a>2.2、thenAccept</h2><p>接受上一个任务结果进行处理，没有返回结果;异步使用thenAcceptAsync</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">    	<span class="comment">//接受上一个任务结果进行处理，没有返回结果;异步使用thenAcceptAsync</span></span><br><span class="line">        .thenAccept(result -&gt; System.out.println(result + <span class="number">222</span>));</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3、thenRun"><a href="#2-3、thenRun" class="headerlink" title="2.3、thenRun"></a>2.3、thenRun</h2><p>没有入参和反参，当之前completableFuture执行完后，运行runnable任务；异步使用thenRunAsync</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"supplyAsync"</span> + Thread.currentThread().getName());<span class="comment">//supplyAsyncForkJoinPool.commonPool-worker-9</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">111</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">//没有入参和反参，当之前completableFuture执行完后，运行runnable任务；异步使用thenRunAsync</span></span><br><span class="line">        .thenRun(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"thenRun:"</span> + Thread.currentThread().getName());<span class="comment">//thenRun:main</span></span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-4、thenCombine"><a href="#2-4、thenCombine" class="headerlink" title="2.4、thenCombine"></a>2.4、thenCombine</h2><p>与thenApply类似，返回类型为CompletableFuture；异步使用thenComposeAsync</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer join = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        <span class="comment">//与thenApply类似，前一个任务处理完的结果作为入参，返回一个CompletableFuture任务类型</span></span><br><span class="line">        .thenCompose(result -&gt;</span><br><span class="line">                &#123;</span><br><span class="line">                    System.out.println(<span class="string">"thenCompose："</span> + result);<span class="comment">//thenCompose：111</span></span><br><span class="line"></span><br><span class="line">                    <span class="keyword">return</span> CompletableFuture.supplyAsync(() -&gt; result + <span class="number">222</span>);</span><br><span class="line">                &#125;</span><br><span class="line">        ).join();</span><br><span class="line">System.out.println(join);<span class="comment">//333</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="三、两个任务执行完，再执行后续操作"><a href="#三、两个任务执行完，再执行后续操作" class="headerlink" title="三、两个任务执行完，再执行后续操作"></a>三、两个任务执行完，再执行后续操作</h1><h2 id="3-1、thenCombine"><a href="#3-1、thenCombine" class="headerlink" title="3.1、thenCombine"></a>3.1、thenCombine</h2><p>两个任务一起执行，获取两个任务执行结果，处理后返回；异步使用thenCombineAsync</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer result = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        <span class="comment">//两个任务一起执行，获取执行结果在一起处理</span></span><br><span class="line">        .thenCombine(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>),</span><br><span class="line">                <span class="comment">//BiFunction,两个CompletableFuture任务结果作为入参，处理返回</span></span><br><span class="line">                (preResult1, preResult2) -&gt;</span><br><span class="line">                &#123;</span><br><span class="line">                    System.out.println(<span class="string">"thenCombine BiFunction，thread："</span> + Thread.currentThread().getName() + <span class="string">"，preResult1："</span> + preResult1 + <span class="string">"，preResult2："</span> + preResult2);</span><br><span class="line">                    <span class="comment">//thenCombine BiFunction，preResult1：111，preResult2：222</span></span><br><span class="line">                    <span class="keyword">return</span> preResult1 + preResult2 + <span class="number">333</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        )</span><br><span class="line">        .join();</span><br><span class="line">System.out.println(<span class="string">"thenCombine result:"</span> + result);</span><br><span class="line"><span class="comment">//thenCombine result:666</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2、thenAcceptBoth"><a href="#3-2、thenAcceptBoth" class="headerlink" title="3.2、thenAcceptBoth"></a>3.2、thenAcceptBoth</h2><p>两个任务一起执行，获取两个任务执行结果处理，无返回结果；异步使用thenAcceptBothAsync</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Void join = CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        .thenAcceptBoth(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>),</span><br><span class="line">                <span class="comment">//BiConsumer,把两个CompletableFuture任务的结果作为入参，没有返回值</span></span><br><span class="line">                (preResult1, preResult2) -&gt; &#123;</span><br><span class="line">                    System.out.println(<span class="string">"thenCombine BiConsumer，thread："</span> + Thread.currentThread().getName() + <span class="string">"，preResult1："</span> + preResult1 + <span class="string">"，preResult2："</span> + preResult2);</span><br><span class="line">                    <span class="comment">//thenCombine BiConsumer，thread：main，preResult1：111，preResult2：222</span></span><br><span class="line">                &#125;</span><br><span class="line">        ).join();</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3、runAfterBoth"><a href="#3-3、runAfterBoth" class="headerlink" title="3,3、runAfterBoth"></a>3,3、runAfterBoth</h2><p>两个任务一起执行完调用Runnable任务；异步使用runAfterBothAsync</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        <span class="comment">//等待两个CompletableFuture执行完，运行runnable任务</span></span><br><span class="line">        .runAfterBoth(CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>), <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">"run："</span> + Thread.currentThread().getName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="四、两个任务任一执行完，再执行后续操作"><a href="#四、两个任务任一执行完，再执行后续操作" class="headerlink" title="四、两个任务任一执行完，再执行后续操作"></a>四、两个任务任一执行完，再执行后续操作</h1><h2 id="4-1、applyToEither"><a href="#4-1、applyToEither" class="headerlink" title="4.1、applyToEither"></a>4.1、applyToEither</h2><p>两个CompletableFuture一起执行，当有一个任务处理完，则获取结果值传入Function执行后续处理，返回处理结果；异步使用applyToEitherAsync</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer join = CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        .applyToEither(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>),</span><br><span class="line">                (preResult) -&gt; &#123;</span><br><span class="line">                    System.out.println(<span class="string">"applyToEither preResult:"</span> + preResult); <span class="comment">//applyToEither preResult:111</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="number">333</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        ).join();</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-2、acceptEither"><a href="#4-2、acceptEither" class="headerlink" title="4.2、acceptEither"></a>4.2、acceptEither</h2><p>两个CompletableFuture一起执行，当有一个任务处理完，则获取结果值执行后续处理，无返回；异步使用acceptEitherAsync</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        .acceptEither(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>),</span><br><span class="line">                (preResult) -&gt;</span><br><span class="line">                        System.out.println(<span class="string">"acceptEither:"</span> + preResult)</span><br><span class="line">        );</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-3、runAfterEither"><a href="#4-3、runAfterEither" class="headerlink" title="4.3、runAfterEither"></a>4.3、runAfterEither</h2><p>两个CompletableFuture一起执行，当有任一任务处理完，则执行Runnable，无入参无返回</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; voidCompletableFuture &#x3D; CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; 111)</span><br><span class="line">        .runAfterEither(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; 222),</span><br><span class="line">                new Runnable() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public void run() &#123;</span><br><span class="line">                        System.out.println(&quot;run:&quot; + Thread.currentThread().getName());</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="五、异常处理"><a href="#五、异常处理" class="headerlink" title="五、异常处理"></a>五、异常处理</h1><h2 id="exceptionally"><a href="#exceptionally" class="headerlink" title="exceptionally"></a>exceptionally</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer join = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="number">1</span> / <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">111</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">//捕获前面任务的异常信息进行处理，返回异常默认值，不提供异步操作</span></span><br><span class="line">        .exceptionally(ex -&gt; &#123;</span><br><span class="line">            System.out.println(ex);<span class="comment">//java.util.concurrent.CompletionException: java.lang.ArithmeticException: / by zero</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">222</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">        .join();</span><br><span class="line">System.out.println(<span class="string">"join："</span> + join);<span class="comment">//join：222</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="六、获取结果"><a href="#六、获取结果" class="headerlink" title="六、获取结果"></a>六、获取结果</h1><h2 id="6-1、join"><a href="#6-1、join" class="headerlink" title="6.1、join"></a>6.1、join</h2><p>join抛出的是unchecked Exception 不会要求开发者try…catch</p>
+<h2 id="6-2、get"><a href="#6-2、get" class="headerlink" title="6.2、get"></a>6.2、get</h2><p>get需要捕获处理异常</p>
+<h1 id="七、结果处理"><a href="#七、结果处理" class="headerlink" title="七、结果处理"></a>七、结果处理</h1><h2 id="7-1、whenComplete"><a href="#7-1、whenComplete" class="headerlink" title="7.1、whenComplete"></a>7.1、whenComplete</h2><p>任务结果和异常处理，不影响最终结果的返回</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer result = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        <span class="comment">//获取上一个任务已完成的结果（对此值操作不影响最终结果的返回）和异常</span></span><br><span class="line">        .whenComplete((preResult, ex) -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"preResult："</span> + preResult + <span class="string">"，ex："</span> + ex);<span class="comment">//preResult：111，ex：null</span></span><br><span class="line">        &#125;).join();</span><br><span class="line">System.out.println(<span class="string">"result："</span> + result);<span class="comment">//result：111</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="7-2、handle"><a href="#7-2、handle" class="headerlink" title="7.2、handle"></a>7.2、handle</h2><p>任务结果和异常处理，带结果返回</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer result = CompletableFuture</span><br><span class="line">        .supplyAsync(() -&gt; <span class="number">111</span>)</span><br><span class="line">        .handle((preResult, ex) -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"preResult："</span> + preResult + <span class="string">"，ex："</span> + ex);<span class="comment">//preResult：111，ex：null</span></span><br><span class="line">            <span class="keyword">return</span> preResult + <span class="number">222</span>;</span><br><span class="line">        &#125;).join();</span><br><span class="line">System.out.println(<span class="string">"result："</span> + result);<span class="comment">//result：333</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="八、多个任务执行"><a href="#八、多个任务执行" class="headerlink" title="八、多个任务执行"></a>八、多个任务执行</h1><h2 id="8-1、allOf"><a href="#8-1、allOf" class="headerlink" title="8.1、allOf"></a>8.1、allOf</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Void&gt; allOf = CompletableFuture</span><br><span class="line">        .allOf(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>),</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>)</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">"allOf："</span> + allOf.join());</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-2、anyOf"><a href="#8-2、anyOf" class="headerlink" title="8,2、anyOf"></a>8,2、anyOf</h2><p>等待任一任务完成获取结果</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CompletableFuture&lt;Object&gt; anyOf = CompletableFuture</span><br><span class="line">        .anyOf(</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">111</span>),</span><br><span class="line">                CompletableFuture.supplyAsync(() -&gt; <span class="number">222</span>)</span><br><span class="line">        );</span><br><span class="line">System.out.println(<span class="string">"anyOf："</span> + anyOf.join());<span class="comment">//anyOf：111</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>并发编程</category>
+        <category>CompletableFuture</category>
+      </categories>
+      <tags>
+        <tag>多线程</tag>
       </tags>
   </entry>
 </search>
