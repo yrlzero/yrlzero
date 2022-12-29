@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、生产者生产者即消息数据产生的来源头，通常情况下，将原始数据（如数据库、审计日志、系统日志）写入到Kafka系统的应用程序称之为生产者实例。 二、消费者消费者即消息数据流出的出口，通常情况下，读取Kafka系统中业务数据的应用程序被称为消费者实例">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka概念">
+<meta property="og:url" content="http://yrlzero.github.io/2022/12/29/Kafka%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="一、生产者生产者即消息数据产生的来源头，通常情况下，将原始数据（如数据库、审计日志、系统日志）写入到Kafka系统的应用程序称之为生产者实例。 二、消费者消费者即消息数据流出的出口，通常情况下，读取Kafka系统中业务数据的应用程序被称为消费者实例">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%A6%82%E5%BF%B5/261038057408774.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%A6%82%E5%BF%B5/image-20221229113248231.png">
+<meta property="article:published_time" content="2022-12-29T08:36:09.136Z">
+<meta property="article:modified_time" content="2022-12-29T08:38:38.971Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="mq">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/images/Kafka%E6%A6%82%E5%BF%B5/261038057408774.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/12/29/Kafka%E6%A6%82%E5%BF%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kafka概念 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/12/29/Kafka%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kafka概念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-12-29 16:36:09 / 修改时间：16:38:38" itemprop="dateCreated datePublished" datetime="2022-12-29T16:36:09+08:00">2022-12-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/" itemprop="url" rel="index"><span itemprop="name">mq</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、生产者"><a href="#一、生产者" class="headerlink" title="一、生产者"></a>一、生产者</h2><p>生产者即消息数据产生的来源头，通常情况下，将原始数据（如数据库、审计日志、系统日志）写入到Kafka系统的应用程序称之为生产者实例。</p>
+<h2 id="二、消费者"><a href="#二、消费者" class="headerlink" title="二、消费者"></a>二、消费者</h2><p>消费者即消息数据流出的出口，通常情况下，读取Kafka系统中业务数据的应用程序被称为消费者实例</p>
+<a id="more"></a>
+
+<h2 id="三、Topic（主题）"><a href="#三、Topic（主题）" class="headerlink" title="三、Topic（主题）"></a>三、Topic（主题）</h2><p>Topic（主题）即业务数据在Kafka系统中的分类集合，通常情况下，相同类型的业务数据会存储在同一个Topic（主题）下。 Topic（主题）的主要作用是将不同的业务数据分类存储，便于Kafka系统统一维护和管理业务数据。</p>
+<img src="/images/Kafka概念/261038057408774.png" style="zoom:67%;" />
+
+<p>一个Topic会被归类为一则消息，每个Topic可以被分割为多个Partition，在每条消息中，它在文件中的位置称为Offset，用于标记唯一一条消息。在Kafka中，消息被消费后，消息仍然会被保留一定时间后在删除，比如在配置信息中，文件信息保留7天，那么7天后，不管Kafka中的消息是否被消费，都会被删除；以此来释放磁盘空间，减少磁盘的IO消耗。</p>
+<p>在Kafka中，一个Topic的多个分区，被分布在Kafka集群的多个Server上，每个Server负责分区中消息的读写操作。另外，Kafka还可以配置分区需要备份的个数，以便提高可用行。由于用到来ZK来协调，每个分区都有一个Server为Leader状态，服务对外响应（如读写操作），若该Leader宕机，会由其他的Follower来选举出新的Leader来保证集群的高可用性。</p>
+<h2 id="四、Broker（代理节点）"><a href="#四、Broker（代理节点）" class="headerlink" title="四、Broker（代理节点）"></a>四、Broker（代理节点）</h2><p>代理节点即Kafka系统中服务节点，通常情况下，Kafka系统中一台服务器主机被称为Kafka系统的一个代理节点。</p>
+<p>代理节点的主要作用是负责消息数据的存储、为客户端提供服务、保证Kafka系统的正常运行等。代理节点是Kafka系统组建集群的最小单位，一个Kafka集群由一个代理节点或者多个代理节点组成。</p>
+<h2 id="五、Zookeeper"><a href="#五、Zookeeper" class="headerlink" title="五、Zookeeper"></a>五、Zookeeper</h2><p>Zookeeper即Kafka集群元数据管理系统，由于Kafka系统是一个分布式消息系统，由于分布式的原因，Kafka系统需要Zookeeper来协调管理服务。</p>
+<p>Zookeeper在Kafka系统中主要作用是<strong>选举主题分区Leader、协调各个代理节点服务、存储Kafka元数据信息</strong>等。</p>
+<p>在新版本Kafka系统中，Kafka系统对于新的消费者实例使用了Kafka内部的消费者组协调协议，减少了对Zookeeper的依赖。这时的Zookeeper对于Kafka系统来说，更像是一个小型的<strong>分布式元数据存储系统</strong>。</p>
+<h2 id="六、核心组件元数据分布"><a href="#六、核心组件元数据分布" class="headerlink" title="六、核心组件元数据分布"></a>六、核心组件元数据分布</h2><p>Kafka系统中，核心组件的元数据信息均存储在Zookeeper系统。这些元数据信息具体包含控制器选举次数、代理节点和主题、配置、管理员操作、控制器、以及老版本消费者实例。这些元数据信息在Zookeeper系统中的分布</p>
+<p><img src="/images/Kafka%E6%A6%82%E5%BF%B5/image-20221229113248231.png" alt=""></p>
+<h3 id="6-1、控制器选举次数"><a href="#6-1、控制器选举次数" class="headerlink" title="6.1、控制器选举次数"></a>6.1、控制器选举次数</h3><p>Kafka系统中的控制器每进行一次选举次数，都会在Zookeeper的<strong>/controller_epoch</strong>节点下进行记录。该值为一个数字，Kafka集群中第一个代理节点（Broker）启动时该值为1。</p>
+<p>Kafka集群中,如果遇到代理节点宕机或者变更，那么Kafka集群会重新选举新的控制器。每次控制器发生变化时，在Zookeeper的<strong>/controller_epoch</strong>节点中的值就会加1。</p>
+<h3 id="6-2、Broker和Topic"><a href="#6-2、Broker和Topic" class="headerlink" title="6.2、Broker和Topic"></a>6.2、Broker和Topic</h3><p>在Zookeeper的<strong>/brokers</strong>节点中存储着Kafka代理节点和主题的元数据信息。</p>
+<p>其中，Zookeeper的<strong>/brokers/ids</strong>节点中存储着代理节点的<strong>ID</strong>值。Zookeeper的<strong>/brokers/topics</strong>节点中存储着<strong>主题</strong>和<strong>分区</strong>的元数据信息。</p>
+<h3 id="6-3、配置"><a href="#6-3、配置" class="headerlink" title="6.3、配置"></a>6.3、配置</h3><p>Kafka系统中修改主题属性这类操作，会被存储到Zookeeper的<strong>/config</strong>节点，<strong>/config</strong>节点主要包含三个子节点，分别是：</p>
+<ul>
+<li><strong>topic</strong>：存储Kafka集群主题的额外属性，比如修改过主题的属性操作；</li>
+<li><strong>client</strong>：客户端和主题配置被重写，包含消费者应用和生产者应用；</li>
+<li><strong>changes</strong>：配置修改通知。</li>
+</ul>
+<h3 id="6-4、管理员操作"><a href="#6-4、管理员操作" class="headerlink" title="6.4、管理员操作"></a>6.4、管理员操作</h3><p>在执行管理员操作时，比如删除、分配等。在Zookeeper的<strong>/admin</strong>节点会生成相应的子节点，内容如下：</p>
+<ul>
+<li>delete_topics：标记待删除的主题名； </li>
+<li>reassign_partitions：重新分配分区操作；</li>
+<li>preferred_replica_election：恢复Leader分区平衡操作。</li>
+</ul>
+<h3 id="6-5、控制器"><a href="#6-5、控制器" class="headerlink" title="6.5、控制器"></a>6.5、控制器</h3><p>Kafka系统正常运行时，在Zookeeper的<strong>/controller</strong>节点下会存储一个Kafka代理节点的ID值，该ID值与Kafka代理节点ID相同，表示代理节点上存在控制器功能。</p>
+<h3 id="6-6、老版本消费者实例"><a href="#6-6、老版本消费者实例" class="headerlink" title="6.6、老版本消费者实例"></a>6.6、老版本消费者实例</h3><p>在消费者实例中，如果使用kafka.tools.ConsoleConsumer接口去读取Kafka主题数据，则会产生Zookeeper系统/consumers节点。</p>
+<p>在Zookeeper系统的/<strong>consumers</strong>节点中，存在若干个消费者组子节点，每个消费者组子节点下又会存在三个子子节点：</p>
+<ul>
+<li>消费者线程ID（Zookeeper系统<strong>/consumers/ids</strong>）；</li>
+<li>消费者产生的偏移量（Zookeeper系统/<strong>consumers/offsets</strong>）；</li>
+<li>消费者线程和分区的对应关系（Zookeeper系统<strong>/consumers/owners</strong>）。</li>
+</ul>
+<blockquote>
+<p>如果使用的是Kafka新版本消费者接口，则消费者实例产生的元数据信息不会存储在Zookeeper的<strong>/consumers</strong>节点中，而是存储在Kafka系统的内部主题中。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mq/" rel="tag"># mq</a>
+              <a href="/tags/Kafka/" rel="tag"># Kafka</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/29/Kafka%E6%89%A7%E8%A1%8C%E8%84%9A%E6%9C%AC%E6%93%8D%E4%BD%9C/" rel="prev" title="Kafka命令行工具">
+      <i class="fa fa-chevron-left"></i> Kafka命令行工具
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/29/Kafka%E5%AD%98%E5%82%A8/" rel="next" title="Kafka存储">
+      Kafka存储 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、生产者"><span class="nav-text">一、生产者</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、消费者"><span class="nav-text">二、消费者</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Topic（主题）"><span class="nav-text">三、Topic（主题）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、Broker（代理节点）"><span class="nav-text">四、Broker（代理节点）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、Zookeeper"><span class="nav-text">五、Zookeeper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、核心组件元数据分布"><span class="nav-text">六、核心组件元数据分布</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1、控制器选举次数"><span class="nav-text">6.1、控制器选举次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2、Broker和Topic"><span class="nav-text">6.2、Broker和Topic</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3、配置"><span class="nav-text">6.3、配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4、管理员操作"><span class="nav-text">6.4、管理员操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-5、控制器"><span class="nav-text">6.5、控制器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-6、老版本消费者实例"><span class="nav-text">6.6、老版本消费者实例</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">46</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">59</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
