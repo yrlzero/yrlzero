@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yrlzero.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、分区在Kafka系统中，一个主题（Topic）下包含多个不同的分区（Partition），每个分区（Partition）相当于一个超大的文件被均匀分配成若干个大小相等的片段（Segment）。 Kafka可以保证分区上的消息是有序的，不同分区之间的消息没有顺序。 分区可以设置副本因子，其中Leader分区负责对应分区的读写、Follower分区负责同步分区的数据。 二、ISR（In sync">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka数据同步">
+<meta property="og:url" content="http://yrlzero.github.io/2022/12/31/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/index.html">
+<meta property="og:site_name" content="yrl&#39;s blog">
+<meta property="og:description" content="一、分区在Kafka系统中，一个主题（Topic）下包含多个不同的分区（Partition），每个分区（Partition）相当于一个超大的文件被均匀分配成若干个大小相等的片段（Segment）。 Kafka可以保证分区上的消息是有序的，不同分区之间的消息没有顺序。 分区可以设置副本因子，其中Leader分区负责对应分区的读写、Follower分区负责同步分区的数据。 二、ISR（In sync">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230151550853.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230160305790.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230161438507.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230161557284.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230163553328.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230163604931.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221229172438324.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221229173835728.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221229174609002.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230180735742.png">
+<meta property="og:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230181059661.png">
+<meta property="article:published_time" content="2022-12-31T02:48:19.112Z">
+<meta property="article:modified_time" content="2022-12-31T03:17:17.847Z">
+<meta property="article:author" content="yrl">
+<meta property="article:tag" content="mq">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yrlzero.github.io/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230151550853.png">
+
+<link rel="canonical" href="http://yrlzero.github.io/2022/12/31/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kafka数据同步 | yrl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">yrl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yrlzero.github.io/2022/12/31/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="yrl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="yrl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kafka数据同步
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-12-31 10:48:19 / 修改时间：11:17:17" itemprop="dateCreated datePublished" datetime="2022-12-31T10:48:19+08:00">2022-12-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/" itemprop="url" rel="index"><span itemprop="name">mq</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/mq/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、分区"><a href="#一、分区" class="headerlink" title="一、分区"></a>一、分区</h1><p>在Kafka系统中，一个<strong>主题（Topic）</strong>下包含多个不同的<strong>分区（Partition）</strong>，每个<strong>分区（Partition）</strong>相当于一个超大的文件被均匀分配成<strong>若干个大小相等的片段（Segment）</strong>。</p>
+<p>Kafka可以保证分区上的消息是有序的，不同分区之间的消息没有顺序。</p>
+<p>分区可以设置副本因子，其中Leader分区负责对应分区的读写、Follower分区负责同步分区的数据。</p>
+<h1 id="二、ISR（In-sync-replicas）"><a href="#二、ISR（In-sync-replicas）" class="headerlink" title="二、ISR（In sync replicas）"></a>二、ISR（In sync replicas）</h1><p>Leader分区会维持一个与其保持同步的replica集合，该集合就是ISR。</p>
+<p>当开启Ack机制时，Leader分区收到数据后，后面的Follower就开始同步数据了，但是如果有一个Follower出现了故障，无法与Leader来进行同步，这样Leader就会一直等待下去了，直到它同步完成才会把Ack发送出去。这种情况下会大大的让Kafka效率降低，所以ISR就出现了。</p>
+<a id="more"></a>
+
+<p>旧版本通过<strong>消息数量</strong>控制剔除ISR阈值，而新版本通过<strong>时间阈值</strong>控制，避免瞬间大批消息造成Follower频繁的剔除加入</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kafka 0.9.0 版本之前存在的参数</span></span><br><span class="line"><span class="comment"># 这个参数规定了 Follower 如果落后 Leader 的消息数量超过了这个参数指定的数量之后，</span></span><br><span class="line"><span class="comment"># 就会认为 Follower 是 out-of-sync，就会从 ISR 列表里移除</span></span><br><span class="line"><span class="attr">replica.lag.max.messages</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># kafka 0.10.x 新增的参数</span></span><br><span class="line"><span class="comment"># 与 Leader 上一次交互时间超过阈值就会把 Follower 剔除出 ISR</span></span><br><span class="line"><span class="attr">replica.lag.time.max.ms</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-1、ACK的应答机制"><a href="#2-1、ACK的应答机制" class="headerlink" title="2.1、ACK的应答机制"></a>2.1、ACK的应答机制</h2><p>Kafka对数据的可靠性要求不是非常的高，就是可以说是容忍那么一丢丢的数据丢失，可以不等待ISR里的Follower全部接收成功。</p>
+<p>通过指定生产者ACK参数，决定其应答方式：</p>
+<ul>
+<li><strong>acks=0（默认）：</strong>producer不等待broker的ack，这一个操作是提供了最低的一个延迟，使得broker一接收到还没来得及写入磁盘的时候就已经返回了，当broker出现故障的时候就会可能丢失数据。</li>
+<li><strong>acks=1：</strong>producer等待broker的ack，partition的Leader落盘成功以后返回了ack，如果follwer在同步成功之前发生了故障的话，那么就会把数据丢失掉。</li>
+<li><strong>acks=-1/all：</strong>producer等待broker的ack，partition的Leader和Follower需要全部落盘成功之后才会返回ack，但是如果在Follower同步完成之后，在broker在发送ack前，Leader发生了故障，那么可能会造成数据的重复。</li>
+</ul>
+<h2 id="2-2、Follower故障"><a href="#2-2、Follower故障" class="headerlink" title="2.2、Follower故障"></a>2.2、Follower故障</h2><p>Follower发生故障后会被临时踢出ISR（动态变化），待该Follower恢复后，Follower会读取本地的磁盘记录的上次的HW，并将该log文件高于HW的部分截取掉，从HW开始向Leader进行同步，等该Follower的LEO大于等于该Partition的HW，即Follower追上Leader后，就可以重新加入ISR</p>
+<h2 id="2-3、Leader故障"><a href="#2-3、Leader故障" class="headerlink" title="2.3、Leader故障"></a>2.3、Leader故障</h2><p>Leader发生故障后，会从<strong>ISR</strong>中选出一个新的Leader，为了保证多个副本之间的数据一致性，其余的Follower会先将各自的log文件高于hw的部分截掉（新Leader自己不会截掉），然后从新的Leader同步数据。</p>
+<h1 id="三、LEO（log-end-offset-）"><a href="#三、LEO（log-end-offset-）" class="headerlink" title="三、LEO（log end offset ）"></a>三、LEO（log end offset ）</h1><p>log end offset 标识的是每个分区中最后一条消息的下一个位置，分区的每个副本都有自己的LEO.</p>
+<h1 id="四、High-Watermarker（高水位线）"><a href="#四、High-Watermarker（高水位线）" class="headerlink" title="四、High Watermarker（高水位线）"></a>四、High Watermarker（高水位线）</h1><h2 id="4-1、作用"><a href="#4-1、作用" class="headerlink" title="4.1、作用"></a>4.1、作用</h2><ul>
+<li>定义消息可见性，确定哪些数据对于消费者可以进行消费</li>
+<li>协助Kafka副本分区间完成同步（0.11 版本之前Kafka使用HW机制保证数据的同步，但是基于HW的同步数据可能会导致数据的不一致、数据丢失等情况，后续版本改用Leader Epoch）</li>
+</ul>
+<p>HW(High Watermark)是<strong>所有副本中最小的LEO</strong>。</p>
+<p>当所有节点都备份成功，Leader会更新水位线，所有HW之前的的数据才可以被消费者消费。</p>
+<p><img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230151550853.png" alt="image-20221230151550853"></p>
+<p>如上图，0-7的已提交的消息可以被消费者消费，8开始的消息对于消费者不可见。</p>
+<h2 id="4-2、更新"><a href="#4-2、更新" class="headerlink" title="4.2、更新"></a>4.2、更新</h2><p>每个分区副本都保存一组HW和LEO值，并且Leader分区副本所在的Broker上，还保存了其他Follower分区副本的LEO值，这些Follower分区副本又被称为远程副本（Remote Replica）</p>
+<p><img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230160305790.png" alt="image-20221230160305790"></p>
+<ul>
+<li>更新<ul>
+<li>Broker0上的Leader分区副本的HW和LEO，以及所有Follower分区副本的LEO</li>
+<li>Broker1上的Follower的HW和LEO</li>
+</ul>
+</li>
+<li>不更新<ul>
+<li>Broker0上所有Follower分区副本的HW</li>
+</ul>
+</li>
+</ul>
+<p>为什么要在 Broker0 上保存这些 Follower 副本呢？</p>
+<ul>
+<li>帮助 Leader 副本确定其高水位，也就是分区高水位。</li>
+</ul>
+<h3 id="4-2-1、更新时机"><a href="#4-2-1、更新时机" class="headerlink" title="4.2.1、更新时机"></a>4.2.1、更新时机</h3><table>
+<thead>
+<tr>
+<th><strong>更新对象</strong></th>
+<th><strong>更新时机</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Borker0 上Leader分区副本的LEO</td>
+<td>Leader分区副本接收到生产者发送的消息，写入到本地磁盘后，会更新其LEO值</td>
+</tr>
+<tr>
+<td>Broker 1上Follower分区副本的LEO</td>
+<td>Follower分区副本从Leader分区副本拉取消息，写入本地磁盘后，会更新其LEO值</td>
+</tr>
+<tr>
+<td>Broker0上远程副本的LEO</td>
+<td>Follower分区副本从Leader分区副本拉取消息，会告诉Leader分区副本从哪个位移开始拉取，Leader分区副本会使用这个位移来更新远程副本的LEO</td>
+</tr>
+<tr>
+<td>Broker0上Leader副本的高水位</td>
+<td>两个更新时机：一个是Leader副本更新其LEO之后，一个是更新完远程副本LEO后，具体算法：取Leader分区副本和所有与Leader同步的远程副本LEO的最小值<br/>max{currentHW, min（LEO-1, LEO-2, ……，LEO-n）}</td>
+</tr>
+<tr>
+<td>Broker 1上Follower副本的高水位</td>
+<td>Follower副本更新完LEO后，会比较LEO与leader副本发来的高水位值，并用两者的较少值去更新自己的高水位</td>
+</tr>
+</tbody></table>
+<h3 id="4-2-2、流程"><a href="#4-2-2、流程" class="headerlink" title="4.2.2、流程"></a>4.2.2、流程</h3><h4 id="Leader分区副本"><a href="#Leader分区副本" class="headerlink" title="Leader分区副本"></a>Leader分区副本</h4><ul>
+<li><p>处理生产者请求</p>
+<ul>
+<li>消息写入本地磁盘</li>
+<li>更新LEO值（触发更新HW）<ul>
+<li>获取所有远程副本中最小的LEO值</li>
+<li>获取当前HW值</li>
+<li>更新 currentHW = max{currentHW, min（LEO-1, LEO-2, ……，LEO-n）}</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Follower拉取Leader分区消息</p>
+<ul>
+<li>读取磁盘（页缓存）数据</li>
+<li>Follower分区副本在请求时会携带其LEO值，更新远程分区副本的LEO值（触发更新HW）<ul>
+<li>获取所有远程副本中最小的LEO值</li>
+<li>获取当前HW值</li>
+<li>更新 currentHW = max{currentHW, min（LEO-1, LEO-2, ……，LEO-n）}</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="Follower分区副本"><a href="#Follower分区副本" class="headerlink" title="Follower分区副本"></a>Follower分区副本</h4><ul>
+<li>从Leader分区拉回数据<ul>
+<li>消息写入本地磁盘</li>
+<li>更新LEO值（触发更新HW）<ul>
+<li>获取Leader返回的高水值，currentHW</li>
+<li>获取更新后的LEO值，currentLEO</li>
+<li>更新高水位为 min(currentHW, currentLEO)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-2-3、同步"><a href="#4-2-3、同步" class="headerlink" title="4.2.3、同步"></a>4.2.3、同步</h3><h4 id="初始状态"><a href="#初始状态" class="headerlink" title="初始状态"></a>初始状态</h4><p><img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230161438507.png" alt="image-20221230161438507"></p>
+<p>这里的 Remote LEO 代表之前我们 Broker0 中的远程副本的 LEO，我们的 Follower 副本通过 FETCH 请求不断与 Leader 副本进行数据同步</p>
+<h4 id="生产者发送消息"><a href="#生产者发送消息" class="headerlink" title="生产者发送消息"></a>生产者发送消息</h4><img src="/images/Kafka数据同步/image-20221230161557284.png" style="zoom:80%;" />
+
+<ul>
+<li>生产者消息写入磁盘，更新LEO</li>
+<li>更新高水位<ul>
+<li>当前HW=0</li>
+<li>远程副本LEO=0</li>
+<li>HW= Math.max(HW,最小远程副本LEO)= Math.max(0,0)  = 0</li>
+</ul>
+</li>
+</ul>
+<h4 id="第一次同步"><a href="#第一次同步" class="headerlink" title="第一次同步"></a>第一次同步</h4><p><img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230163553328.png" alt=""></p>
+<ul>
+<li>Leader接收Follower请求<ul>
+<li>读取磁盘（页缓存）数据</li>
+<li>根据Follower请求的offset，更新Remoto LEO = 0</li>
+<li>更新HW（无变化）</li>
+</ul>
+</li>
+<li>Follower拉回数据<ul>
+<li>写入本地磁盘，更新LEO值</li>
+<li>更新高水位<ul>
+<li>获取 Leader 发送的高水位值：<code>currentHW = 0</code></li>
+<li>获取更新后的LEO值，currentLEO = 1</li>
+<li>HW= Math.max(HW,最小远程副本LEO) = Math.max(0,0) = 0</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>经过这一次拉取， Leader 和 Follower 副本的 <code>LEO</code> 都是 1，各自的高水位依然是0，没有被更新</p>
+<h4 id="第二次同步"><a href="#第二次同步" class="headerlink" title="第二次同步"></a>第二次同步</h4><p><img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230163604931.png" alt=""></p>
+<ul>
+<li>Leader接收Follower请求<ul>
+<li>读取磁盘（页缓存）数据</li>
+<li>根据Follower请求的offset，更新Remoto LEO = 1</li>
+<li>更新HW= Math.max(HW,最小远程副本LEO) = Math.max(0,1) = 1</li>
+</ul>
+</li>
+<li>Follower拉回数据<ul>
+<li>写入本地磁盘，更新LEO值（无变化）</li>
+<li>更新高水位<ul>
+<li>获取 Leader 发送的高水位值：<code>currentHW = 1</code></li>
+<li>获取更新后的LEO值，currentLEO = 1</li>
+<li>HW= Math.max(HW,最小远程副本LEO) = Math.max(1,1) = 1</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>至此，一次完整的消息同步周期就结束了。事实上，Kafka 就是利用这样的机制，实现了 Leader 和 Follower 副本之间的同步。</p>
+<h2 id="4-3、数据丢失"><a href="#4-3、数据丢失" class="headerlink" title="4.3、数据丢失"></a>4.3、数据丢失</h2><p> 截断后立即进行领导人选举</p>
+<p><img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221229172438324.png" alt=""></p>
+<ul>
+<li><p>BrokerB是分区的Leader，当BrokerA读到m2消息，但是没有等到BrokerB确认m2消息提交（BrokerB等待所有节点拷贝数据），此时BrokerA只是拷贝了m2消息，其HW仍为1.</p>
+</li>
+<li><p>BrokerA还没得到BrokerB确认m2消息，此时BrokerA宕机</p>
+</li>
+<li><p>BrokerA重启，根据HW=1，将m2消息截断丢弃，尝试连接BrokerB下载数据，此时BrokerB宕机，BrokerA成为分区Leader，此时m2消息丢失</p>
+</li>
+</ul>
+<h2 id="4-4、数据不一致"><a href="#4-4、数据不一致" class="headerlink" title="4.4、数据不一致"></a>4.4、数据不一致</h2><p>在多次硬故障后重新启动<img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221229173835728.png" alt=""></p>
+<ul>
+<li>BrokerB是分区的Leader，有m2消息，HW=1</li>
+<li>BrokerA和BrokerB同时宕机</li>
+<li>BrokerA先启动，成为Leader，此时接收请求，写入m3消息，HW=1</li>
+<li>BrokerB启动后，两个Broker的HW都是1，但是数据不一致</li>
+</ul>
+<h1 id="五、Leader-epoch"><a href="#五、Leader-epoch" class="headerlink" title="五、Leader epoch"></a>五、Leader epoch</h1><p>​        由于0.11版本之前Kafka的副本备份机制的设计存在问题。依赖HW的概念实现数据同步，但是存在数据不一致问题和丢失数据问题。</p>
+<p>​        因此Kafka-0.11版本引入了 Leader Epoch解决这个问题，不在使用HW作为数据截断的依据。</p>
+<p>​        引入了Leader epoch的概念，任意一个Leader持有一个LeaderEpoch。该LeaderEpoch这是一个由Controller管理的32位数字，存储在Zookeeper的分区状态信息中，并作为LeaderAndIsrRequest的一部分传递给每个新的Leader。</p>
+<img src="/images/Kafka数据同步/image-20221229174609002.png"  />
+
+<p>每个消息集都带有一个4字节的Leader Epoch号。</p>
+<p>在每个日志目录中，会创建一个新的Leader Epoch Sequence文件，在其中存储Leader Epoch的序列和在该Epoch中生成的消息的Start Offset。它也缓存在每个副本中，也缓存在内存中。</p>
+<p>也就是说Leader epoch实际上是一对值：（epoch，startOffset）</p>
+<ul>
+<li>epoch表示Leader的版本号，从0开始，当Leader变更过1次时epoch就会+1</li>
+<li>startOffset对应于该epoch版本的Leader写入第一条消息的位移</li>
+</ul>
+<p>Follower宕机重启后需要做数据恢复时，会发送Leader Epoch Request获取Leader分区的Leader Epoch信息，Follower根据这些信息进行数据截断，替代旧版本通过高水位截断日志的方式。</p>
+<h2 id="5-1、Follower成为Leader"><a href="#5-1、Follower成为Leader" class="headerlink" title="5.1、Follower成为Leader"></a>5.1、Follower成为Leader</h2><p>首先将新的Leader Epoch和Follower分区副本的LEO（log end offset）添加到Leader Epoch Sequence序列文件的末尾并刷新数据。该Leader产生的每个新消息集都带有新的“Leader Epoch”标记。</p>
+<h2 id="5-2、Leader变成Follower"><a href="#5-2、Leader变成Follower" class="headerlink" title="5.2、Leader变成Follower"></a>5.2、Leader变成Follower</h2><p>Leader从本地的Leader Epoch Sequence文件加载数据到内存中</p>
+<p>其他Follower给相应的分区的Leader发送epoch请求，该请求包含当前节点最新的EpochID、StartOffset信息。</p>
+<p>Leader接收到信息以后返回该EpochID所对应的LastOffset信息。该信息可能是最新EpochID的StartOffset或者是当前EpochID的Log End Offset信息.</p>
+<h2 id="5-3、同步数据"><a href="#5-3、同步数据" class="headerlink" title="5.3、同步数据"></a>5.3、同步数据</h2><p>当发生宕机重启时，Follower向Leader发送请求Epoch请求</p>
+<ul>
+<li>Leader根据Follower请求携带的epoch判断<ul>
+<li>epoch相同，则返回最新的last offset</li>
+<li>epoch不同，则返回对应epoch的start offset</li>
+</ul>
+</li>
+<li>Follower根据返回的offset与当前offset比较<pre><code>- Follower的offset大，则截断数据</code></pre><ul>
+<li>Follower的offset小，则同步数据</li>
+</ul>
+</li>
+</ul>
+<p>不再依靠高水位截断数据，而是依靠Leader Epoch有效的解决数据丢失和数据不一致问题</p>
+<h2 id="5-4、解决数据丢失"><a href="#5-4、解决数据丢失" class="headerlink" title="5.4、解决数据丢失"></a>5.4、解决数据丢失</h2><p><img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230180735742.png" alt=""></p>
+<ul>
+<li>BrokerA宕机重启后，不再依赖于HW截断数据</li>
+<li>当BrokerB宕机，BrokerA成为Leader，Epoch数据更新为[1,2]</li>
+<li>期间BrokerA有数据写入</li>
+<li>BrokerB重启后，向Leader发送Epoch请求，同步数据</li>
+</ul>
+<h2 id="5-5、解决数据不一致"><a href="#5-5、解决数据不一致" class="headerlink" title="5.5、解决数据不一致"></a>5.5、解决数据不一致</h2><p><img src="/images/Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5/image-20221230181059661.png" alt=""></p>
+<ul>
+<li>BrokerA和BrokerB都宕机</li>
+<li>BrokerA先启动，成为Leader，接收数据m3</li>
+<li>BrokerB启动，向LeaderEpoch请求，截断自己offset为1的数据，再从Leader同步新数据</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mq/" rel="tag"># mq</a>
+              <a href="/tags/Kafka/" rel="tag"># Kafka</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/29/Kafka-API/" rel="prev" title="Kafka-API">
+      <i class="fa fa-chevron-left"></i> Kafka-API
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、分区"><span class="nav-text">一、分区</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、ISR（In-sync-replicas）"><span class="nav-text">二、ISR（In sync replicas）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1、ACK的应答机制"><span class="nav-text">2.1、ACK的应答机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2、Follower故障"><span class="nav-text">2.2、Follower故障</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3、Leader故障"><span class="nav-text">2.3、Leader故障</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、LEO（log-end-offset-）"><span class="nav-text">三、LEO（log end offset ）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、High-Watermarker（高水位线）"><span class="nav-text">四、High Watermarker（高水位线）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1、作用"><span class="nav-text">4.1、作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2、更新"><span class="nav-text">4.2、更新</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-1、更新时机"><span class="nav-text">4.2.1、更新时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-2、流程"><span class="nav-text">4.2.2、流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Leader分区副本"><span class="nav-text">Leader分区副本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Follower分区副本"><span class="nav-text">Follower分区副本</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-3、同步"><span class="nav-text">4.2.3、同步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#初始状态"><span class="nav-text">初始状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#生产者发送消息"><span class="nav-text">生产者发送消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#第一次同步"><span class="nav-text">第一次同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#第二次同步"><span class="nav-text">第二次同步</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3、数据丢失"><span class="nav-text">4.3、数据丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4、数据不一致"><span class="nav-text">4.4、数据不一致</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、Leader-epoch"><span class="nav-text">五、Leader epoch</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1、Follower成为Leader"><span class="nav-text">5.1、Follower成为Leader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2、Leader变成Follower"><span class="nav-text">5.2、Leader变成Follower</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3、同步数据"><span class="nav-text">5.3、同步数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-4、解决数据丢失"><span class="nav-text">5.4、解决数据丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-5、解决数据不一致"><span class="nav-text">5.5、解决数据不一致</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yrl"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">yrl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">46</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">59</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yrl</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+</body>
+</html>
